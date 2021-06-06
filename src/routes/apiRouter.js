@@ -1,6 +1,10 @@
 const express = require('express');
 
-module.exports = function apiRouter(apiValidatorMiddleware, statusController) {
+module.exports = function apiRouter(
+  apiValidatorMiddleware,
+  statusController,
+  projectsController
+) {
   return (
     express
       .Router()
@@ -15,6 +19,7 @@ module.exports = function apiRouter(apiValidatorMiddleware, statusController) {
 
       .get('/health', statusController.health)
 
-    // ROUTES
+      // ROUTES
+      .get('/projects', projectsController.getAll)
   );
 };

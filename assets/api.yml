@@ -42,7 +42,67 @@ paths:
     responses:
       200:
         description: 'Description specified.'
+
   # USER ENDPOINTS
+  /projects:
+    get:
+      tags:
+        - Project
+      operationId: getAllProjects
+      summary: 'Get info from all projects'
+      responses:
+        200:
+          description: 'Projects info was retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '670b9562-b30d-52d5-b827-655787665500'
+                        title:
+                          type: string
+                          example: 'Prohibir la utilizacion de Winbugs globalmente'
+                        description:
+                          type: string
+                          example: 'No puede ser que haya gente que use Winbugs'
+                        type:
+                          type: string
+                          example: 'social'
+                        objective:
+                          type: string
+                          example: 'Salvar a la gente de esta maldicion'
+                        country:
+                          type: string
+                          example: 'Argentina'
+                        city:
+                          type: string
+                          example: 'Buenos Aires'
+                        published_on:
+                          type: string
+                          example: '?'
+                        finalized_by:
+                          type: string
+                          example: '?'
+
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to get projects info.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'Id do not match any project.'
 
   # STATUS
   /ping:
