@@ -7,7 +7,7 @@ services:
     container_name: core
     environment:
       - PORT=3000
-      - DATABASE_URL=postgres://postgres:postgres@core-db:5432/sf-core
+      - DATABASE_URL=postgres://postgres:postgres@core-db:5432/sf_core
       - NODE_ENV=development
     networks:
       - dev-net
