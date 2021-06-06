@@ -8,7 +8,8 @@ DEFAULT_URL='postgres://postgres:postgres@localhost:5432/sf_core'
 cd ./scripts
 echo "Seedy FIUBA - Core microservice\n"
 
-echo "> CREATING PROJECTS TABLE IN DATABASE 'sf_core':"
+echo "> CREATING TABLE 'users':"
 psql $DATABASE_URL -f projects.sql
-echo "> MIGRATING PROJECTS INTO TABLE 'projects':"
+
+echo "\n> INSERT DATA TO TABLE 'projects':"
 psql $DATABASE_URL -f add_projects.sql
