@@ -1,0 +1,431 @@
+openapi: '3.0.0'
+info:
+  title: 'Users Microservice'
+  description: >
+    This microservice is part of the **Seedy FIUBA Project**.
+  version: '1.0.0'
+  contact:
+    name: Learn more
+    url: 'https://github.com/orgs/SeedyFiuba-G8/'
+
+servers:
+  - url: http://sf-tdp2-users.herokuapp.com/
+    description: 'Production'
+  - url: http://sf-tdp2-users-dev.herokuapp.com/
+    description: 'Staging'
+  - url: http://localhost:3000/
+    description: 'Local development'
+
+tags:
+  - name: Admin
+    description: 'Admin operations'
+
+  - name: User
+    description: 'User operations'
+
+  - name: Status
+
+paths:
+  # ADMIN ENDPOINTS
+
+  /admin/login:
+    post:
+      tags:
+        - Admin
+      operationId: loginAdmin
+      summary: 'Log in an admin'
+      description: 'Allows admins to log in to their account.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'memis_pomofot@gmail.com'
+                password:
+                  type: string
+                  example: 'SomePassword123'
+              required:
+                - email
+                - password
+      responses:
+        200:
+          description: 'Admin was logged in successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: '670b9562-b30d-52d5-b827-655787665500'
+                  token:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to log in.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'E-mail and password combination is invalid.'
+
+  /admin/register:
+    post:
+      tags:
+        - Admin
+      operationId: registerAdmin
+      summary: 'Register a new admin by e-mail'
+      description: 'Allows to add new admins to the database.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'memis_pomofot@gmail.com'
+                first_name:
+                  type: string
+                  example: 'Memis'
+                last_name:
+                  type: string
+                  example: 'Pomofot'
+                password:
+                  type: string
+                  example: 'SomePassword123'
+              required:
+                - email
+                - first_name
+                - last_name
+                - password
+      responses:
+        201:
+          description: 'Admin was registered successfully.'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to register the admin.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'Admin already registered.'
+
+  # USER ENDPOINTS
+
+  /profile/{id}:
+    get:
+      tags:
+        - User
+      operationId: getUserInfo
+      summary: 'Get a user profile by ID'
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            example: '670b9562-b30d-52d5-b827-655787665500'
+          required: true
+          description: 'UUID of the user to get.'
+      responses:
+        200:
+          description: 'User profile was retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first_name:
+                    type: string
+                    example: 'Memis'
+                  last_name:
+                    type: string
+                    example: 'Pomofot'
+                  img_url:
+                    type: string
+                    example: 'img.ur/jdsfhj54njkfdf'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to get user info.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'Id do not match any user.'
+
+  /user/login:
+    post:
+      tags:
+        - User
+      operationId: loginUser
+      summary: 'Log in an user'
+      description: 'Allows users to log in to their account.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'memis_pomofot@gmail.com'
+                password:
+                  type: string
+                  example: 'SomePassword123'
+              required:
+                - email
+                - password
+      responses:
+        200:
+          description: 'User was logged in successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: '670b9562-b30d-52d5-b827-655787665500'
+                  token:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to log in.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'E-mail and password combination is invalid.'
+
+  /user/recoverPassword:
+    post:
+      tags:
+        - User
+      operationId: recoverPassword
+      summary: 'Init password recovery process'
+      description: 'Allows users to recover their passwords.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'memis_pomofot@gmail.com'
+              required:
+                - email
+      responses:
+        204:
+          description: 'Password recovery process initialized.'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to initialize the password recovery process.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'Invalid e-mail received.'
+
+  /user/register:
+    post:
+      tags:
+        - User
+      operationId: registerUser
+      summary: 'Register a new user by e-mail'
+      description: 'Allows to add new users to the database.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'memis_pomofot@gmail.com'
+                first_name:
+                  type: string
+                  example: 'Memis'
+                last_name:
+                  type: string
+                  example: 'Pomofot'
+                password:
+                  type: string
+                  example: 'SomePassword123'
+              required:
+                - email
+                - first_name
+                - last_name
+                - password
+      responses:
+        201:
+          description: 'User was registered successfully'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to register the user.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'E-mail already registered.'
+
+  /user/update:
+    post:
+      tags:
+        - User
+      operationId: updateUserInfo
+      summary: 'Update user information'
+      description: 'Allows to update certain information fields from an user.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: '670b9562-b30d-52d5-b827-655787665500'
+                token:
+                  type: string
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+                fields:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field_name:
+                        type: string
+                        example: 'first_name'
+                      value:
+                        type: string
+                        example: 'Frank'
+                  required:
+                    - field_name
+                    - value
+      responses:
+        204:
+          description: 'User info updated successfully'
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to update the user info.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'Invalid field name received.'
+
+  /users:
+    get:
+      tags:
+        - User
+      operationId: getAllUsers
+      summary: 'Get info from all users'
+      responses:
+        200:
+          description: 'Users info was retrieved successfully.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '670b9562-b30d-52d5-b827-655787665500'
+                        first_name:
+                          type: string
+                          example: 'Memis'
+                        last_name:
+                          type: string
+                          example: 'Pomofot'
+
+        400:
+          description: 'Bad request.'
+        409:
+          description: 'It was not possible to get user info.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    example: 'Id do not match any user.'
+
+  # STATUS
+  /ping:
+    get:
+      tags:
+        - Status
+      operationId: ping
+      responses:
+        200:
+          description: 'Server is active.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'OK'
+
+  /health:
+    get:
+      tags:
+        - Status
+      operationId: health
+      responses:
+        200:
+          description: 'Microservice general health state reported.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  database:
+                    type: string
+                    example: 'UP'

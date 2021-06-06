@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  express:
+    build: ./
+    image: core_microservice
+    container_name: core
+    environment:
+      - PORT=3000
+      - DATABASE_URL=postgres://postgres:postgres@core-db:5432/sf-core
+      - NODE_ENV=development
+    networks:
+      - dev-net
+    ports:
+      - 3000:3000
+    depends_on:
+      - database
+
+  database:
+    image: postgres
+    container_name: core-db
+    volumes:
+      - core-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - dev-net
+    ports:
+      - 3001:5432
+
+networks:
+  dev-net:
+    driver: bridge
+
+volumes:
+  core-db-data:
+    driver: local
