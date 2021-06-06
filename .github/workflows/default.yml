@@ -62,16 +62,16 @@ jobs:
         run: heroku container:login
 
       - name: Tag container
-        run: docker tag core_microservice registry.heroku.com/sf-tdp2-core-prod/web
+        run: docker tag core_microservice registry.heroku.com/sf-tdp2-core/web
 
       - name: Push container
-        run: docker push registry.heroku.com/sf-tdp2-core-prod/web
+        run: docker push registry.heroku.com/sf-tdp2-core/web
 
       - name: Release container
-        run: heroku container:release web --app sf-tdp2-core-prod
+        run: heroku container:release web --app sf-tdp2-core
 
       - name: Set NODE_ENV to production
-        run: heroku config:set NODE_ENV=production --app sf-tdp2-core-prod
+        run: heroku config:set NODE_ENV=production --app sf-tdp2-core
 
   # Runs only when push/pr to dev
   deploy_dev:
@@ -91,13 +91,13 @@ jobs:
         run: heroku container:login
 
       - name: Tag container
-        run: docker tag users_microservice registry.heroku.com/sf-tdp2-core-development/web
+        run: docker tag users_microservice registry.heroku.com/sf-tdp2-core-dev/web
 
       - name: Push container
-        run: docker push registry.heroku.com/sf-tdp2-core-development/web
+        run: docker push registry.heroku.com/sf-tdp2-core-dev/web
 
       - name: Release container
-        run: heroku container:release web --app sf-tdp2-core-development
+        run: heroku container:release web --app sf-tdp2-core-dev
 
       - name: Set NODE_ENV to stage
-        run: heroku config:set NODE_ENV=stage --app sf-tdp2-core-development
+        run: heroku config:set NODE_ENV=stage --app sf-tdp2-core-dev
