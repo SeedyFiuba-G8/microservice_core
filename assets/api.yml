@@ -27,7 +27,7 @@ tags:
 
 paths:
   # PROJECTS
-  /project/all:
+  /project:
     get:
       summary: Get all projects
       description: Get info from every project.
