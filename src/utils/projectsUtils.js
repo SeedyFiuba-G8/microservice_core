@@ -1,4 +1,8 @@
 module.exports = function projectsUtils() {
+  return {
+    buildProjectObject
+  };
+
   function buildProjectObject(projectInfo) {
     return {
       id: projectInfo.id,
@@ -12,8 +16,4 @@ module.exports = function projectsUtils() {
       finalized_by: projectInfo.finalized_by // Posible mapeo futuro a Date
     };
   }
-
-  return {
-    buildProjectObject
-  };
 };
