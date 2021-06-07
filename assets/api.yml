@@ -1,140 +1,236 @@
 openapi: '3.0.0'
+
+# =============================================================================
+
 info:
   title: 'Core Microservice'
   description: >
-    This microservice is part of the **Seedy FIUBA Project**.
+    Part of the **Seedy FIUBA Project** ([view it on GitHub](https://github.com/orgs/SeedyFiuba-G8/)).
   version: '1.0.0'
-  contact:
-    name: Learn more
-    url: 'https://github.com/orgs/SeedyFiuba-G8/'
+
+# =============================================================================
 
 servers:
-  - url: http://sf-tdp2-core-orod.herokuapp.com/
+  - url: http://sf-tdp2-core.herokuapp.com/
     description: 'Production'
-  - url: http://sf-tdp2-core-development.herokuapp.com/
+  - url: http://sf-tdp2-core-dev.herokuapp.com/
     description: 'Staging'
   - url: http://localhost:3000/
     description: 'Local development'
 
+# =============================================================================
+
 tags:
-  - name: Admin
-    description: 'Admin operations'
+  - name: Projects
 
-  - name: User
-    description: 'User operations'
-
-  - name: Status
+# =============================================================================
 
 paths:
-  /:
+  # PROJECTS
+  /project/all:
     get:
+      summary: Get all projects
+      description: Get info from every project.
       tags:
-        - Documentation
-      operationId: docs
+        - Projects
       responses:
         200:
-          description: 'Description specified.'
-  /api-docs:
-  get:
-    tags:
-      - Documentation
-    operationId: docs
-    responses:
-      200:
-        description: 'Description specified.'
-
-  # USER ENDPOINTS
-  /projects:
-    get:
-      tags:
-        - Project
-      operationId: getAllProjects
-      summary: 'Get info from all projects'
-      responses:
-        200:
-          description: 'Projects info was retrieved successfully.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  projects:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          example: '670b9562-b30d-52d5-b827-655787665500'
-                        title:
-                          type: string
-                          example: 'Prohibir la utilizacion de Winbugs globalmente'
-                        description:
-                          type: string
-                          example: 'No puede ser que haya gente que use Winbugs'
-                        type:
-                          type: string
-                          example: 'social'
-                        objective:
-                          type: string
-                          example: 'Salvar a la gente de esta maldicion'
-                        country:
-                          type: string
-                          example: 'Argentina'
-                        city:
-                          type: string
-                          example: 'Buenos Aires'
-                        published_on:
-                          type: string
-                          example: '?'
-                        finalized_by:
-                          type: string
-                          example: '?'
-
+          $ref: '#/components/responses/getAllProjects'
         400:
-          description: 'Bad request.'
+          $ref: '#/components/responses/400'
         409:
-          description: 'It was not possible to get projects info.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  err:
-                    type: string
-                    example: 'Id do not match any project.'
+          $ref: '#/components/responses/409'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
 
   # STATUS
   /ping:
     get:
       tags:
         - Status
-      operationId: ping
       responses:
         200:
-          description: 'Server is active.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: 'OK'
+          $ref: '#/components/responses/ping'
+        400:
+          $ref: '#/components/responses/400'
+        415:
+          $ref: '#/components/responses/415'
 
   /health:
     get:
       tags:
         - Status
-      operationId: health
       responses:
         200:
-          description: 'Microservice general health state reported.'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  database:
-                    type: string
-                    example: 'UP'
+          $ref: '#/components/responses/ping'
+        400:
+          $ref: '#/components/responses/400'
+        415:
+          $ref: '#/components/responses/415'
+
+# =============================================================================
+
+components:
+  # ---------------------------------------------------------------------------
+  responses:
+    # ERRORS
+    400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    404:
+      description: Not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    409:
+      description: Conflict.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    415:
+      description: Unsupported Media Type.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    500:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    # PROJECTS
+    getAllProjects:
+      description: Projects info retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AllProjects'
+
+    # STATUS
+    health:
+      description: Microservice general health state reported.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Health'
+
+    ping:
+      description: Server is active.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Ping'
+
+  # ---------------------------------------------------------------------------
+  # requestBodies:
+
+  # ---------------------------------------------------------------------------
+  schemas:
+    # GENERAL
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            status:
+              type: integer
+            name:
+              type: string
+            message:
+              type: string
+            errors:
+              type: object
+            data:
+              type: object
+          required:
+            - status
+            - name
+      required:
+        - error
+
+    # PROJECTS
+    AllProjects:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+      required:
+        - projects
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        published_on:
+          type: string
+          example: '?'
+        finalized_by:
+          type: string
+          example: '?'
+      required:
+        - id
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
+        - published_on
+        - finalized_by
+
+    # STATUS
+    Ping:
+      type: object
+      properties:
+        status:
+          type: string
+          example: 'ok'
+      required:
+        - status
+
+    Health:
+      type: object
+      properties:
+        database:
+          type: string
+          example: 'UP'
+      required:
+        - database
+#
+# =============================================================================
