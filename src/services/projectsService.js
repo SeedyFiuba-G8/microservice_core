@@ -1,4 +1,8 @@
 module.exports = function usersService(projectsRepository) {
+  return {
+    getAll
+  };
+
   /**
    * Fetchs all users data from db
    *
@@ -7,8 +11,4 @@ module.exports = function usersService(projectsRepository) {
   async function getAll() {
     return projectsRepository.getAll();
   }
-
-  return {
-    getAll
-  };
 };

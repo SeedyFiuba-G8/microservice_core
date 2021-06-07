@@ -3,6 +3,10 @@ module.exports = function usersController(
   projectsUtils,
   logger
 ) {
+  return {
+    getAll
+  };
+
   /**
    * Fetchs all projects data from db
    *
@@ -28,8 +32,4 @@ module.exports = function usersController(
 
     return res.status(200).json(response);
   }
-
-  return {
-    getAll
-  };
 };

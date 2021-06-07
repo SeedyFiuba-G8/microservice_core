@@ -27,16 +27,14 @@
   },
   "homepage": "https://github.com/SeedyFiuba-G8/microservice_core#readme",
   "dependencies": {
+    "@seedyfiuba/api_components": "^1.0.3",
+    "@seedyfiuba/db_components": "^1.0.1",
+    "@seedyfiuba/error_components": "^1.0.1",
+    "@seedyfiuba/logging_components": "^1.0.1",
     "config": "^3.3.6",
     "dependable": "^1.1.0",
     "express": "^4.17.1",
-    "express-openapi-validate": "^0.6.1",
-    "knex": "^0.95.6",
-    "lodash": "^4.17.21",
-    "pg": "^8.6.0",
-    "swagger-ui-express": "^4.1.6",
-    "winston": "^3.3.3",
-    "yamljs": "^0.3.0"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "eslint": "^7.26.0",

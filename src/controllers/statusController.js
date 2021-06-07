@@ -1,4 +1,9 @@
 module.exports = function statusController(dbService) {
+  return {
+    health,
+    ping
+  };
+
   async function health(req, res) {
     const dbStatus = await dbService.getDatabaseHealth();
 
@@ -16,9 +21,4 @@ module.exports = function statusController(dbService) {
 
     return res.status(200).json(response);
   }
-
-  return {
-    health,
-    ping
-  };
 };
