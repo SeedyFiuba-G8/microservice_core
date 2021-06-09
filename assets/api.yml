@@ -36,6 +36,19 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getAllProjects'
+        500:
+          $ref: '#/components/responses/500'
+
+    post:
+      summary: Create a new project
+      description: Allows an entrepeneur user to create a new project.
+      tags:
+        - Projects
+      requestBody:
+        $ref: '#/components/requestBodies/postProject'
+      responses:
+        201:
+          description: 'Project was created successfully.'
         400:
           $ref: '#/components/responses/400'
         409:
@@ -135,7 +148,13 @@ components:
             $ref: '#/components/schemas/Ping'
 
   # ---------------------------------------------------------------------------
-  # requestBodies:
+  requestBodies:
+    postProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostProjectData'
 
   # ---------------------------------------------------------------------------
   schemas:
@@ -199,10 +218,10 @@ components:
           example: 'Buenos Aires'
         published_on:
           type: string
-          example: '?'
+          example: '2021-06-09T20:28:32.190Z'
         finalized_by:
           type: string
-          example: '?'
+          example: '2021-06-09T20:28:32.190Z'
       required:
         - id
         - title
@@ -212,6 +231,39 @@ components:
         - country
         - city
         - published_on
+        - finalized_by
+
+    PostProjectData:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalized_by:
+          type: string
+          example: '?'
+      required:
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
         - finalized_by
 
     # STATUS

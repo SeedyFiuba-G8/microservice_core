@@ -1,4 +1,4 @@
-module.exports = function projectsUtils() {
+module.exports = function projectUtils() {
   return {
     buildProjectObject
   };
