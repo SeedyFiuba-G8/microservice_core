@@ -1,4 +1,4 @@
-module.exports = function usersRepository(errors, knex, logger) {
+module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
     getAll
@@ -40,9 +40,13 @@ module.exports = function usersRepository(errors, knex, logger) {
   /**
    * Get all data from projects table
    *
-   * @returns {Promise}
+   * @returns {Project[]} Project
    */
-  function getAll() {
-    return knex('projects');
+  async function getAll() {
+    const projectsInfo = await knex('projects');
+    const projects = projectsInfo.map((projectInfo) =>
+      projectUtils.buildProjectObject(projectInfo)
+    );
+    return projects;
   }
 };

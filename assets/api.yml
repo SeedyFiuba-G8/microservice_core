@@ -216,12 +216,12 @@ components:
         city:
           type: string
           example: 'Buenos Aires'
-        published_on:
+        publishedOn:
           type: string
-          example: '2021-06-09T20:28:32.190Z'
-        finalized_by:
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+        finalizedBy:
           type: string
-          example: '2021-06-09T20:28:32.190Z'
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
         - id
         - title
@@ -230,8 +230,8 @@ components:
         - objective
         - country
         - city
-        - published_on
-        - finalized_by
+        - publishedOn
+        - finalizedBy
 
     PostProjectData:
       type: object
@@ -254,9 +254,9 @@ components:
         city:
           type: string
           example: 'Buenos Aires'
-        finalized_by:
+        finalizedBy:
           type: string
-          example: '?'
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
         - title
         - description
@@ -264,7 +264,7 @@ components:
         - objective
         - country
         - city
-        - finalized_by
+        - finalizedBy
 
     # STATUS
     Ping:

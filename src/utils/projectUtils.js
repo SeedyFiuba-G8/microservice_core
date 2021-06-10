@@ -1,6 +1,7 @@
 module.exports = function projectUtils() {
   return {
-    buildProjectObject
+    buildProjectObject,
+    buildProjectResponseObject
   };
 
   function buildProjectObject(projectInfo) {
@@ -12,8 +13,15 @@ module.exports = function projectUtils() {
       objective: projectInfo.objective,
       country: projectInfo.country,
       city: projectInfo.city,
-      published_on: projectInfo.published_on, // Posible mapeo futuro a Date
-      finalized_by: projectInfo.finalized_by // Posible mapeo futuro a Date
+      publishedOn: projectInfo.published_on,
+      finalizedBy: projectInfo.finalized_by
     };
+  }
+
+  function buildProjectResponseObject(project) {
+    const projectRes = { ...project };
+    projectRes.finalizedBy = project.finalizedBy.toString();
+    projectRes.publishedOn = project.publishedOn.toString();
+    return projectRes;
   }
 };

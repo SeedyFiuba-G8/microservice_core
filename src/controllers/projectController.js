@@ -42,6 +42,12 @@ module.exports = function usersController(
       return next(err);
     }
 
-    return res.status(200).json(projects);
+    return res
+      .status(200)
+      .json({
+        projects: projects.map((project) =>
+          projectUtils.buildProjectResponseObject(project)
+        )
+      });
   }
 };
