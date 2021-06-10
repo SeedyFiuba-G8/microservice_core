@@ -11,9 +11,9 @@ info:
 # =============================================================================
 
 servers:
-  - url: http://sf-tdp2-core.herokuapp.com/
+  - url: https://sf-tdp2-core.herokuapp.com/
     description: 'Production'
-  - url: http://sf-tdp2-core-dev.herokuapp.com/
+  - url: https://sf-tdp2-core-dev.herokuapp.com/
     description: 'Staging'
   - url: http://localhost:3000/
     description: 'Local development'
@@ -27,7 +27,7 @@ tags:
 
 paths:
   # PROJECTS
-  /project/all:
+  /project:
     get:
       summary: Get all projects
       description: Get info from every project.
@@ -36,6 +36,19 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getAllProjects'
+        500:
+          $ref: '#/components/responses/500'
+
+    post:
+      summary: Create a new project
+      description: Allows an entrepeneur user to create a new project.
+      tags:
+        - Projects
+      requestBody:
+        $ref: '#/components/requestBodies/postProject'
+      responses:
+        201:
+          description: 'Project was created successfully.'
         400:
           $ref: '#/components/responses/400'
         409:
@@ -135,7 +148,13 @@ components:
             $ref: '#/components/schemas/Ping'
 
   # ---------------------------------------------------------------------------
-  # requestBodies:
+  requestBodies:
+    postProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostProjectData'
 
   # ---------------------------------------------------------------------------
   schemas:
@@ -197,12 +216,12 @@ components:
         city:
           type: string
           example: 'Buenos Aires'
-        published_on:
+        publishedOn:
           type: string
-          example: '?'
-        finalized_by:
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+        finalizedBy:
           type: string
-          example: '?'
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
         - id
         - title
@@ -211,8 +230,41 @@ components:
         - objective
         - country
         - city
-        - published_on
-        - finalized_by
+        - publishedOn
+        - finalizedBy
+
+    PostProjectData:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalizedBy:
+          type: string
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+      required:
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
+        - finalizedBy
 
     # STATUS
     Ping:
