@@ -12,7 +12,7 @@ function createContainer() {
     'controllers',
     'middlewares',
     'repositories',
-    'routes',
+    'routers',
     'services',
     'utils'
   ];
