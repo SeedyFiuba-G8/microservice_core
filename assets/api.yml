@@ -279,6 +279,8 @@ components:
         id:
           type: string
           example: '670b9562-b30d-52d5-b827-655787665500'
+      required:
+        - id
 
     # STATUS
     Ping:
