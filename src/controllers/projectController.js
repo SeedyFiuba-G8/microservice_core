@@ -5,7 +5,8 @@ module.exports = function projectController(
 ) {
   return {
     create,
-    getAll
+    getAll,
+    remove
   };
 
   /**
@@ -48,5 +49,25 @@ module.exports = function projectController(
         projectUtils.buildProjectResponseObject(project)
       )
     });
+  }
+
+  /**
+   * @returns {Promise}
+   */
+  async function remove(req, res, next) {
+    const { projectId } = req.params;
+    let deletedProjectId;
+
+    try {
+      deletedProjectId = await projectService.remove(projectId);
+    } catch (err) {
+      return next(err);
+    }
+
+    if (!deletedProjectId) {
+      return res.status(404).send();
+    }
+
+    return res.status(200).send({ id: projectId });
   }
 };

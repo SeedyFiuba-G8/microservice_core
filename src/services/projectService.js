@@ -3,13 +3,14 @@ const { v4: uuidv4 } = require('uuid');
 module.exports = function usersService(projectRepository) {
   return {
     create,
-    getAll
+    getAll,
+    remove
   };
 
   /**
    * Creates a new project
    *
-   * @returns {uuid} id
+   * @returns {Promise} uuid
    */
   async function create(projectInfo) {
     const id = uuidv4();
@@ -19,6 +20,15 @@ module.exports = function usersService(projectRepository) {
     await projectRepository.create({ id, ...projectInfo });
 
     return id;
+  }
+
+  /**
+   * Deletes an existing project
+   *
+   * @returns {Promise} uuid
+   */
+  async function remove(projectId) {
+    return projectRepository.remove(projectId);
   }
 
   /**

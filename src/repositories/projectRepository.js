@@ -1,7 +1,11 @@
+// const DELETE_FOUND = 1;
+const DELETE_NOT_FOUND = 0;
+
 module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
-    getAll
+    getAll,
+    remove
   };
 
   /**
@@ -14,7 +18,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    * @param {String} projectInfo.city
    * @param {String} projectInfo.finalizedBy "2021-06-09T20:28:32.190Z"
    *
-   * @returns {undefined}
+   * @returns {Promise}
    */
   async function create(projectInfo) {
     try {
@@ -40,7 +44,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   /**
    * Get all data from projects table
    *
-   * @returns {Project[]} Project
+   * @returns {Promise} Project[]
    */
   async function getAll() {
     const projectsInfo = await knex('projects');
@@ -48,5 +52,18 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
       projectUtils.buildProjectObject(projectInfo)
     );
     return projects;
+  }
+
+  /**
+   * Removes a project with specified id from projects table
+   *
+   * @returns {Promise} uuid
+   */
+  async function remove(projectId) {
+    const result = await knex('projects').where('id', projectId).del();
+    if (result === DELETE_NOT_FOUND) {
+      return null;
+    }
+    return projectId;
   }
 };
