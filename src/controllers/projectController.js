@@ -24,7 +24,7 @@ module.exports = function projectController(
       return next(err);
     }
 
-    return res.status(201).send({ id: projectId });
+    return res.status(200).send({ id: projectId });
   }
 
   /**

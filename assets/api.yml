@@ -47,7 +47,7 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/postProject'
       responses:
-        201:
+        200:
           $ref: '#/components/responses/postProject'
         400:
           $ref: '#/components/responses/400'
