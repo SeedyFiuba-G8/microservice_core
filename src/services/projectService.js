@@ -32,9 +32,9 @@ module.exports = function usersService(projectRepository) {
   }
 
   /**
-   * Fetchs all users data from db
+   * Fetchs all projects data from db
    *
-   * @returns {Promise}
+   * @returns {Promise} Project[]
    */
   async function getAll() {
     return projectRepository.getAll();

@@ -1,5 +1,3 @@
-const DELETE_NOT_FOUND = 0;
-
 module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
