@@ -1,4 +1,4 @@
-module.exports = function usersController(
+module.exports = function projectController(
   projectService,
   projectUtils,
   logger
@@ -12,17 +12,18 @@ module.exports = function usersController(
    * @returns {Promise}
    */
   async function create(req, res, next) {
+    let projectId;
     const projectInfo = req.body;
 
     /* TODO: Validate body is complete. */
 
     try {
-      await projectService.create(projectInfo);
+      projectId = await projectService.create(projectInfo);
     } catch (err) {
       return next(err);
     }
 
-    return res.status(201).send();
+    return res.status(201).send({ projectId });
   }
 
   /**
@@ -42,12 +43,10 @@ module.exports = function usersController(
       return next(err);
     }
 
-    return res
-      .status(200)
-      .json({
-        projects: projects.map((project) =>
-          projectUtils.buildProjectResponseObject(project)
-        )
-      });
+    return res.status(200).json({
+      projects: projects.map((project) =>
+        projectUtils.buildProjectResponseObject(project)
+      )
+    });
   }
 };

@@ -48,7 +48,7 @@ paths:
         $ref: '#/components/requestBodies/postProject'
       responses:
         201:
-          description: 'Project was created successfully.'
+          $ref: '#/components/responses/postProject'
         400:
           $ref: '#/components/responses/400'
         409:
@@ -131,6 +131,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AllProjects'
+
+    postProject:
+      description: Project created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
 
     # STATUS
     health:
@@ -265,6 +272,13 @@ components:
         - country
         - city
         - finalizedBy
+
+    ProjectId:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
 
     # STATUS
     Ping:
