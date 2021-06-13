@@ -64,10 +64,6 @@ module.exports = function projectController(
       return next(err);
     }
 
-    if (!deletedProjectId) {
-      return res.status(404).send();
-    }
-
-    return res.status(200).send({ id: projectId });
+    return res.status(200).send({ id: deletedProjectId });
   }
 };

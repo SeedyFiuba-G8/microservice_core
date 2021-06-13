@@ -1,4 +1,3 @@
-// const DELETE_FOUND = 1;
 const DELETE_NOT_FOUND = 0;
 
 module.exports = function usersRepository(errors, knex, logger, projectUtils) {
@@ -61,8 +60,8 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    */
   async function remove(projectId) {
     const result = await knex('projects').where('id', projectId).del();
-    if (result === DELETE_NOT_FOUND) {
-      return null;
+    if (!result) {
+      throw errors.NotFound('There is no project with the specified id.');
     }
     return projectId;
   }
