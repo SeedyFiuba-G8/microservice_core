@@ -4,6 +4,7 @@ module.exports = function projectService(errors, projectRepository) {
   return {
     create,
     getAll,
+    getByProjectId,
     remove
   };
 
@@ -20,6 +21,10 @@ module.exports = function projectService(errors, projectRepository) {
     await projectRepository.create({ id: projectId, ...projectInfo });
 
     return projectId;
+  }
+
+  async function getByProjectId(projectId) {
+    return projectRepository.getByProjectId(projectId);
   }
 
   /**

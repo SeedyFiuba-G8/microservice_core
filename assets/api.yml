@@ -59,8 +59,32 @@ paths:
           $ref: '#/components/responses/500'
 
   /project/{projectId}:
+    get:
+      summary: Get a project by id.
+      description: Allos a user to get retrieve a project's information by its id.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: string
+          required: true
+          description: uuid of the project to retrieve
+      responses:
+        200:
+          $ref: '#/components/responses/getProject'
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
     delete:
-      summary: Delete a project by ID
+      summary: Delete a project by id.
       description: Allows an owner of a project or an admin to delete a project.
       tags:
         - Projects
@@ -82,8 +106,6 @@ paths:
           $ref: '#/components/responses/401'
         404:
           $ref: '#/components/responses/404'
-        409:
-          $ref: '#/components/responses/409'
         415:
           $ref: '#/components/responses/415'
         500:
@@ -169,6 +191,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AllProjects'
+
+    getProject:
+      description: Project info retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
 
     postProject:
       description: Project created successfully.
@@ -256,6 +285,9 @@ components:
         id:
           type: string
           example: '670b9562-b30d-52d5-b827-655787665500'
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -282,6 +314,7 @@ components:
           example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
         - id
+        - userId
         - title
         - description
         - type

@@ -2,6 +2,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
     getAll,
+    getByProjectId,
     getCreatorId,
     remove
   };
@@ -51,6 +52,16 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
       projectUtils.buildProjectObject(projectInfo)
     );
     return projects;
+  }
+
+  async function getByProjectId(projectId) {
+    const projectInfo = await knex('projects').where('id', projectId).first();
+
+    if (!projectInfo) {
+      throw errors.NotFound('There is no project with the specified id.');
+    }
+
+    return projectUtils.buildProjectObject(projectInfo);
   }
 
   async function getCreatorId(projectId) {

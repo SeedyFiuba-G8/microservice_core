@@ -6,6 +6,7 @@ module.exports = function projectController(
   return {
     create,
     getAll,
+    get,
     remove
   };
 
@@ -25,6 +26,21 @@ module.exports = function projectController(
     }
 
     return res.status(200).send({ id: projectId });
+  }
+
+  async function get(req, res, next) {
+    const { projectId } = req.params;
+    let projectInfo;
+
+    try {
+      projectInfo = await projectService.getByProjectId(projectId);
+    } catch (err) {
+      return next(err);
+    }
+
+    return res
+      .status(200)
+      .send(projectUtils.buildProjectResponseObject(projectInfo));
   }
 
   /**
