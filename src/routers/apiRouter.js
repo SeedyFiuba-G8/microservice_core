@@ -21,6 +21,6 @@ module.exports = function apiRouter(
       // ROUTES
 
       // Projects
-      .get('/project/all', projectsController.getAll)
+      .get('/project', projectsController.getAll)
   );
 };

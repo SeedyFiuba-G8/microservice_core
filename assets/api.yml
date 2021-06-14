@@ -11,9 +11,9 @@ info:
 # =============================================================================
 
 servers:
-  - url: http://sf-tdp2-core.herokuapp.com/
+  - url: https://sf-tdp2-core.herokuapp.com/
     description: 'Production'
-  - url: http://sf-tdp2-core-dev.herokuapp.com/
+  - url: https://sf-tdp2-core-dev.herokuapp.com/
     description: 'Staging'
   - url: http://localhost:3000/
     description: 'Local development'
@@ -27,7 +27,7 @@ tags:
 
 paths:
   # PROJECTS
-  /project/all:
+  /project:
     get:
       summary: Get all projects
       description: Get info from every project.
