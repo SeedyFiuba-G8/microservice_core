@@ -48,7 +48,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    * @returns {Promise} Project[]
    */
   async function getAll() {
-    const projectsInfo = await knex('projects');
+    const projectsInfo = await knex('projects').orderBy('published_on', 'desc');
 
     const projects = projectsInfo.map((projectInfo) =>
       projectUtils.buildProjectObject(projectInfo)
@@ -63,7 +63,9 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    * @returns {Promise} Project
    */
   async function getByUserId(userId) {
-    const projectsInfo = await knex('projects').where('user_id', userId);
+    const projectsInfo = await knex('projects')
+      .where('user_id', userId)
+      .orderBy('published_on', 'desc');
 
     if (!projectsInfo.length) {
       throw errors.NotFound(
