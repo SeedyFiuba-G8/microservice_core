@@ -64,6 +64,8 @@ paths:
       description: Allows an owner of a project or an admin to delete a project.
       tags:
         - Projects
+      requestBody:
+        $ref: '#/components/requestBodies/userId'
       parameters:
         - in: path
           name: projectId
@@ -76,6 +78,8 @@ paths:
           $ref: '#/components/responses/deleteProject'
         400:
           $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
         404:
           $ref: '#/components/responses/404'
         409:
@@ -118,6 +122,13 @@ components:
     # ERRORS
     400:
       description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    401:
+      description: Unauthorized.
       content:
         application/json:
           schema:
@@ -196,6 +207,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PostProjectData'
+
+    userId:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserId'
   # ---------------------------------------------------------------------------
   schemas:
     # GENERAL
@@ -276,6 +294,9 @@ components:
     PostProjectData:
       type: object
       properties:
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -298,6 +319,7 @@ components:
           type: string
           example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
+        - userId
         - title
         - description
         - type
@@ -314,6 +336,13 @@ components:
           example: '670b9562-b30d-52d5-b827-655787665500'
       required:
         - id
+
+    UserId:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
 
     # STATUS
     Ping:

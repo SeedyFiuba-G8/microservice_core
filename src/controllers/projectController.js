@@ -56,10 +56,11 @@ module.exports = function projectController(
    */
   async function remove(req, res, next) {
     const { projectId } = req.params;
+    const { userId } = req.body;
     let deletedProjectId;
 
     try {
-      deletedProjectId = await projectService.remove(projectId);
+      deletedProjectId = await projectService.remove(userId, projectId);
     } catch (err) {
       return next(err);
     }

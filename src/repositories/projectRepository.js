@@ -2,6 +2,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
     getAll,
+    getCreatorId,
     remove
   };
 
@@ -21,6 +22,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     try {
       await knex('projects').insert({
         id: projectInfo.id,
+        user_id: projectInfo.userId,
         title: projectInfo.title,
         description: projectInfo.description,
         type: projectInfo.type,
@@ -51,6 +53,19 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     return projects;
   }
 
+  async function getCreatorId(projectId) {
+    const result = await knex('projects')
+      .select('user_id')
+      .where('id', projectId)
+      .first();
+
+    if (!result) {
+      throw errors.NotFound('There is no project with the specified id.');
+    }
+
+    return result.user_id;
+  }
+
   /**
    * Removes a project with specified id from projects table
    *
@@ -58,9 +73,11 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    */
   async function remove(projectId) {
     const result = await knex('projects').where('id', projectId).del();
+
     if (!result) {
       throw errors.NotFound('There is no project with the specified id.');
     }
+
     return projectId;
   }
 };

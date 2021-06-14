@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 
-module.exports = function usersService(projectRepository) {
+module.exports = function projectService(errors, projectRepository) {
   return {
     create,
     getAll,
@@ -13,13 +13,13 @@ module.exports = function usersService(projectRepository) {
    * @returns {Promise} uuid
    */
   async function create(projectInfo) {
-    const id = uuidv4();
+    const projectId = uuidv4();
 
     /* TODO Logic validations */
 
-    await projectRepository.create({ id, ...projectInfo });
+    await projectRepository.create({ id: projectId, ...projectInfo });
 
-    return id;
+    return projectId;
   }
 
   /**
@@ -27,7 +27,15 @@ module.exports = function usersService(projectRepository) {
    *
    * @returns {Promise} uuid
    */
-  async function remove(projectId) {
+  async function remove(userId, projectId) {
+    const creatorId = await projectRepository.getCreatorId(projectId);
+
+    if (creatorId !== userId) {
+      throw errors.Unauthorized(
+        'You do not have permissions over the specified project.'
+      );
+    }
+
     return projectRepository.remove(projectId);
   }
 

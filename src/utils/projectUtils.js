@@ -7,6 +7,7 @@ module.exports = function projectUtils() {
   function buildProjectObject(projectInfo) {
     return {
       id: projectInfo.id,
+      userId: projectInfo.user_id,
       title: projectInfo.title,
       description: projectInfo.description,
       type: projectInfo.type,
