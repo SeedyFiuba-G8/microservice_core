@@ -1,12 +1,8 @@
-module.exports = function projectController(
-  projectService,
-  projectUtils,
-  logger
-) {
+module.exports = function projectController(projectService, projectUtils) {
   return {
     create,
-    getAll,
     get,
+    getAll,
     remove
   };
 
@@ -44,19 +40,21 @@ module.exports = function projectController(
   }
 
   /**
-   * Fetchs all projects data from db
+   * Fetchs all projects data from db.
+   *
+   * If userId is specified in req.query, it gets all projects
+   * created by that user. Else, it retrieves all projects.
    *
    * @returns {Promise}
    */
   async function getAll(req, res, next) {
+    const { userId } = req.query;
     let projects;
+    const method = userId ? 'getByUserId' : 'getAll';
 
     try {
-      projects = await projectService.getAll();
+      projects = await projectService[method](userId);
     } catch (err) {
-      logger.warn('projectsService.getAll:', err);
-      err.status = 409;
-      err.name = 'Error in projectsService.getAll';
       return next(err);
     }
 

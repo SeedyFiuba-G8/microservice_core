@@ -2,8 +2,9 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
     getAll,
+    getByUserId,
     getByProjectId,
-    getCreatorId,
+    getUserId,
     remove
   };
 
@@ -48,12 +49,40 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    */
   async function getAll() {
     const projectsInfo = await knex('projects');
+
     const projects = projectsInfo.map((projectInfo) =>
       projectUtils.buildProjectObject(projectInfo)
     );
+
     return projects;
   }
 
+  /**
+   * Get all data of projects created by userId
+   *
+   * @returns {Promise} Project
+   */
+  async function getByUserId(userId) {
+    const projectsInfo = await knex('projects').where('user_id', userId);
+
+    if (!projectsInfo.length) {
+      throw errors.NotFound(
+        'There are no projects created by the specified user.'
+      );
+    }
+
+    const projects = projectsInfo.map((projectInfo) =>
+      projectUtils.buildProjectObject(projectInfo)
+    );
+
+    return projects;
+  }
+
+  /**
+   * Get all data of project with projectId
+   *
+   * @returns {Promise} Project
+   */
   async function getByProjectId(projectId) {
     const projectInfo = await knex('projects').where('id', projectId).first();
 
@@ -64,7 +93,12 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     return projectUtils.buildProjectObject(projectInfo);
   }
 
-  async function getCreatorId(projectId) {
+  /**
+   * Get userId of project with projectId
+   *
+   * @returns {Promise} Project
+   */
+  async function getUserId(projectId) {
     const result = await knex('projects')
       .select('user_id')
       .where('id', projectId)

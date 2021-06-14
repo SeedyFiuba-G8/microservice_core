@@ -4,6 +4,7 @@ module.exports = function projectService(errors, projectRepository) {
   return {
     create,
     getAll,
+    getByUserId,
     getByProjectId,
     remove
   };
@@ -23,6 +24,20 @@ module.exports = function projectService(errors, projectRepository) {
     return projectId;
   }
 
+  /**
+   * Fetchs all projects created by userId
+   *
+   * @returns {Promise} Project[]
+   */
+  async function getByUserId(userId) {
+    return projectRepository.getByUserId(userId);
+  }
+
+  /**
+   * Fetchs project data of projectId
+   *
+   * @returns {Promise} Project
+   */
   async function getByProjectId(projectId) {
     return projectRepository.getByProjectId(projectId);
   }
@@ -33,7 +48,7 @@ module.exports = function projectService(errors, projectRepository) {
    * @returns {Promise} uuid
    */
   async function remove(userId, projectId) {
-    const creatorId = await projectRepository.getCreatorId(projectId);
+    const creatorId = await projectRepository.getUserId(projectId);
 
     if (creatorId !== userId) {
       throw errors.Unauthorized(

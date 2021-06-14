@@ -29,13 +29,22 @@ paths:
   # PROJECTS
   /project:
     get:
-      summary: Get all projects
-      description: Get info from every project.
+      summary: Get all projects (optionally, of a specified user)
+      description: Get info from every project (of the app/of the user).
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+          description: The userId of whom we want to retrieve projects.
       tags:
         - Projects
       responses:
         200:
           $ref: '#/components/responses/getAllProjects'
+        404:
+          $ref: '#/components/responses/404'
         500:
           $ref: '#/components/responses/500'
 
