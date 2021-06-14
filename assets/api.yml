@@ -92,6 +92,34 @@ paths:
         500:
           $ref: '#/components/responses/500'
 
+    put:
+      summary: Modify the information of the project.
+      description: Allows an owner of a project or an admin to modify the information of a project.
+      tags:
+        - Projects
+      requestBody:
+        $ref: '#/components/requestBodies/putProject'
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: string
+          required: true
+          description: uuid of the project to modify
+      responses:
+        200:
+          $ref: '#/components/responses/putProject'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
     delete:
       summary: Delete a project by id.
       description: Allows an owner of a project or an admin to delete a project.
@@ -215,6 +243,13 @@ components:
           schema:
             $ref: '#/components/schemas/ProjectId'
 
+    putProject:
+      description: Project modified successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
+
     deleteProject:
       description: Project deleted successfully.
       content:
@@ -245,6 +280,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PostProjectData'
+
+    putProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PutProjectData'
 
     userId:
       required: true
@@ -369,6 +411,36 @@ components:
         - country
         - city
         - finalizedBy
+
+    PutProjectData:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalizedBy:
+          type: string
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+      required:
+        - userId
 
     ProjectId:
       type: object

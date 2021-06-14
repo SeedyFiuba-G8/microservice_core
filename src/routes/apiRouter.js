@@ -21,6 +21,7 @@ module.exports = function apiRouter(
       // ROUTES
       .post('/project', projectController.create)
       .get('/project/:projectId', projectController.get)
+      .put('/project/:projectId', projectController.modify)
       .delete('/project/:projectId', projectController.remove)
 
       // Projects

@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   return {
     create,
@@ -5,6 +7,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     getByUserId,
     getByProjectId,
     getUserId,
+    update,
     remove
   };
 
@@ -21,21 +24,15 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
    * @returns {Promise}
    */
   async function create(projectInfo) {
+    const projectRow = mapProjectInfoToRow(projectInfo);
+
     try {
-      await knex('projects').insert({
-        id: projectInfo.id,
-        user_id: projectInfo.userId,
-        title: projectInfo.title,
-        description: projectInfo.description,
-        type: projectInfo.type,
-        objective: projectInfo.objective,
-        country: projectInfo.country,
-        city: projectInfo.city,
-        finalized_by: projectInfo.finalizedBy
-      });
+      await knex('projects').insert(projectRow);
     } catch (err) {
       if (err.code === '23505')
-        throw errors.Conflict('A project with specified id already exists.');
+        throw errors.InternalServerError(
+          'A project with specified id already exists.'
+        );
 
       logger.error(err);
       throw errors.InternalServerError();
@@ -114,6 +111,25 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
   }
 
   /**
+   * Updates a project info
+   *
+   * @returns {Promise} id
+   */
+  async function update(projectId, newProjectInfo) {
+    const fieldsToUpdate = mapProjectInfoToRow(newProjectInfo);
+
+    const result = await knex('projects')
+      .update(fieldsToUpdate)
+      .where('id', projectId);
+
+    if (!result) {
+      throw errors.NotFound('There is no project with the specified id.');
+    }
+
+    return projectId;
+  }
+
+  /**
    * Removes a project with specified id from projects table
    *
    * @returns {Promise} uuid
@@ -126,5 +142,14 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     }
 
     return projectId;
+  }
+
+  function mapProjectInfoToRow(projectInfo) {
+    return _.mapKeys(projectInfo, (value, key) => {
+      if (key === 'finalizedBy') return 'finalized_by';
+      if (key === 'userId') return 'user_id';
+      if (key === 'publishedOn') return 'published_on';
+      return key;
+    });
   }
 };

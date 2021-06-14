@@ -6,6 +6,7 @@ module.exports = function projectService(errors, projectRepository) {
     getAll,
     getByUserId,
     getByProjectId,
+    modify,
     remove
   };
 
@@ -43,18 +44,23 @@ module.exports = function projectService(errors, projectRepository) {
   }
 
   /**
+   * Modifies project data
+   *
+   * @returns {Promise} Project
+   */
+  async function modify(userId, projectId, newProjectInfo) {
+    await checkPermissionsOverProject(userId, projectId);
+
+    return projectRepository.update(projectId, newProjectInfo);
+  }
+
+  /**
    * Deletes an existing project
    *
    * @returns {Promise} uuid
    */
   async function remove(userId, projectId) {
-    const creatorId = await projectRepository.getUserId(projectId);
-
-    if (creatorId !== userId) {
-      throw errors.Unauthorized(
-        'You do not have permissions over the specified project.'
-      );
-    }
+    await checkPermissionsOverProject(userId, projectId);
 
     return projectRepository.remove(projectId);
   }
@@ -66,5 +72,15 @@ module.exports = function projectService(errors, projectRepository) {
    */
   async function getAll() {
     return projectRepository.getAll();
+  }
+
+  async function checkPermissionsOverProject(userId, projectId) {
+    const creatorId = await projectRepository.getUserId(projectId);
+
+    if (creatorId !== userId) {
+      throw errors.Unauthorized(
+        'You do not have permissions over the specified project.'
+      );
+    }
   }
 };
