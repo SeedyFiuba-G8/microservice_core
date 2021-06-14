@@ -1,4 +1,8 @@
-module.exports = function projectController(projectService, projectUtils) {
+module.exports = function projectController(
+  errors,
+  projectService,
+  projectUtils
+) {
   return {
     create,
     get,
@@ -13,9 +17,16 @@ module.exports = function projectController(projectService, projectUtils) {
     let projectId;
     const projectInfo = req.body;
 
+    projectInfo.finalizedBy = new Date(projectInfo.finalizedBy);
+
     /* TODO: Validate body is complete. */
 
     try {
+      // eslint-disable-next-line
+      if (isNaN(projectInfo.finalizedBy)) {
+        throw errors.BadRequest('finalizedBy Date format is invalid.');
+      }
+
       projectId = await projectService.create(projectInfo);
     } catch (err) {
       return next(err);
