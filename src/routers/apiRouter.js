@@ -2,7 +2,7 @@ const express = require('express');
 
 module.exports = function apiRouter(
   apiValidatorMiddleware,
-  projectsController,
+  projectController,
   statusController
 ) {
   return (
@@ -19,8 +19,11 @@ module.exports = function apiRouter(
       .get('/health', statusController.health)
 
       // ROUTES
+      .post('/project', projectController.create)
+      .get('/project/:projectId', projectController.get)
+      .delete('/project/:projectId', projectController.remove)
 
       // Projects
-      .get('/project', projectsController.getAll)
+      .get('/project', projectController.getAll)
   );
 };

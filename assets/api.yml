@@ -29,17 +29,92 @@ paths:
   # PROJECTS
   /project:
     get:
-      summary: Get all projects
-      description: Get info from every project.
+      summary: Get all projects (optionally, of a specified user)
+      description: Get info from every project (of the app/of the user).
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+          description: The userId of whom we want to retrieve projects.
       tags:
         - Projects
       responses:
         200:
           $ref: '#/components/responses/getAllProjects'
+        404:
+          $ref: '#/components/responses/404'
+        500:
+          $ref: '#/components/responses/500'
+
+    post:
+      summary: Create a new project
+      description: Allows an entrepeneur user to create a new project.
+      tags:
+        - Projects
+      requestBody:
+        $ref: '#/components/requestBodies/postProject'
+      responses:
+        200:
+          $ref: '#/components/responses/postProject'
         400:
           $ref: '#/components/responses/400'
         409:
           $ref: '#/components/responses/409'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
+  /project/{projectId}:
+    get:
+      summary: Get a project by id.
+      description: Allos a user to get retrieve a project's information by its id.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: string
+          required: true
+          description: uuid of the project to retrieve
+      responses:
+        200:
+          $ref: '#/components/responses/getProject'
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
+    delete:
+      summary: Delete a project by id.
+      description: Allows an owner of a project or an admin to delete a project.
+      tags:
+        - Projects
+      requestBody:
+        $ref: '#/components/requestBodies/userId'
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: string
+          required: true
+          description: uuid of the project to delete
+      responses:
+        200:
+          $ref: '#/components/responses/deleteProject'
+        400:
+          $ref: '#/components/responses/400'
+        401:
+          $ref: '#/components/responses/401'
+        404:
+          $ref: '#/components/responses/404'
         415:
           $ref: '#/components/responses/415'
         500:
@@ -83,6 +158,13 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
 
+    401:
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
     404:
       description: Not found.
       content:
@@ -119,6 +201,27 @@ components:
           schema:
             $ref: '#/components/schemas/AllProjects'
 
+    getProject:
+      description: Project info retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
+
+    postProject:
+      description: Project created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
+
+    deleteProject:
+      description: Project deleted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
+
     # STATUS
     health:
       description: Microservice general health state reported.
@@ -135,8 +238,20 @@ components:
             $ref: '#/components/schemas/Ping'
 
   # ---------------------------------------------------------------------------
-  # requestBodies:
+  requestBodies:
+    postProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostProjectData'
 
+    userId:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserId'
   # ---------------------------------------------------------------------------
   schemas:
     # GENERAL
@@ -179,6 +294,9 @@ components:
         id:
           type: string
           example: '670b9562-b30d-52d5-b827-655787665500'
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -197,22 +315,76 @@ components:
         city:
           type: string
           example: 'Buenos Aires'
-        published_on:
+        publishedOn:
           type: string
-          example: '?'
-        finalized_by:
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+        finalizedBy:
           type: string
-          example: '?'
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
         - id
+        - userId
         - title
         - description
         - type
         - objective
         - country
         - city
-        - published_on
-        - finalized_by
+        - publishedOn
+        - finalizedBy
+
+    PostProjectData:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalizedBy:
+          type: string
+          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+      required:
+        - userId
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
+        - finalizedBy
+
+    ProjectId:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
+      required:
+        - id
+
+    UserId:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
 
     # STATUS
     Ping:
