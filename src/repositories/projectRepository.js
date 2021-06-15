@@ -1,6 +1,11 @@
 const _ = require('lodash');
 
-module.exports = function usersRepository(errors, knex, logger, projectUtils) {
+module.exports = function $projectRepository(
+  errors,
+  knex,
+  logger,
+  projectUtils
+) {
   return {
     create,
     getAll,
@@ -30,12 +35,13 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
       await knex('projects').insert(projectRow);
     } catch (err) {
       if (err.code === '23505')
-        throw errors.InternalServerError(
-          'A project with specified id already exists.'
+        throw errors.create(
+          500,
+          'A project with specified ID already exists, please retry.'
         );
 
       logger.error(err);
-      throw errors.InternalServerError();
+      throw errors.UnknownError;
     }
   }
 
@@ -65,7 +71,8 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
       .orderBy('published_on', 'desc');
 
     if (!projectsInfo.length) {
-      throw errors.NotFound(
+      throw errors.create(
+        404,
         'There are no projects created by the specified user.'
       );
     }
@@ -86,7 +93,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     const projectInfo = await knex('projects').where('id', projectId).first();
 
     if (!projectInfo) {
-      throw errors.NotFound('There is no project with the specified id.');
+      throw errors.create(404, 'There is no project with the specified id.');
     }
 
     return projectUtils.buildProjectObject(projectInfo);
@@ -104,7 +111,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
       .first();
 
     if (!result) {
-      throw errors.NotFound('There is no project with the specified id.');
+      throw errors.create(404, 'There is no project with the specified id.');
     }
 
     return result.user_id;
@@ -123,7 +130,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
       .where('id', projectId);
 
     if (!result) {
-      throw errors.NotFound('There is no project with the specified id.');
+      throw errors.create(404, 'There is no project with the specified id.');
     }
 
     return projectId;
@@ -138,7 +145,7 @@ module.exports = function usersRepository(errors, knex, logger, projectUtils) {
     const result = await knex('projects').where('id', projectId).del();
 
     if (!result) {
-      throw errors.NotFound('There is no project with the specified id.');
+      throw errors.create(404, 'There is no project with the specified id.');
     }
 
     return projectId;

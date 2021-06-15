@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 
-module.exports = function projectService(errors, projectRepository) {
+module.exports = function $projectService(errors, projectRepository) {
   return {
     create,
     getAll,
@@ -78,7 +78,8 @@ module.exports = function projectService(errors, projectRepository) {
     const creatorId = await projectRepository.getUserId(projectId);
 
     if (creatorId !== userId) {
-      throw errors.Unauthorized(
+      throw errors.create(
+        403,
         'You do not have permissions over the specified project.'
       );
     }
