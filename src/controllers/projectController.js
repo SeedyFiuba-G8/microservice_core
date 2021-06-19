@@ -1,35 +1,30 @@
 const _ = require('lodash');
 
-module.exports = function projectController(
+module.exports = function $projectController(
   errors,
+  expressify,
   projectService,
   projectUtils
 ) {
-  return {
+  return expressify({
     create,
     get,
     getAll,
     modify,
     remove
-  };
+  });
 
   /**
    * Creates a new project and returns its id
    *
    * @returns {Promise}
    */
-  async function create(req, res, next) {
-    let projectId;
+  async function create(req, res) {
     const projectInfo = req.body;
+    const parsedProjectInfo = parseProjectInfo(projectInfo);
+    const id = await projectService.create(parsedProjectInfo);
 
-    try {
-      const parsedProjectInfo = parseProjectInfo(projectInfo);
-      projectId = await projectService.create(parsedProjectInfo);
-    } catch (err) {
-      return next(err);
-    }
-
-    return res.status(200).send({ id: projectId });
+    return res.status(200).json({ id });
   }
 
   /**
@@ -37,19 +32,13 @@ module.exports = function projectController(
    *
    * @returns {Promise}
    */
-  async function get(req, res, next) {
+  async function get(req, res) {
     const { projectId } = req.params;
-    let projectInfo;
-
-    try {
-      projectInfo = await projectService.getByProjectId(projectId);
-    } catch (err) {
-      return next(err);
-    }
+    const projectInfo = await projectService.getByProjectId(projectId);
 
     return res
       .status(200)
-      .send(projectUtils.buildProjectResponseObject(projectInfo));
+      .json(projectUtils.buildProjectResponseObject(projectInfo));
   }
 
   /**
@@ -60,15 +49,14 @@ module.exports = function projectController(
    *
    * @returns {Promise}
    */
-  async function getAll(req, res, next) {
+  async function getAll(req, res) {
     const { userId } = req.query;
     let projects;
-    const method = userId ? 'getByUserId' : 'getAll';
 
-    try {
-      projects = await projectService[method](userId);
-    } catch (err) {
-      return next(err);
+    if (!userId) {
+      projects = await projectService.getAll();
+    } else {
+      projects = await projectService.getByUserId(userId);
     }
 
     return res.status(200).json({
@@ -83,19 +71,15 @@ module.exports = function projectController(
    *
    * @returns {Promise}
    */
-  async function modify(req, res, next) {
+  async function modify(req, res) {
     const { projectId } = req.params;
     const { userId } = req.body;
     const newProjectInfo = _.omit(req.body, ['userId']);
 
-    try {
-      const parsedNewProjectInfo = parseProjectInfo(newProjectInfo);
-      await projectService.modify(userId, projectId, parsedNewProjectInfo);
-    } catch (err) {
-      return next(err);
-    }
+    const parsedNewProjectInfo = parseProjectInfo(newProjectInfo);
+    await projectService.modify(userId, projectId, parsedNewProjectInfo);
 
-    return res.status(200).send({ id: projectId });
+    return res.status(200).json({ id: projectId });
   }
 
   /**
@@ -103,18 +87,12 @@ module.exports = function projectController(
    *
    * @returns {Promise}
    */
-  async function remove(req, res, next) {
+  async function remove(req, res) {
     const { projectId } = req.params;
     const { userId } = req.body;
-    let deletedProjectId;
+    const deletedProjectId = await projectService.remove(userId, projectId);
 
-    try {
-      deletedProjectId = await projectService.remove(userId, projectId);
-    } catch (err) {
-      return next(err);
-    }
-
-    return res.status(200).send({ id: deletedProjectId });
+    return res.status(200).json({ id: deletedProjectId });
   }
 
   /* Possible migration of this function to a middleware in a future */
@@ -135,7 +113,7 @@ module.exports = function projectController(
       parsedProjectInfo.finalizedBy = new Date(projectInfo.finalizedBy);
       // eslint-disable-next-line
       if (isNaN(parsedProjectInfo.finalizedBy)) {
-        throw errors.BadRequest('finalizedBy Date format is invalid.');
+        throw errors.create(404, 'finalizedBy Date format is invalid.');
       }
     }
 

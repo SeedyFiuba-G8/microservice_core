@@ -53,6 +53,11 @@ function createContainer() {
     }
   );
 
+  container.register('expressify', function $expressify() {
+    // eslint-disable-next-line global-require
+    return require('expressify')();
+  });
+
   container.register('knex', function $knex(config) {
     return dbComponents.knex(config.knex);
   });
