@@ -70,8 +70,6 @@ paths:
           $ref: '#/components/responses/postProject'
         400:
           $ref: '#/components/responses/400'
-        409:
-          $ref: '#/components/responses/409'
         415:
           $ref: '#/components/responses/415'
         500:
@@ -93,8 +91,6 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getProject'
-        400:
-          $ref: '#/components/responses/400'
         404:
           $ref: '#/components/responses/404'
         415:
@@ -121,8 +117,8 @@ paths:
           $ref: '#/components/responses/patchProject'
         400:
           $ref: '#/components/responses/400'
-        401:
-          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
         404:
           $ref: '#/components/responses/404'
         415:
@@ -147,10 +143,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/deleteProject'
-        400:
-          $ref: '#/components/responses/400'
-        401:
-          $ref: '#/components/responses/401'
+        403:
+          $ref: '#/components/responses/403'
         404:
           $ref: '#/components/responses/404'
         415:
@@ -196,8 +190,8 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
 
-    401:
-      description: Unauthorized.
+    403:
+      description: Forbidden.
       content:
         application/json:
           schema:

@@ -1,10 +1,10 @@
 const _ = require('lodash');
 
 module.exports = function $projectController(
-  errors,
   expressify,
   projectService,
-  projectUtils
+  projectUtils,
+  validationUtils
 ) {
   return expressify({
     create,
@@ -89,7 +89,13 @@ module.exports = function $projectController(
     return res.status(200).json({ id: deletedProjectId });
   }
 
-  /* Possible migration of this function to a middleware in a future */
+  /**
+   * Parse a project's info by picking the valid fields and validating them
+   *
+   * @param {Object} projectInfo
+   *
+   * @returns {Object} parsedProjectInfo
+   */
   function parseProjectInfo(projectInfo) {
     const parsedProjectInfo = _.pick(projectInfo, [
       'userId',
@@ -102,22 +108,18 @@ module.exports = function $projectController(
       'finalizedBy'
     ]);
 
-    /* TODO: Validate body is complete. */
-    if (parsedProjectInfo.finalizedBy) {
-      parsedProjectInfo.finalizedBy = new Date(projectInfo.finalizedBy);
-      // eslint-disable-next-line
-      if (isNaN(parsedProjectInfo.finalizedBy)) {
-        throw errors.create(404, 'finalizedBy Date format is invalid.');
-      }
-    }
-
-    return parsedProjectInfo;
+    return validationUtils.validateProjectInfo(parsedProjectInfo);
   }
 
+  /**
+   * Parse the filters and pick the valid ones
+   *
+   * @param {Object} filters
+   *
+   * @returns {Object} parsedFilters
+   */
   function parseFilters(filters) {
     const parsedFilters = _.pick(filters, ['userId', 'limit', 'offset']);
-
-    /* TODO: Validate filters are coherent */
 
     return parsedFilters;
   }
