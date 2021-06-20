@@ -21,8 +21,10 @@ module.exports = function $projectController(
    */
   async function create(req, res) {
     const projectInfo = req.body;
+    const userId = req.headers.uid;
     const parsedProjectInfo = parseProjectInfo(projectInfo);
-    const id = await projectService.create(parsedProjectInfo);
+
+    const id = await projectService.create(userId, parsedProjectInfo);
 
     return res.status(200).json({ id });
   }
@@ -67,11 +69,11 @@ module.exports = function $projectController(
    */
   async function modify(req, res) {
     const { projectId } = req.params;
-    const { userId } = req.body;
-    const newProjectInfo = _.omit(req.body, ['userId']);
+    const userId = req.headers.uid;
+    const changedProjectInfo = req.body;
 
-    const parsedNewProjectInfo = parseProjectInfo(newProjectInfo);
-    await projectService.modify(userId, projectId, parsedNewProjectInfo);
+    const parsedChangedProjectInfo = parseProjectInfo(changedProjectInfo);
+    await projectService.modify(userId, projectId, parsedChangedProjectInfo);
 
     return res.status(200).json({ id: projectId });
   }
@@ -83,7 +85,8 @@ module.exports = function $projectController(
    */
   async function remove(req, res) {
     const { projectId } = req.params;
-    const { userId } = req.body;
+    const userId = req.headers.uid;
+
     const deletedProjectId = await projectService.remove(userId, projectId);
 
     return res.status(200).json({ id: deletedProjectId });
@@ -98,7 +101,6 @@ module.exports = function $projectController(
    */
   function parseProjectInfo(projectInfo) {
     const parsedProjectInfo = _.pick(projectInfo, [
-      'userId',
       'title',
       'objective',
       'description',

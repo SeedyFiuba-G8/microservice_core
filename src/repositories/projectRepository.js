@@ -34,10 +34,7 @@ module.exports = function $projectRepository(
       await knex('projects').insert(projectRow);
     } catch (err) {
       if (err.code === '23505')
-        throw errors.create(
-          500,
-          'A project with specified ID already exists, please retry.'
-        );
+        throw errors.create(500, 'A project with specified ID already exists.');
 
       logger.error(err);
       throw errors.UnknownError;

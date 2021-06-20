@@ -14,12 +14,10 @@ module.exports = function $projectService(errors, projectRepository) {
    *
    * @returns {Promise} uuid
    */
-  async function create(projectInfo) {
+  async function create(userId, projectInfo) {
     const projectId = uuidv4();
 
-    /* TODO Logic validations */
-
-    await projectRepository.create({ id: projectId, ...projectInfo });
+    await projectRepository.create({ id: projectId, userId, ...projectInfo });
 
     return projectId;
   }

@@ -32,6 +32,13 @@ paths:
       summary: Get all projects (optionally, of a specified user) ordered by creation date
       description: Get info from every project (of the app/of the user) ordered by creation date.
       parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
         - in: query
           name: userId
           required: false
@@ -63,6 +70,14 @@ paths:
       description: Allows an entrepeneur user to create a new project.
       tags:
         - Projects
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
       requestBody:
         $ref: '#/components/requestBodies/postProject'
       responses:
@@ -103,6 +118,14 @@ paths:
       description: Allows an owner of a project or an admin to modify the information of a project.
       tags:
         - Projects
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
       requestBody:
         $ref: '#/components/requestBodies/patchProject'
       parameters:
@@ -131,13 +154,19 @@ paths:
       description: Allows an owner of a project or an admin to delete a project.
       tags:
         - Projects
-      requestBody:
-        $ref: '#/components/requestBodies/userId'
       parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
         - in: path
           name: projectId
           schema:
             type: string
+            format: uuid
           required: true
           description: uuid of the project to delete
       responses:
@@ -291,13 +320,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PatchProjectData'
-
-    userId:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserId'
   # ---------------------------------------------------------------------------
   schemas:
     # GENERAL
@@ -382,9 +404,6 @@ components:
     PostProjectData:
       type: object
       properties:
-        userId:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -407,7 +426,6 @@ components:
           type: string
           example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
       required:
-        - userId
         - title
         - description
         - type
@@ -419,9 +437,6 @@ components:
     PatchProjectData:
       type: object
       properties:
-        userId:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -443,8 +458,6 @@ components:
         finalizedBy:
           type: string
           example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
-      required:
-        - userId
 
     ProjectId:
       type: object
@@ -454,13 +467,6 @@ components:
           example: '670b9562-b30d-52d5-b827-655787665500'
       required:
         - id
-
-    UserId:
-      type: object
-      properties:
-        userId:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
 
     # STATUS
     Ping:
