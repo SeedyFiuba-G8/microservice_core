@@ -19,12 +19,12 @@ module.exports = function apiRouter(
       .get('/health', statusController.health)
 
       // ROUTES
-      .post('/project', projectController.create)
-      .get('/project/:projectId', projectController.get)
-      .put('/project/:projectId', projectController.modify)
-      .delete('/project/:projectId', projectController.remove)
+      .post('/projects', projectController.create)
+      .get('/projects/:projectId', projectController.get)
+      .patch('/projects/:projectId', projectController.modify)
+      .delete('/projects/:projectId', projectController.remove)
 
       // Projects
-      .get('/project', projectController.getAll)
+      .get('/projects', projectController.getBy)
   );
 };

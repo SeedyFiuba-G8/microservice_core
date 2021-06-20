@@ -9,7 +9,7 @@ module.exports = function $projectController(
   return expressify({
     create,
     get,
-    getAll,
+    getBy,
     modify,
     remove
   });
@@ -42,22 +42,16 @@ module.exports = function $projectController(
   }
 
   /**
-   * Fetchs all projects data from db.
+   * Fetchs projects data from db that match filters specified in req.query.
    *
-   * If userId is specified in req.query, it gets all projects
-   * created by that user. Else, it retrieves all projects.
+   * If no filters are specified, it retrieves all projects.
    *
    * @returns {Promise}
    */
-  async function getAll(req, res) {
-    const { userId } = req.query;
-    let projects;
+  async function getBy(req, res) {
+    const filters = parseFilters(req.query);
 
-    if (!userId) {
-      projects = await projectService.getAll();
-    } else {
-      projects = await projectService.getByUserId(userId);
-    }
+    const projects = await projectService.getBy(filters);
 
     return res.status(200).json({
       projects: projects.map((project) =>
@@ -118,5 +112,13 @@ module.exports = function $projectController(
     }
 
     return parsedProjectInfo;
+  }
+
+  function parseFilters(filters) {
+    const parsedFilters = _.pick(filters, ['userId', 'limit', 'offset']);
+
+    /* TODO: Validate filters are coherent */
+
+    return parsedFilters;
   }
 };

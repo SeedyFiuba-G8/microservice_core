@@ -27,10 +27,10 @@ tags:
 
 paths:
   # PROJECTS
-  /project:
+  /projects:
     get:
-      summary: Get all projects (optionally, of a specified user)
-      description: Get info from every project (of the app/of the user).
+      summary: Get all projects (optionally, of a specified user) ordered by creation date
+      description: Get info from every project (of the app/of the user) ordered by creation date.
       parameters:
         - in: query
           name: userId
@@ -38,13 +38,23 @@ paths:
           schema:
             type: string
           description: The userId of whom we want to retrieve projects.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+          description: The number of projects to be retrieved.
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+          description: The number of projects we want to take as offset.
       tags:
         - Projects
       responses:
         200:
-          $ref: '#/components/responses/getAllProjects'
-        404:
-          $ref: '#/components/responses/404'
+          $ref: '#/components/responses/getProjects'
         500:
           $ref: '#/components/responses/500'
 
@@ -67,7 +77,7 @@ paths:
         500:
           $ref: '#/components/responses/500'
 
-  /project/{projectId}:
+  /projects/{projectId}:
     get:
       summary: Get a project by id.
       description: Allos a user to get retrieve a project's information by its id.
@@ -92,13 +102,13 @@ paths:
         500:
           $ref: '#/components/responses/500'
 
-    put:
+    patch:
       summary: Modify the information of the project.
       description: Allows an owner of a project or an admin to modify the information of a project.
       tags:
         - Projects
       requestBody:
-        $ref: '#/components/requestBodies/putProject'
+        $ref: '#/components/requestBodies/patchProject'
       parameters:
         - in: path
           name: projectId
@@ -108,7 +118,7 @@ paths:
           description: uuid of the project to modify
       responses:
         200:
-          $ref: '#/components/responses/putProject'
+          $ref: '#/components/responses/patchProject'
         400:
           $ref: '#/components/responses/400'
         401:
@@ -222,7 +232,7 @@ components:
             $ref: '#/components/schemas/Error'
 
     # PROJECTS
-    getAllProjects:
+    getProjects:
       description: Projects info retrieved successfully.
       content:
         application/json:
@@ -243,7 +253,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProjectId'
 
-    putProject:
+    patchProject:
       description: Project modified successfully.
       content:
         application/json:
@@ -281,12 +291,12 @@ components:
           schema:
             $ref: '#/components/schemas/PostProjectData'
 
-    putProject:
+    patchProject:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/PutProjectData'
+            $ref: '#/components/schemas/PatchProjectData'
 
     userId:
       required: true
@@ -412,7 +422,7 @@ components:
         - city
         - finalizedBy
 
-    PutProjectData:
+    PatchProjectData:
       type: object
       properties:
         userId:

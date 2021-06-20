@@ -8,8 +8,7 @@ module.exports = function $projectRepository(
 ) {
   return {
     create,
-    getAll,
-    getByUserId,
+    getBy,
     getByProjectId,
     getUserId,
     update,
@@ -46,42 +45,24 @@ module.exports = function $projectRepository(
   }
 
   /**
-   * Get all data from projects table
+   * Get all data of projects that match filters
    *
-   * @returns {Promise} Project[]
-   */
-  async function getAll() {
-    const projectsInfo = await knex('projects').orderBy('published_on', 'desc');
-
-    const projects = projectsInfo.map((projectInfo) =>
-      projectUtils.buildProjectObject(projectInfo)
-    );
-
-    return projects;
-  }
-
-  /**
-   * Get all data of projects created by userId
+   * If no filters specified, it returns all projects
    *
    * @returns {Promise} Project
    */
-  async function getByUserId(userId) {
-    const projectsInfo = await knex('projects')
-      .where('user_id', userId)
-      .orderBy('published_on', 'desc');
+  async function getBy(filters) {
+    const query = knex('projects').orderBy('published_on', 'desc');
 
-    if (!projectsInfo.length) {
-      throw errors.create(
-        404,
-        'There are no projects created by the specified user.'
-      );
-    }
+    if (filters.userId) query.where('user_id', filters.userId);
+    if (filters.limit) query.limit(filters.limit);
+    if (filters.offset) query.offset(filters.offset);
 
-    const projects = projectsInfo.map((projectInfo) =>
-      projectUtils.buildProjectObject(projectInfo)
+    return query.then((projects) =>
+      projects.map((projectInfo) =>
+        projectUtils.buildProjectObject(projectInfo)
+      )
     );
-
-    return projects;
   }
 
   /**

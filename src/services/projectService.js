@@ -3,8 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 module.exports = function $projectService(errors, projectRepository) {
   return {
     create,
-    getAll,
-    getByUserId,
+    getBy,
     getByProjectId,
     modify,
     remove
@@ -26,12 +25,13 @@ module.exports = function $projectService(errors, projectRepository) {
   }
 
   /**
-   * Fetchs all projects created by userId
+   * Fetchs all projects that match filters.
+   * If no filters specified, it fetches all projects.
    *
    * @returns {Promise} Project[]
    */
-  async function getByUserId(userId) {
-    return projectRepository.getByUserId(userId);
+  async function getBy(filters) {
+    return projectRepository.getBy(filters);
   }
 
   /**
@@ -63,15 +63,6 @@ module.exports = function $projectService(errors, projectRepository) {
     await checkPermissionsOverProject(userId, projectId);
 
     return projectRepository.remove(projectId);
-  }
-
-  /**
-   * Fetchs all projects data from db
-   *
-   * @returns {Promise} Project[]
-   */
-  async function getAll() {
-    return projectRepository.getAll();
   }
 
   async function checkPermissionsOverProject(userId, projectId) {

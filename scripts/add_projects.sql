@@ -6,20 +6,20 @@ INSERT INTO public.projects(
 	(
 		'123e4567-e89b-12d3-a456-426614174001',
 		'ca718a21-a126-484f-bc50-145126a6f75b',
-		'Prohibir la utilizacion de Winbugs globalmente',
-		'No puede ser que haya gente que use Winbugs',
+		'Titulo 1',
+		'Descripcion 1',
 		'social',
-		'Salvar a la gente de esta maldicion',
+		'Objetivo 1',
 		'Argentina',
 		'Buenos Aires'
 	),
 	(
 		'9bb37345-41ad-471e-adc3-980fd05e5b63',
 		'ca718a21-a126-484f-bc50-145126a6f75b',
-		'Que vuelva la presencialidad loco',
-		'Extraniamos FIUBA',
+		'Titulo 2',
+		'Descripcion 2',
 		'education',
-		'Retomar las tardes de trucos y mates',
+		'Objetivo 2',
 		'Argentina',
 		'Buenos Aires'
 	);
