@@ -1,7 +1,6 @@
 module.exports = function projectUtils() {
   return {
-    buildProjectObject,
-    buildProjectResponseObject
+    buildProjectObject
   };
 
   function buildProjectObject(projectInfo) {
@@ -17,12 +16,5 @@ module.exports = function projectUtils() {
       publishedOn: projectInfo.published_on,
       finalizedBy: projectInfo.finalized_by
     };
-  }
-
-  function buildProjectResponseObject(project) {
-    const projectRes = { ...project };
-    projectRes.finalizedBy = project.finalizedBy.toString();
-    projectRes.publishedOn = project.publishedOn.toString();
-    return projectRes;
   }
 };

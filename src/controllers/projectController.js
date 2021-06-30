@@ -38,9 +38,7 @@ module.exports = function $projectController(
     const { projectId } = req.params;
     const projectInfo = await projectService.getByProjectId(projectId);
 
-    return res
-      .status(200)
-      .json(projectUtils.buildProjectResponseObject(projectInfo));
+    return res.status(200).json(projectInfo);
   }
 
   /**
@@ -52,14 +50,9 @@ module.exports = function $projectController(
    */
   async function getBy(req, res) {
     const filters = parseFilters(req.query);
-
     const projects = await projectService.getBy(filters);
 
-    return res.status(200).json({
-      projects: projects.map((project) =>
-        projectUtils.buildProjectResponseObject(project)
-      )
-    });
+    return res.status(200).json({ projects });
   }
 
   /**

@@ -345,6 +345,18 @@ components:
       required:
         - error
 
+        # TYPES
+    
+    Date:
+      type: string
+      format: date-time
+      example: '2021-06-13T21:29:29.330Z'
+
+    Id:
+      type: string
+      format: uuid
+      example: '123e4567-e89b-12d3-a456-426614174000'
+
     # PROJECTS
     AllProjects:
       type: object
@@ -384,11 +396,9 @@ components:
           type: string
           example: 'Buenos Aires'
         publishedOn:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
         finalizedBy:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
       required:
         - id
         - userId
@@ -423,8 +433,7 @@ components:
           type: string
           example: 'Buenos Aires'
         finalizedBy:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
       required:
         - title
         - description
@@ -456,8 +465,7 @@ components:
           type: string
           example: 'Buenos Aires'
         finalizedBy:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
 
     ProjectId:
       type: object
