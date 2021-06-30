@@ -466,6 +466,7 @@ components:
           example: 'Buenos Aires'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+      minProperties: 1
 
     ProjectId:
       type: object
