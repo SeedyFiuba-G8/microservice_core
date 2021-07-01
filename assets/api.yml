@@ -27,15 +27,41 @@ tags:
 
 paths:
   # PROJECTS
-  /project:
+  /projects:
     get:
-      summary: Get all projects
-      description: Get info from every project.
+      summary: Get all projects (optionally, of a specified user) ordered by creation date
+      description: Get info from every project (of the app/of the user) ordered by creation date.
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+          description: The userId of whom we want to retrieve projects.
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+          description: The number of projects to be retrieved.
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+          description: The number of projects we want to take as offset.
       tags:
         - Projects
       responses:
         200:
-          $ref: '#/components/responses/getAllProjects'
+          $ref: '#/components/responses/getProjects'
         500:
           $ref: '#/components/responses/500'
 
@@ -44,15 +70,112 @@ paths:
       description: Allows an entrepeneur user to create a new project.
       tags:
         - Projects
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
       requestBody:
         $ref: '#/components/requestBodies/postProject'
       responses:
-        201:
-          description: 'Project was created successfully.'
+        200:
+          $ref: '#/components/responses/postProject'
         400:
           $ref: '#/components/responses/400'
-        409:
-          $ref: '#/components/responses/409'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}:
+    get:
+      summary: Get a project by id.
+      description: Allos a user to get retrieve a project's information by its id.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: string
+          required: true
+          description: uuid of the project to retrieve
+      responses:
+        200:
+          $ref: '#/components/responses/getProject'
+        404:
+          $ref: '#/components/responses/404'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
+    patch:
+      summary: Modify the information of the project.
+      description: Allows an owner of a project or an admin to modify the information of a project.
+      tags:
+        - Projects
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
+      requestBody:
+        $ref: '#/components/requestBodies/patchProject'
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            type: string
+          required: true
+          description: uuid of the project to modify
+      responses:
+        200:
+          $ref: '#/components/responses/patchProject'
+        400:
+          $ref: '#/components/responses/400'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
+        415:
+          $ref: '#/components/responses/415'
+        500:
+          $ref: '#/components/responses/500'
+
+    delete:
+      summary: Delete a project by id.
+      description: Allows an owner of a project or an admin to delete a project.
+      tags:
+        - Projects
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that requests
+        - in: path
+          name: projectId
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the project to delete
+      responses:
+        200:
+          $ref: '#/components/responses/deleteProject'
+        403:
+          $ref: '#/components/responses/403'
+        404:
+          $ref: '#/components/responses/404'
         415:
           $ref: '#/components/responses/415'
         500:
@@ -87,10 +210,33 @@ paths:
 
 components:
   # ---------------------------------------------------------------------------
+  requestBodies:
+    postProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostProjectData'
+
+    patchProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PatchProjectData'
+  
+  # ---------------------------------------------------------------------------
   responses:
     # ERRORS
     400:
       description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    403:
+      description: Forbidden.
       content:
         application/json:
           schema:
@@ -125,12 +271,40 @@ components:
             $ref: '#/components/schemas/Error'
 
     # PROJECTS
-    getAllProjects:
+    getProjects:
       description: Projects info retrieved successfully.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/AllProjects'
+
+    getProject:
+      description: Project info retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
+
+    postProject:
+      description: Project created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
+
+    patchProject:
+      description: Project modified successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
+
+    deleteProject:
+      description: Project deleted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProjectId'
 
     # STATUS
     health:
@@ -146,15 +320,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Ping'
-
-  # ---------------------------------------------------------------------------
-  requestBodies:
-    postProject:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PostProjectData'
 
   # ---------------------------------------------------------------------------
   schemas:
@@ -181,6 +346,18 @@ components:
       required:
         - error
 
+        # TYPES
+    
+    Date:
+      type: string
+      format: date-time
+      example: '2021-06-13T21:29:29.330Z'
+
+    Id:
+      type: string
+      format: uuid
+      example: '123e4567-e89b-12d3-a456-426614174000'
+
     # PROJECTS
     AllProjects:
       type: object
@@ -196,6 +373,9 @@ components:
       type: object
       properties:
         id:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
+        userId:
           type: string
           example: '670b9562-b30d-52d5-b827-655787665500'
         title:
@@ -217,13 +397,12 @@ components:
           type: string
           example: 'Buenos Aires'
         publishedOn:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
         finalizedBy:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
       required:
         - id
+        - userId
         - title
         - description
         - type
@@ -255,8 +434,7 @@ components:
           type: string
           example: 'Buenos Aires'
         finalizedBy:
-          type: string
-          example: 'Sun Jun 06 2021 19:27:45 GMT-0300 (Argentina Standard Time)' #Date.toString()
+          $ref: '#/components/schemas/Date'
       required:
         - title
         - description
@@ -265,6 +443,40 @@ components:
         - country
         - city
         - finalizedBy
+
+    PatchProjectData:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalizedBy:
+          $ref: '#/components/schemas/Date'
+      minProperties: 1
+
+    ProjectId:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '670b9562-b30d-52d5-b827-655787665500'
+      required:
+        - id
 
     # STATUS
     Ping:

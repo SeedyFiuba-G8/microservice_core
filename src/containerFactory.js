@@ -12,7 +12,7 @@ function createContainer() {
     'controllers',
     'middlewares',
     'repositories',
-    'routes',
+    'routers',
     'services',
     'utils'
   ];
@@ -48,10 +48,17 @@ function createContainer() {
 
   container.register(
     'errorHandlerMiddleware',
-    function $errorHandlerMiddleware() {
-      return errorComponents.errorHandlerMiddleware();
+    function $errorHandlerMiddleware(logger) {
+      return errorComponents.errorHandlerMiddleware(
+        process.env.NODE_ENV !== 'test' ? logger : undefined
+      );
     }
   );
+
+  container.register('expressify', function $expressify() {
+    // eslint-disable-next-line global-require
+    return require('expressify')();
+  });
 
   container.register('knex', function $knex(config) {
     return dbComponents.knex(config.knex);
