@@ -210,6 +210,22 @@ paths:
 
 components:
   # ---------------------------------------------------------------------------
+  requestBodies:
+    postProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostProjectData'
+
+    patchProject:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PatchProjectData'
+  
+  # ---------------------------------------------------------------------------
   responses:
     # ERRORS
     400:
@@ -305,21 +321,6 @@ components:
           schema:
             $ref: '#/components/schemas/Ping'
 
-  # ---------------------------------------------------------------------------
-  requestBodies:
-    postProject:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PostProjectData'
-
-    patchProject:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PatchProjectData'
   # ---------------------------------------------------------------------------
   schemas:
     # GENERAL
