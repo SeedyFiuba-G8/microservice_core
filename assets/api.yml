@@ -62,8 +62,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getProjects'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
     post:
       summary: Create a new project
@@ -83,12 +83,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/postProject'
-        400:
-          $ref: '#/components/responses/400'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
   /projects/{projectId}:
     get:
@@ -106,12 +102,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getProject'
-        404:
-          $ref: '#/components/responses/404'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
     patch:
       summary: Modify the information of the project.
@@ -138,16 +130,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/patchProject'
-        400:
-          $ref: '#/components/responses/400'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
     delete:
       summary: Delete a project by id.
@@ -172,14 +156,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/deleteProject'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
   # STATUS
   /health:
@@ -189,10 +167,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/health'
-        400:
-          $ref: '#/components/responses/400'
-        415:
-          $ref: '#/components/responses/415'
+        default:
+          $ref: '#/components/responses/Error'
 
   /ping:
     get:
@@ -201,10 +177,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/ping'
-        400:
-          $ref: '#/components/responses/400'
-        415:
-          $ref: '#/components/responses/415'
+        default:
+          $ref: '#/components/responses/Error'
 
 # =============================================================================
 
@@ -227,44 +201,10 @@ components:
   
   # ---------------------------------------------------------------------------
   responses:
-    # ERRORS
-    400:
-      description: Bad request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    403:
-      description: Forbidden.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    404:
-      description: Not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    409:
-      description: Conflict.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    415:
-      description: Unsupported Media Type.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    500:
-      description: Internal Server Error.
+    Error:
+      description: >
+        An error has occured. Check response body for more
+        information about what happened.
       content:
         application/json:
           schema:
@@ -327,26 +267,19 @@ components:
     Error:
       type: object
       properties:
-        error:
-          type: object
-          properties:
-            status:
-              type: integer
-            name:
-              type: string
-            message:
-              type: string
-            errors:
-              type: object
-            data:
-              type: object
-          required:
-            - status
-            - name
+        status:
+          type: integer
+        name:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
       required:
-        - error
-
-        # TYPES
+        - status
+        - name
     
     Date:
       type: string
