@@ -1,10 +1,6 @@
 const _ = require('lodash');
 
-module.exports = function $projectController(
-  expressify,
-  projectService,
-  validationUtils
-) {
+module.exports = function $projectController(expressify, projectService) {
   return expressify({
     create,
     get,
