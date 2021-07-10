@@ -410,6 +410,7 @@ components:
         - country
         - city
         - finalizedBy
+        - tags
 
     PatchProjectData:
       type: object
