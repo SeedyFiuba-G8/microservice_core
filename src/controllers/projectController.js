@@ -29,7 +29,15 @@ module.exports = function $projectController(expressify, projectService) {
    */
   async function get(req, res) {
     const { projectId } = req.params;
+    console.log(
+      `(projectController:get) calling projetService:get with id: ${projectId}`
+    );
     const projectInfo = await projectService.get(projectId);
+    console.log(
+      `(projectController:get) projetService:get returned projectInfo: ${JSON.stringify(
+        projectInfo
+      )}`
+    );
 
     return res.status(200).json(projectInfo);
   }
@@ -43,7 +51,17 @@ module.exports = function $projectController(expressify, projectService) {
    */
   async function getPreviewsBy(req, res) {
     const { filters, limit, offset } = parseFilters(req.query);
+    console.log(
+      `(projectController:getPreviewsBy) calling projetService:getPreviewsBy with: { filters: ${JSON.stringify(
+        filters
+      )}, limit: ${JSON.stringify(limit)}, offset: ${JSON.stringify(offset)}, }`
+    );
     const projects = await projectService.getPreviewsBy(filters, limit, offset);
+    console.log(
+      `(projectController:getPreviewsBy) projetService:getPreviewsBy returned projects: ${JSON.stringify(
+        projects
+      )}`
+    );
 
     return res.status(200).json({ projects });
   }

@@ -43,11 +43,25 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function get(projectId) {
+    console.log(
+      `(projectService:get) calling projetRepository:get with: {
+        filters: ${JSON.stringify({
+          filters: {
+            id: projectId
+          }
+        })}
+      }`
+    );
     const projects = await projectRepository.get({
       filters: {
         id: projectId
       }
     });
+    console.log(
+      `(projectService:get) projetRepository:get returned projects: ${JSON.stringify(
+        projects
+      )}`
+    );
 
     if (!projects.length)
       throw errors.create(404, 'There is no project with the specified id.');
@@ -73,6 +87,14 @@ module.exports = function $projectService(
       'tags'
     ];
 
+    console.log(
+      `(projectService:getPreviewsBy) calling projetRepository:get with: {
+        filters: ${JSON.stringify(filters)},
+        select: ${JSON.stringify(previewFields)},
+        limit: ${JSON.stringify(limit)},
+        offset: ${JSON.stringify(offset)}
+      }`
+    );
     return projectRepository.get({
       filters,
       select: previewFields,

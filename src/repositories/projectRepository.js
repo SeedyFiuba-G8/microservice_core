@@ -34,6 +34,15 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
    * @returns {Promise}
    */
   async function get({ select, filters = {}, limit, offset } = {}) {
+    console.log(`(projectRepository:get) querying knex with: {
+      select: ${JSON.stringify(
+        _.isArray(select) ? dbUtils.mapToDb(select) : '*'
+      )},
+      where: ${JSON.stringify(dbUtils.mapToDb(filters))},
+      limit: ${JSON.stringify(limit)},
+      offset: ${JSON.stringify(offset)},
+    }`);
+
     const query = knex('projects')
       .select(_.isArray(select) ? dbUtils.mapToDb(select) : '*')
       .where(dbUtils.mapToDb(filters))
