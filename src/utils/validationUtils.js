@@ -5,17 +5,13 @@ module.exports = function $validationUtils(config, errors) {
 
   /**
    * Validates that projectInfo respects the model constraints
-   *
-   * @param {Object} projectInfo
-   *
-   * @returns {Object} validatedProjectInfo
    */
   function validateProjectInfo(projectInfo) {
     Object.keys(config.constraints.project).forEach((field) => {
       if (projectInfo[field] === undefined) return;
 
-      const minLength = config.constraints.project[field].min;
-      const maxLength = config.constraints.project[field].max;
+      const { min: minLength, max: maxLength } =
+        config.constraints.project[field];
 
       if (!validLength(projectInfo[field], minLength, maxLength))
         throw errors.create(
@@ -24,19 +20,26 @@ module.exports = function $validationUtils(config, errors) {
         );
     });
 
-    const validatedProjectInfo = { ...projectInfo };
+    // Tags validation
 
-    if (projectInfo.finalizedBy) {
-      validatedProjectInfo.finalizedBy = new Date(projectInfo.finalizedBy);
-      // eslint-disable-next-line
-      if (isNaN(validatedProjectInfo.finalizedBy)) {
-        throw errors.create(400, 'finalizedBy Date format is invalid.');
-      }
-    }
+    const { max, maxTagLength } = config.constraints.tags;
+    const { tags } = projectInfo;
 
-    return validatedProjectInfo;
+    if (tags.length > max)
+      throw errors.create(400, `Too many tags! Up to ${max} are allowed`);
+
+    tags.forEach((tag) => {
+      if (!validLength(tag, 0, maxTagLength))
+        throw errors.create(
+          400,
+          `Tag too long. Its length must be less than ${maxTagLength}`
+        );
+    });
   }
 
+  /**
+   * Generic length validator
+   */
   function validLength(field, minLength, maxLength) {
     let valid = true;
     if (minLength !== undefined) valid = valid && field.length >= minLength;

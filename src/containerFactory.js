@@ -38,6 +38,10 @@ function createContainer() {
     return dbComponents.dbService(knex, logger);
   });
 
+  container.register('dbUtils', function $dbService() {
+    return dbComponents.dbUtils();
+  });
+
   container.register('docsRouter', function $docsRouter() {
     return apiComponents.docsRouter(apiPath);
   });

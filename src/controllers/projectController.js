@@ -3,14 +3,13 @@ const _ = require('lodash');
 module.exports = function $projectController(
   expressify,
   projectService,
-  projectUtils,
   validationUtils
 ) {
   return expressify({
     create,
     get,
-    getBy,
-    modify,
+    getPreviewsBy,
+    update,
     remove
   });
 
@@ -22,9 +21,7 @@ module.exports = function $projectController(
   async function create(req, res) {
     const projectInfo = req.body;
     const userId = req.headers.uid;
-    const parsedProjectInfo = parseProjectInfo(projectInfo);
-
-    const id = await projectService.create(userId, parsedProjectInfo);
+    const id = await projectService.create(userId, projectInfo);
 
     return res.status(200).json({ id });
   }
@@ -36,7 +33,7 @@ module.exports = function $projectController(
    */
   async function get(req, res) {
     const { projectId } = req.params;
-    const projectInfo = await projectService.getByProjectId(projectId);
+    const projectInfo = await projectService.get(projectId);
 
     return res.status(200).json(projectInfo);
   }
@@ -48,9 +45,9 @@ module.exports = function $projectController(
    *
    * @returns {Promise}
    */
-  async function getBy(req, res) {
-    const filters = parseFilters(req.query);
-    const projects = await projectService.getBy(filters);
+  async function getPreviewsBy(req, res) {
+    const { filters, limit, offset } = parseFilters(req.query);
+    const projects = await projectService.getPreviewsBy(filters, limit, offset);
 
     return res.status(200).json({ projects });
   }
@@ -60,13 +57,12 @@ module.exports = function $projectController(
    *
    * @returns {Promise}
    */
-  async function modify(req, res) {
+  async function update(req, res) {
     const { projectId } = req.params;
-    const userId = req.headers.uid;
-    const changedProjectInfo = req.body;
+    const requesterId = req.headers.uid;
+    const newProjectInfo = req.body;
 
-    const parsedChangedProjectInfo = parseProjectInfo(changedProjectInfo);
-    await projectService.modify(userId, projectId, parsedChangedProjectInfo);
+    await projectService.update(projectId, newProjectInfo, requesterId);
 
     return res.status(200).json({ id: projectId });
   }
@@ -78,44 +74,27 @@ module.exports = function $projectController(
    */
   async function remove(req, res) {
     const { projectId } = req.params;
-    const userId = req.headers.uid;
+    const requesterId = req.headers.uid;
 
-    const deletedProjectId = await projectService.remove(userId, projectId);
+    await projectService.remove(projectId, requesterId);
 
-    return res.status(200).json({ id: deletedProjectId });
+    return res.status(200).json({ id: projectId });
   }
 
-  /**
-   * Parse a project's info by picking the valid fields and validating them
-   *
-   * @param {Object} projectInfo
-   *
-   * @returns {Object} parsedProjectInfo
-   */
-  function parseProjectInfo(projectInfo) {
-    const parsedProjectInfo = _.pick(projectInfo, [
-      'title',
-      'objective',
-      'description',
-      'type',
-      'city',
-      'country',
-      'finalizedBy'
-    ]);
-
-    return validationUtils.validateProjectInfo(parsedProjectInfo);
-  }
+  // Aux
 
   /**
    * Parse the filters and pick the valid ones
    *
    * @param {Object} filters
    *
-   * @returns {Object} parsedFilters
+   * @returns {Object}
    */
   function parseFilters(filters) {
-    const parsedFilters = _.pick(filters, ['userId', 'limit', 'offset']);
-
-    return parsedFilters;
+    return {
+      filters: _.pick(filters, ['userId']),
+      limit: _.get(filters, 'limit'),
+      offset: _.get(filters, 'offset')
+    };
   }
 };

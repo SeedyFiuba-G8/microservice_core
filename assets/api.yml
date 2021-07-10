@@ -32,13 +32,6 @@ paths:
       summary: Get all projects (optionally, of a specified user) ordered by creation date
       description: Get info from every project (of the app/of the user) ordered by creation date.
       parameters:
-        - in: header
-          name: uid
-          schema:
-            type: string
-            format: uuid
-          required: true
-          description: uuid of the user that requests
         - in: query
           name: userId
           required: false
@@ -96,7 +89,7 @@ paths:
         - in: path
           name: projectId
           schema:
-            type: string
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the project to retrieve
       responses:
@@ -114,10 +107,15 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that requests
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to modify
       requestBody:
         $ref: '#/components/requestBodies/patchProject'
       parameters:
@@ -142,15 +140,13 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that requests
         - in: path
           name: projectId
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the project to delete
       responses:
@@ -298,7 +294,7 @@ components:
         projects:
           type: array
           items:
-            $ref: '#/components/schemas/Project'
+            $ref: '#/components/schemas/ProjectPreview'
       required:
         - projects
 
@@ -306,11 +302,9 @@ components:
       type: object
       properties:
         id:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
+          $ref: '#/components/schemas/Id'
         userId:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
+          $ref: '#/components/schemas/Id'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -333,6 +327,8 @@ components:
           $ref: '#/components/schemas/Date'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
       required:
         - id
         - userId
@@ -344,6 +340,42 @@ components:
         - city
         - publishedOn
         - finalizedBy
+        - tags
+
+    ProjectPreview:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalizedBy:
+          $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
+      required:
+        - id
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
+        - finalizedBy
+        - tags
 
     PostProjectData:
       type: object
@@ -368,6 +400,8 @@ components:
           example: 'Buenos Aires'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
       required:
         - title
         - description
@@ -400,6 +434,8 @@ components:
           example: 'Buenos Aires'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
       minProperties: 1
 
     ProjectId:
@@ -411,6 +447,12 @@ components:
       required:
         - id
 
+    Tags:
+      type: array
+      items:
+        type: string
+      example: ['javascript', 'python', 'food']
+    
     # STATUS
     Ping:
       type: object
