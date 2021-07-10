@@ -21,10 +21,10 @@ module.exports = function apiRouter(
       // ROUTES
 
       // Projects
-      .get('/projects', projectController.getBy)
+      .get('/projects', projectController.getPreviewsBy)
       .post('/projects', projectController.create)
       .get('/projects/:projectId', projectController.get)
-      .patch('/projects/:projectId', projectController.modify)
+      .patch('/projects/:projectId', projectController.update)
       .delete('/projects/:projectId', projectController.remove)
   );
 };
