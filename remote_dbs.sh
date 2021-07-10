@@ -3,8 +3,8 @@
 # This script will automatically update remote dbs
 # DANGER: This sould be removed when repository is made public!
 
-DEV_URL='postgres://ujlehfjywtfqvb:2001d745df5e3e1b7474df770ea604bc4009a9f7ae83d80d75b36dc502133b62@ec2-18-233-83-165.compute-1.amazonaws.com:5432/dcqh2n319p9suc'
-PROD_URL='postgres://nwzilirwqwlaya:633be5d76d509372e99c7430f5c316ffad1fb393630a5c6c7a4fc6f41ecb4fbf@ec2-3-212-75-25.compute-1.amazonaws.com:5432/d8i9eai6f8jjfe'
+DEV_URL='postgres://rtubvacsoievvu:24096b74d1004dd509d097f9ef67cb3fe435f5854331b2d6eee2242fb184459e@ec2-52-202-152-4.compute-1.amazonaws.com:5432/de89hbc694el6c'
+PROD_URL='postgres://xidjakrpkrurmq:00cfe945ba243703600f4d19fa69f805fd4e16c0e1b947645a1e16814a659794@ec2-52-202-152-4.compute-1.amazonaws.com:5432/dd8boc9idmttqi'
 
 echo "\n> Updating dev..."
 DATABASE_URL=$DEV_URL ./init_db.sh
