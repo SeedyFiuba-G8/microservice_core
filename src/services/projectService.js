@@ -31,8 +31,10 @@ module.exports = function $projectService(
       ...projectInfo
     };
 
-    await projectRepository.create(data);
-    await tagRepository.updateForProject(id, projectInfo.tags);
+    await Promise.all([
+      projectRepository.create(data),
+      tagRepository.updateForProject(id, projectInfo.tags)
+    ]);
 
     return id;
   }
@@ -90,8 +92,10 @@ module.exports = function $projectService(
     const projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
     validationUtils.validateProjectInfo(projectInfo);
 
-    await projectRepository.update(projectId, projectInfo, requesterId);
-    await tagRepository.updateForProject(projectId, projectInfo.tags);
+    await Promise.all([
+      projectRepository.update(projectId, projectInfo, requesterId),
+      tagRepository.updateForProject(projectId, projectInfo.tags)
+    ]);
 
     return projectId;
   }
@@ -102,8 +106,10 @@ module.exports = function $projectService(
    * @returns {Promise} uuid
    */
   async function remove(projectId, requesterId) {
-    await projectRepository.remove(projectId, requesterId);
-    await tagRepository.removeForProject(projectId);
+    await Promise.all([
+      projectRepository.remove(projectId, requesterId),
+      tagRepository.removeForProject(projectId)
+    ]);
 
     return projectId;
   }
