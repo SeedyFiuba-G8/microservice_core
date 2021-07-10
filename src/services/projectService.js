@@ -31,10 +31,8 @@ module.exports = function $projectService(
       ...projectInfo
     };
 
-    await Promise.all([
-      projectRepository.create(data),
-      tagRepository.updateForProject(id, projectInfo.tags)
-    ]);
+    await projectRepository.create(data);
+    await tagRepository.updateForProject(id, projectInfo.tags);
 
     return id;
   }
