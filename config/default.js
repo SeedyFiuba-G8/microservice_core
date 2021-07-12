@@ -36,6 +36,9 @@ module.exports = {
     tags: {
       max: 12,
       maxTagLength: 20
+    },
+    reviewers: {
+      max: 10
     }
   },
   knex: {
