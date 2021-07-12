@@ -32,13 +32,6 @@ paths:
       summary: Get all projects (optionally, of a specified user) ordered by creation date
       description: Get info from every project (of the app/of the user) ordered by creation date.
       parameters:
-        - in: header
-          name: uid
-          schema:
-            type: string
-            format: uuid
-          required: true
-          description: uuid of the user that requests
         - in: query
           name: userId
           required: false
@@ -62,8 +55,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getProjects'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
     post:
       summary: Create a new project
@@ -83,12 +76,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/postProject'
-        400:
-          $ref: '#/components/responses/400'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
   /projects/{projectId}:
     get:
@@ -100,18 +89,14 @@ paths:
         - in: path
           name: projectId
           schema:
-            type: string
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the project to retrieve
       responses:
         200:
           $ref: '#/components/responses/getProject'
-        404:
-          $ref: '#/components/responses/404'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
     patch:
       summary: Modify the information of the project.
@@ -122,10 +107,15 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that requests
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to modify
       requestBody:
         $ref: '#/components/requestBodies/patchProject'
       parameters:
@@ -138,16 +128,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/patchProject'
-        400:
-          $ref: '#/components/responses/400'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
     delete:
       summary: Delete a project by id.
@@ -158,28 +140,20 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that requests
         - in: path
           name: projectId
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the project to delete
       responses:
         200:
           $ref: '#/components/responses/deleteProject'
-        403:
-          $ref: '#/components/responses/403'
-        404:
-          $ref: '#/components/responses/404'
-        415:
-          $ref: '#/components/responses/415'
-        500:
-          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/Error'
 
   # STATUS
   /health:
@@ -189,10 +163,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/health'
-        400:
-          $ref: '#/components/responses/400'
-        415:
-          $ref: '#/components/responses/415'
+        default:
+          $ref: '#/components/responses/Error'
 
   /ping:
     get:
@@ -201,10 +173,8 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/ping'
-        400:
-          $ref: '#/components/responses/400'
-        415:
-          $ref: '#/components/responses/415'
+        default:
+          $ref: '#/components/responses/Error'
 
 # =============================================================================
 
@@ -227,44 +197,10 @@ components:
   
   # ---------------------------------------------------------------------------
   responses:
-    # ERRORS
-    400:
-      description: Bad request.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    403:
-      description: Forbidden.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    404:
-      description: Not found.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    409:
-      description: Conflict.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    415:
-      description: Unsupported Media Type.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
-    500:
-      description: Internal Server Error.
+    Error:
+      description: >
+        An error has occured. Check response body for more
+        information about what happened.
       content:
         application/json:
           schema:
@@ -327,26 +263,19 @@ components:
     Error:
       type: object
       properties:
-        error:
-          type: object
-          properties:
-            status:
-              type: integer
-            name:
-              type: string
-            message:
-              type: string
-            errors:
-              type: object
-            data:
-              type: object
-          required:
-            - status
-            - name
+        status:
+          type: integer
+        name:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
       required:
-        - error
-
-        # TYPES
+        - status
+        - name
     
     Date:
       type: string
@@ -365,7 +294,7 @@ components:
         projects:
           type: array
           items:
-            $ref: '#/components/schemas/Project'
+            $ref: '#/components/schemas/ProjectPreview'
       required:
         - projects
 
@@ -373,11 +302,9 @@ components:
       type: object
       properties:
         id:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
+          $ref: '#/components/schemas/Id'
         userId:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
+          $ref: '#/components/schemas/Id'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -400,6 +327,8 @@ components:
           $ref: '#/components/schemas/Date'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
       required:
         - id
         - userId
@@ -411,6 +340,42 @@ components:
         - city
         - publishedOn
         - finalizedBy
+        - tags
+
+    ProjectPreview:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        finalizedBy:
+          $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
+      required:
+        - id
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
+        - finalizedBy
+        - tags
 
     PostProjectData:
       type: object
@@ -435,6 +400,8 @@ components:
           example: 'Buenos Aires'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
       required:
         - title
         - description
@@ -443,6 +410,7 @@ components:
         - country
         - city
         - finalizedBy
+        - tags
 
     PatchProjectData:
       type: object
@@ -467,6 +435,8 @@ components:
           example: 'Buenos Aires'
         finalizedBy:
           $ref: '#/components/schemas/Date'
+        tags:
+          $ref: '#/components/schemas/Tags'
       minProperties: 1
 
     ProjectId:
@@ -478,6 +448,12 @@ components:
       required:
         - id
 
+    Tags:
+      type: array
+      items:
+        type: string
+      example: ['javascript', 'python', 'food']
+    
     # STATUS
     Ping:
       type: object

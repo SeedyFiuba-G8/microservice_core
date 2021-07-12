@@ -1,20 +1,38 @@
-module.exports = function projectUtils() {
+const _ = require('lodash');
+
+module.exports = function projectUtils(errors) {
   return {
-    buildProjectObject
+    buildProjectInfo
   };
 
-  function buildProjectObject(projectInfo) {
-    return {
-      id: projectInfo.id,
-      userId: projectInfo.user_id,
-      title: projectInfo.title,
-      description: projectInfo.description,
-      type: projectInfo.type,
-      objective: projectInfo.objective,
-      country: projectInfo.country,
-      city: projectInfo.city,
-      publishedOn: projectInfo.published_on,
-      finalizedBy: projectInfo.finalized_by
-    };
+  /**
+   * Parse a project's info by picking the valid fields and validating them
+   *
+   * @returns {Object}
+   */
+  function buildProjectInfo(rawProjectInfo, addFinalizationDate = false) {
+    const projectInfo = _.pick(rawProjectInfo, [
+      'title',
+      'objective',
+      'description',
+      'type',
+      'city',
+      'country',
+      'finalizedBy',
+      'tags'
+    ]);
+
+    // We make sure there are no duplicated tags
+    if (projectInfo.tags) projectInfo.tags = _.uniq(projectInfo.tags);
+
+    if (addFinalizationDate && projectInfo.finalizedBy) {
+      projectInfo.finalizedBy = new Date(projectInfo.finalizedBy);
+
+      // eslint-disable-next-line
+      if (isNaN(projectInfo.finalizedBy))
+        throw errors.create(400, 'finalizedBy Date format is invalid.');
+    }
+
+    return projectInfo;
   }
 };

@@ -28,8 +28,8 @@
   "homepage": "https://github.com/SeedyFiuba-G8/microservice_core#readme",
   "dependencies": {
     "@seedyfiuba/api_components": "^1.0.3",
-    "@seedyfiuba/db_components": "^1.0.1",
-    "@seedyfiuba/error_components": "^1.2.2",
+    "@seedyfiuba/db_components": "^1.1.1",
+    "@seedyfiuba/error_components": "^1.2.6",
     "@seedyfiuba/logging_components": "^1.0.2",
     "config": "^3.3.6",
     "dependable": "^1.1.0",
@@ -46,6 +46,7 @@
     "eslint-plugin-prettier": "^3.4.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",
-    "prettier": "^2.3.0"
+    "prettier": "^2.3.0",
+    "supertest": "^6.1.3"
   }
 }

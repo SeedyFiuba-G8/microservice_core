@@ -1,11 +1,17 @@
 const { v4: uuidv4 } = require('uuid');
 
-module.exports = function $projectService(errors, projectRepository) {
+module.exports = function $projectService(
+  errors,
+  projectRepository,
+  projectUtils,
+  tagRepository,
+  validationUtils
+) {
   return {
     create,
-    getBy,
-    getByProjectId,
-    modify,
+    get,
+    getPreviewsBy,
+    update,
     remove
   };
 
@@ -14,22 +20,21 @@ module.exports = function $projectService(errors, projectRepository) {
    *
    * @returns {Promise} uuid
    */
-  async function create(userId, projectInfo) {
-    const projectId = uuidv4();
+  async function create(userId, rawProjectInfo) {
+    const projectInfo = projectUtils.buildProjectInfo(rawProjectInfo, true);
+    validationUtils.validateProjectInfo(projectInfo);
 
-    await projectRepository.create({ id: projectId, userId, ...projectInfo });
+    const id = uuidv4();
+    const data = {
+      id,
+      userId,
+      ...projectInfo
+    };
 
-    return projectId;
-  }
+    await projectRepository.create(data);
+    await tagRepository.updateForProject(id, projectInfo.tags);
 
-  /**
-   * Fetchs all projects that match filters.
-   * If no filters specified, it fetches all projects.
-   *
-   * @returns {Promise} Project[]
-   */
-  async function getBy(filters) {
-    return projectRepository.getBy(filters);
+    return id;
   }
 
   /**
@@ -37,8 +42,43 @@ module.exports = function $projectService(errors, projectRepository) {
    *
    * @returns {Promise} Project
    */
-  async function getByProjectId(projectId) {
-    return projectRepository.getByProjectId(projectId);
+  async function get(projectId) {
+    const projects = await projectRepository.get({
+      filters: {
+        id: projectId
+      }
+    });
+
+    if (!projects.length)
+      throw errors.create(404, 'There is no project with the specified id.');
+
+    return projects[0];
+  }
+
+  /**
+   * Fetchs all projects that match filters,
+   *
+   * @returns {Promise} Project[]
+   */
+  async function getPreviewsBy(filters, limit, offset) {
+    const previewFields = [
+      'id',
+      'title',
+      'description',
+      'type',
+      'objective',
+      'country',
+      'city',
+      'finalizedBy',
+      'tags'
+    ];
+
+    return projectRepository.get({
+      filters,
+      select: previewFields,
+      limit,
+      offset
+    });
   }
 
   /**
@@ -46,10 +86,16 @@ module.exports = function $projectService(errors, projectRepository) {
    *
    * @returns {Promise} Project
    */
-  async function modify(userId, projectId, newProjectInfo) {
-    await checkPermissionsOverProject(userId, projectId);
+  async function update(projectId, rawProjectInfo, requesterId) {
+    const projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
+    validationUtils.validateProjectInfo(projectInfo);
 
-    return projectRepository.update(projectId, newProjectInfo);
+    await Promise.all([
+      projectRepository.update(projectId, projectInfo, requesterId),
+      tagRepository.updateForProject(projectId, projectInfo.tags)
+    ]);
+
+    return projectId;
   }
 
   /**
@@ -57,20 +103,12 @@ module.exports = function $projectService(errors, projectRepository) {
    *
    * @returns {Promise} uuid
    */
-  async function remove(userId, projectId) {
-    await checkPermissionsOverProject(userId, projectId);
+  async function remove(projectId, requesterId) {
+    await Promise.all([
+      projectRepository.remove(projectId, requesterId),
+      tagRepository.removeForProject(projectId)
+    ]);
 
-    return projectRepository.remove(projectId);
-  }
-
-  async function checkPermissionsOverProject(userId, projectId) {
-    const creatorId = await projectRepository.getUserId(projectId);
-
-    if (creatorId !== userId) {
-      throw errors.create(
-        403,
-        'You do not have permissions over the specified project.'
-      );
-    }
+    return projectId;
   }
 };

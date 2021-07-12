@@ -32,6 +32,10 @@ module.exports = {
         min: 0,
         max: 20
       }
+    },
+    tags: {
+      max: 12,
+      maxTagLength: 20
     }
   },
   knex: {
