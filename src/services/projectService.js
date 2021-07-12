@@ -69,6 +69,7 @@ module.exports = function $projectService(
   async function getPreviewsBy(filters, limit, offset) {
     const previewFields = [
       'id',
+      'status',
       'title',
       'description',
       'type',

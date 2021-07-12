@@ -432,6 +432,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -453,6 +455,7 @@ components:
           $ref: '#/components/schemas/Tags'
       required:
         - id
+        - status
         - title
         - description
         - type
