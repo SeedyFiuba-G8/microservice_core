@@ -52,8 +52,7 @@ module.exports = function $reviewerRepository(dbUtils, knex) {
         )
       );
 
-    const [result] = await Promise.all(promises);
-    console.log('result:', result);
+    await Promise.all(promises);
   }
 
   // Aux
