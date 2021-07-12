@@ -19,7 +19,8 @@ module.exports = function projectUtils(errors) {
       'city',
       'country',
       'finalizedBy',
-      'tags'
+      'tags',
+      'reviewers'
     ]);
 
     // We make sure there are no duplicated tags

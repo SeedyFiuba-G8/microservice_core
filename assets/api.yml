@@ -303,7 +303,11 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
         userId:
+          $ref: '#/components/schemas/Id'
+        reviewerId:
           $ref: '#/components/schemas/Id'
         title:
           type: string
@@ -329,8 +333,11 @@ components:
           $ref: '#/components/schemas/Date'
         tags:
           $ref: '#/components/schemas/Tags'
+        reviewers:
+          $ref: '#/components/schemas/Reviewers'
       required:
         - id
+        - status
         - userId
         - title
         - description
@@ -341,6 +348,7 @@ components:
         - publishedOn
         - finalizedBy
         - tags
+        - reviewers
 
     ProjectPreview:
       type: object
@@ -402,6 +410,8 @@ components:
           $ref: '#/components/schemas/Date'
         tags:
           $ref: '#/components/schemas/Tags'
+        reviewers:
+          $ref: '#/components/schemas/ReviewersRaw'
       required:
         - title
         - description
@@ -411,6 +421,7 @@ components:
         - city
         - finalizedBy
         - tags
+        - reviewers
 
     PatchProjectData:
       type: object
@@ -437,6 +448,8 @@ components:
           $ref: '#/components/schemas/Date'
         tags:
           $ref: '#/components/schemas/Tags'
+        reviewers:
+          $ref: '#/components/schemas/ReviewersRaw'          
       minProperties: 1
 
     ProjectId:
@@ -447,7 +460,42 @@ components:
           example: '670b9562-b30d-52d5-b827-655787665500'
       required:
         - id
+    
+    Reviewer:
+      type: object
+      properties:
+        reviewerId:
+          $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/ReviewerStatus'  
+      required:
+        - reviewerId
+        - status
 
+    Reviewers:
+      type: array
+      items:
+        $ref: '#/components/schemas/Reviewer'
+
+    ReviewersRaw:
+      type: array
+      items:
+        $ref: '#/components/schemas/Id'
+
+    ProjectStatus:
+      type: string
+      enum:
+        - DRAFT
+        - PUBLISHED
+        - FINALIZED
+
+    ReviewerStatus:
+      type: string
+      enum:
+        - PENDING
+        - ACCEPTED
+        - REJECTED
+      
     Tags:
       type: array
       items:

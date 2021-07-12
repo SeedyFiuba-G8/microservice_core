@@ -1,9 +1,11 @@
+const _ = require('lodash');
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = function $projectService(
   errors,
   projectRepository,
   projectUtils,
+  reviewerRepository,
   tagRepository,
   validationUtils
 ) {
@@ -25,14 +27,18 @@ module.exports = function $projectService(
     validationUtils.validateProjectInfo(projectInfo);
 
     const id = uuidv4();
-    const data = {
+    await projectRepository.create({
       id,
       userId,
-      ...projectInfo
-    };
+      ..._.omit(projectInfo, ['reviewers'])
+    });
 
-    await projectRepository.create(data);
-    await tagRepository.updateForProject(id, projectInfo.tags);
+    // Update reviewers and tags
+    const { tags, reviewers } = projectInfo;
+    await Promise.all([
+      reviewerRepository.updateForProject(id, reviewers),
+      tagRepository.updateForProject(id, tags)
+    ]);
 
     return id;
   }
@@ -43,16 +49,15 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function get(projectId) {
-    const projects = await projectRepository.get({
-      filters: {
-        id: projectId
-      }
+    let project = await getSimpleProject(projectId);
+    project = _.omitBy(project, _.isNull);
+
+    project.reviewers = await reviewerRepository.get({
+      filters: { projectId: project.id },
+      select: ['reviewerId', 'status']
     });
 
-    if (!projects.length)
-      throw errors.create(404, 'There is no project with the specified id.');
-
-    return projects[0];
+    return project;
   }
 
   /**
@@ -87,13 +92,27 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function update(projectId, rawProjectInfo, requesterId) {
-    const projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
+    let projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
     validationUtils.validateProjectInfo(projectInfo);
 
-    await Promise.all([
-      projectRepository.update(projectId, projectInfo, requesterId),
-      tagRepository.updateForProject(projectId, projectInfo.tags)
-    ]);
+    const { tags, reviewers } = projectInfo;
+    projectInfo = _.omit(projectInfo, ['reviewers']);
+
+    if (!_.isEmpty(projectInfo)) {
+      await projectRepository.update(projectId, projectInfo, requesterId);
+    } else {
+      await validatePermissions(projectId, requesterId);
+    }
+
+    // Update tags and reviewers
+    const promises = [];
+
+    if (reviewers)
+      promises.push(reviewerRepository.updateForProject(projectId, reviewers));
+
+    if (tags) promises.push(tagRepository.updateForProject(projectId, tags));
+
+    await Promise.all(promises);
 
     return projectId;
   }
@@ -104,11 +123,46 @@ module.exports = function $projectService(
    * @returns {Promise} uuid
    */
   async function remove(projectId, requesterId) {
+    // TODO: Error si el proyecto está publicado, fallar
+    const { status } = await getSimpleProject(projectId);
+    if (status === 'PUBLISHED')
+      throw errors.create(409, 'Published projects cannot be deleted.');
+
+    await projectRepository.remove(projectId, requesterId);
+
+    // Remove tags and reviewers
     await Promise.all([
-      projectRepository.remove(projectId, requesterId),
-      tagRepository.removeForProject(projectId)
+      tagRepository.removeForProject(projectId),
+      reviewerRepository.removeForProject(projectId)
     ]);
 
     return projectId;
+  }
+
+  // Aux
+
+  /**
+   * Gets a project from repository if it exists
+   */
+  async function getSimpleProject(projectId) {
+    const projects = await projectRepository.get({
+      filters: {
+        id: projectId
+      }
+    });
+
+    if (!projects.length)
+      throw errors.create(404, 'There is no project with the specified id.');
+
+    return projects[0];
+  }
+
+  /**
+   * Validates permissions for project
+   */
+  async function validatePermissions(projectId, requesterId) {
+    const { userId } = await getSimpleProject(projectId);
+    if (userId !== requesterId)
+      throw errors.create(404, 'There is no project with the specified id.');
   }
 };

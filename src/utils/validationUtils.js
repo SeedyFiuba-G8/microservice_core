@@ -20,21 +20,34 @@ module.exports = function $validationUtils(config, errors) {
         );
     });
 
-    // Tags validation
+    const { tags, reviewers } = projectInfo;
 
-    const { max, maxTagLength } = config.constraints.tags;
-    const { tags } = projectInfo;
+    // Reviewers validation
+    if (reviewers !== undefined) {
+      const { max: maxReviewers } = config.constraints.reviewers;
 
-    if (tags.length > max)
-      throw errors.create(400, `Too many tags! Up to ${max} are allowed`);
-
-    tags.forEach((tag) => {
-      if (!validLength(tag, 0, maxTagLength))
+      if (reviewers && reviewers.length > maxReviewers)
         throw errors.create(
           400,
-          `Tag too long. Its length must be less than ${maxTagLength}`
+          `Too many reviewers! Up to ${maxReviewers} are allowed`
         );
-    });
+    }
+
+    // Tags validation
+    if (tags !== undefined) {
+      const { max: maxTags, maxTagLength } = config.constraints.tags;
+
+      if (tags.length > maxTags)
+        throw errors.create(400, `Too many tags! Up to ${maxTags} are allowed`);
+
+      tags.forEach((tag) => {
+        if (!validLength(tag, 0, maxTagLength))
+          throw errors.create(
+            400,
+            `Tag too long. Its length must be less than ${maxTagLength}`
+          );
+      });
+    }
   }
 
   /**
