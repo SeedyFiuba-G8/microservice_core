@@ -3,6 +3,7 @@ const express = require('express');
 module.exports = function apiRouter(
   apiValidatorMiddleware,
   projectController,
+  reviewerController,
   statusController
 ) {
   return (
@@ -26,5 +27,12 @@ module.exports = function apiRouter(
       .get('/projects/:projectId', projectController.get)
       .patch('/projects/:projectId', projectController.update)
       .delete('/projects/:projectId', projectController.remove)
+
+      // Reviewers
+      .get('/reviewrequests/:reviewerId', reviewerController.getRequests)
+      .put(
+        '/reviewrequests/:reviewerId/:projectId',
+        reviewerController.updateRequest
+      )
   );
 };

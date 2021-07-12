@@ -1,9 +1,10 @@
 const _ = require('lodash');
 
-module.exports = function $reviewerRepository(dbUtils, knex) {
+module.exports = function $reviewerRepository(dbUtils, errors, knex) {
   return {
     get,
     removeForProject,
+    update,
     updateForProject
   };
 
@@ -22,6 +23,19 @@ module.exports = function $reviewerRepository(dbUtils, knex) {
    */
   async function removeForProject(projectId) {
     await knex('reviewers').where({ project_id: projectId }).del();
+  }
+
+  /**
+   * Updates status for review request
+   */
+  async function update({ reviewerId, projectId, status }) {
+    const result = await knex('reviewers')
+      .update('status', status)
+      .where(dbUtils.mapToDb({ projectId, reviewerId }));
+
+    if (!result) {
+      throw errors.create(404, 'There is no project with the specified id.');
+    }
   }
 
   /**

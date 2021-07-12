@@ -22,6 +22,7 @@ servers:
 
 tags:
   - name: Projects
+  - name: Reviews
 
 # =============================================================================
 
@@ -82,7 +83,7 @@ paths:
   /projects/{projectId}:
     get:
       summary: Get a project by id.
-      description: Allos a user to get retrieve a project's information by its id.
+      description: Allows a user to retrieve a project's information by its id.
       tags:
         - Projects
       parameters:
@@ -155,6 +156,66 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  # REVIEWERS
+  /reviewrequests/{reviewerId}:
+    get:
+      summary: Get review requests for a given reviewer
+      description: Allows a reviewer to retrieve its review requests.
+      tags:
+        - Reviewers
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user that requests
+        - in: path
+          name: reviewerId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the reviewer
+      responses:
+        200:
+          $ref: '#/components/responses/getReviewRequests'
+        default:
+          $ref: '#/components/responses/Error'
+  
+  /reviewrequests/{reviewerId}/{projectId}:
+    put:
+      summary: Change status of review request
+      description: Allows a reviewer to change the status of its review requests.
+      tags:
+        - Reviewers
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user that requests
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project
+        - in: path
+          name: reviewerId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the reviewer
+      requestBody:
+        $ref: '#/components/requestBodies/putReviewRequest'
+      responses:
+        204:
+          description: 'Review request updated successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+  
   # STATUS
   /health:
     get:
@@ -194,6 +255,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PatchProjectData'
+    
+    putReviewRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PutReviewRequest'
+
   
   # ---------------------------------------------------------------------------
   responses:
@@ -242,6 +311,14 @@ components:
           schema:
             $ref: '#/components/schemas/ProjectId'
 
+    # REVIEWERS
+    getReviewRequests:
+      description: Review requests retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ReviewRequests'
+    
     # STATUS
     health:
       description: Microservice general health state reported.
@@ -460,7 +537,14 @@ components:
           example: '670b9562-b30d-52d5-b827-655787665500'
       required:
         - id
+      
+    Tags:
+      type: array
+      items:
+        type: string
+      example: ['javascript', 'python', 'food']
     
+    # REVIEWERS
     Reviewer:
       type: object
       properties:
@@ -495,12 +579,75 @@ components:
         - PENDING
         - ACCEPTED
         - REJECTED
-      
-    Tags:
-      type: array
-      items:
-        type: string
-      example: ['javascript', 'python', 'food']
+    
+    PutReviewerStatus:
+      type: string
+      enum:
+        - ACCEPTED
+        - REJECTED
+
+    ReviewRequests:
+      type: object
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewRequest'
+      required:
+        - requests
+
+    ReviewRequest:
+      type: object
+      properties:
+        projectId:
+          $ref: '#/components/schemas/Id'
+        userId:
+          $ref: '#/components/schemas/Id'
+        title:
+          type: string
+          example: 'Prohibir la utilizacion de Winbugs globalmente'
+        description:
+          type: string
+          example: 'No puede ser que haya gente que use Winbugs'
+        type:
+          type: string
+          example: 'social'
+        objective:
+          type: string
+          example: 'Salvar a la gente de esta maldicion'
+        country:
+          type: string
+          example: 'Argentina'
+        city:
+          type: string
+          example: 'Buenos Aires'
+        publishedOn:
+          $ref: '#/components/schemas/Date'
+        finalizedBy:
+          $ref: '#/components/schemas/Date'
+        status:
+          $ref: '#/components/schemas/ReviewerStatus'  
+      required:
+        - projectId
+        - userId
+        - title
+        - description
+        - type
+        - objective
+        - country
+        - city
+        - publishedOn
+        - finalizedBy
+        - status
+
+    PutReviewRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/PutReviewerStatus'  
+      required:
+        - status
+
     
     # STATUS
     Ping:

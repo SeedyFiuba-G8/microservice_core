@@ -13,6 +13,7 @@ module.exports = function $projectService(
     create,
     get,
     getPreviewsBy,
+    getSimpleProject,
     update,
     remove
   };
