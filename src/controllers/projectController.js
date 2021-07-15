@@ -88,7 +88,7 @@ module.exports = function $projectController(expressify, projectService) {
    */
   function parseFilters(filters) {
     return {
-      filters: _.pick(filters, ['userId']),
+      filters: _.pick(filters, ['userId', 'type', 'status']),
       limit: _.get(filters, 'limit'),
       offset: _.get(filters, 'offset')
     };

@@ -40,6 +40,19 @@ paths:
             type: string
           description: The userId of whom we want to retrieve projects.
         - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            example: 'social'
+          description: Type of project to retrieve.
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ProjectStatus'
+          description: Status of project to retrieve.
+        - in: query
           name: limit
           required: false
           schema:
