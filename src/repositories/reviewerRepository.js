@@ -28,10 +28,14 @@ module.exports = function $reviewerRepository(dbUtils, errors, knex) {
   /**
    * Updates status for review request
    */
-  async function update({ reviewerId, projectId, status }) {
-    const result = await knex('reviewers')
+  async function update({ reviewerId, projectId, status, neededStatus }) {
+    let query = knex('reviewers')
       .update('status', status)
       .where(dbUtils.mapToDb({ projectId, reviewerId }));
+
+    if (neededStatus) query = query.where('status', neededStatus);
+
+    const result = await query;
 
     if (!result) {
       throw errors.create(404, 'There is no project with the specified id.');

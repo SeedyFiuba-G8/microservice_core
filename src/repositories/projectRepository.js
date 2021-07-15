@@ -5,6 +5,7 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
     create,
     get,
     update,
+    updateBy,
     remove
   };
 
@@ -50,13 +51,28 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
    *
    * @returns {Promise}
    */
-  async function update(projectId, newProjectInfo, requesterId) {
+  async function update(projectId, updateFields, requesterId) {
     const result = await knex('projects')
-      .update(dbUtils.mapToDb(newProjectInfo))
+      .update(dbUtils.mapToDb(updateFields))
       .where({
         id: projectId,
         user_id: requesterId
       });
+
+    if (!result) {
+      throw errors.create(404, 'There is no project with the specified id.');
+    }
+  }
+
+  /**
+   * Updates a project info by filters
+   *
+   * @returns {Promise}
+   */
+  async function updateBy(filters, updateFields) {
+    const result = await knex('projects')
+      .update(dbUtils.mapToDb(updateFields))
+      .where(dbUtils.mapToDb(filters));
 
     if (!result) {
       throw errors.create(404, 'There is no project with the specified id.');
