@@ -1,9 +1,11 @@
+const _ = require('lodash');
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = function $projectService(
   errors,
   projectRepository,
   projectUtils,
+  reviewerRepository,
   tagRepository,
   validationUtils
 ) {
@@ -11,6 +13,7 @@ module.exports = function $projectService(
     create,
     get,
     getPreviewsBy,
+    getSimpleProject,
     update,
     remove
   };
@@ -25,14 +28,18 @@ module.exports = function $projectService(
     validationUtils.validateProjectInfo(projectInfo);
 
     const id = uuidv4();
-    const data = {
+    await projectRepository.create({
       id,
       userId,
-      ...projectInfo
-    };
+      ..._.omit(projectInfo, ['reviewers'])
+    });
 
-    await projectRepository.create(data);
-    await tagRepository.updateForProject(id, projectInfo.tags);
+    // Update reviewers and tags
+    const { tags, reviewers } = projectInfo;
+    await Promise.all([
+      reviewerRepository.updateForProject(id, reviewers),
+      tagRepository.updateForProject(id, tags)
+    ]);
 
     return id;
   }
@@ -43,16 +50,16 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function get(projectId) {
-    const projects = await projectRepository.get({
-      filters: {
-        id: projectId
-      }
-    });
+    let project = await getSimpleProject(projectId);
+    project = _.omitBy(project, _.isNull);
 
-    if (!projects.length)
-      throw errors.create(404, 'There is no project with the specified id.');
+    if (!project.reviewerId)
+      project.reviewers = await reviewerRepository.get({
+        filters: { projectId: project.id },
+        select: ['reviewerId', 'status']
+      });
 
-    return projects[0];
+    return project;
   }
 
   /**
@@ -63,6 +70,7 @@ module.exports = function $projectService(
   async function getPreviewsBy(filters, limit, offset) {
     const previewFields = [
       'id',
+      'status',
       'title',
       'description',
       'type',
@@ -70,7 +78,8 @@ module.exports = function $projectService(
       'country',
       'city',
       'finalizedBy',
-      'tags'
+      'tags',
+      'coverPicUrl'
     ];
 
     return projectRepository.get({
@@ -87,15 +96,9 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function update(projectId, rawProjectInfo, requesterId) {
-    const projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
-    validationUtils.validateProjectInfo(projectInfo);
-
-    await Promise.all([
-      projectRepository.update(projectId, projectInfo, requesterId),
-      tagRepository.updateForProject(projectId, projectInfo.tags)
-    ]);
-
-    return projectId;
+    return rawProjectInfo.status === 'FUNDING'
+      ? publish(projectId, requesterId)
+      : innerUpdate(projectId, rawProjectInfo, requesterId);
   }
 
   /**
@@ -104,11 +107,105 @@ module.exports = function $projectService(
    * @returns {Promise} uuid
    */
   async function remove(projectId, requesterId) {
+    const { status } = await getSimpleProject(projectId);
+    if (status !== 'DRAFT')
+      throw errors.create(
+        409,
+        'Projects that have been already published cannot be deleted.'
+      );
+
+    await projectRepository.remove(projectId, requesterId);
+
+    // Remove tags and reviewers
     await Promise.all([
-      projectRepository.remove(projectId, requesterId),
-      tagRepository.removeForProject(projectId)
+      tagRepository.removeForProject(projectId),
+      reviewerRepository.removeForProject(projectId)
     ]);
 
     return projectId;
+  }
+
+  // Aux
+
+  /**
+   * Updates project info
+   */
+  async function innerUpdate(projectId, rawProjectInfo, requesterId) {
+    let projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
+    validationUtils.validateProjectInfo(projectInfo);
+
+    const { tags, reviewers } = projectInfo;
+    projectInfo = _.omit(projectInfo, ['reviewers']);
+
+    if (!_.isEmpty(projectInfo)) {
+      await projectRepository.update(projectId, projectInfo, requesterId);
+    } else {
+      await validatePermissions(projectId, requesterId);
+    }
+
+    // Update tags and reviewers
+    const promises = [];
+
+    if (reviewers)
+      promises.push(reviewerRepository.updateForProject(projectId, reviewers));
+
+    if (tags) promises.push(tagRepository.updateForProject(projectId, tags));
+
+    await Promise.all(promises);
+
+    return projectId;
+  }
+
+  /**
+   * Tries to publish the project
+   */
+  async function publish(projectId, requesterId) {
+    const possibleReviewers = await reviewerRepository.get({
+      filters: { projectId, status: 'ACCEPTED' },
+      select: ['reviewerId']
+    });
+
+    if (!possibleReviewers.length)
+      throw errors.create(404, 'There is no project with the specified id.');
+
+    // 404 will be returned if project is not in draft
+    // or if user is not the owner
+    await projectRepository.updateBy(
+      { id: projectId, status: 'DRAFT', userId: requesterId },
+      {
+        status: 'FUNDING',
+        reviewerId: _.sample(
+          possibleReviewers.map((reviewer) => reviewer.reviewerId)
+        )
+      }
+    );
+
+    // We remove all reviewers for this project
+    await reviewerRepository.removeForProject(projectId);
+  }
+
+  /**
+   * Gets a project from repository if it exists
+   */
+  async function getSimpleProject(projectId) {
+    const projects = await projectRepository.get({
+      filters: {
+        id: projectId
+      }
+    });
+
+    if (!projects.length)
+      throw errors.create(404, 'There is no project with the specified id.');
+
+    return projects[0];
+  }
+
+  /**
+   * Validates permissions for project
+   */
+  async function validatePermissions(projectId, requesterId) {
+    const { userId } = await getSimpleProject(projectId);
+    if (userId !== requesterId)
+      throw errors.create(404, 'There is no project with the specified id.');
   }
 };

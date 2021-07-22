@@ -19,5 +19,14 @@ module.exports = {
     console: {
       level: 'debug'
     }
+  },
+  services: {
+    sc: {
+      baseUrl: _.get(
+        process.env,
+        'SC_URL',
+        'https://sf-tdp2-sc-dev.herokuapp.com/'
+      )
+    }
   }
 };
