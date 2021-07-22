@@ -28,10 +28,14 @@ module.exports = function $reviewerRepository(dbUtils, errors, knex) {
   /**
    * Updates status for review request
    */
-  async function update({ reviewerId, projectId, status }) {
-    const result = await knex('reviewers')
+  async function update({ reviewerId, projectId, status, neededStatus }) {
+    let query = knex('reviewers')
       .update('status', status)
       .where(dbUtils.mapToDb({ projectId, reviewerId }));
+
+    if (neededStatus) query = query.where('status', neededStatus);
+
+    const result = await query;
 
     if (!result) {
       throw errors.create(404, 'There is no project with the specified id.');
@@ -42,31 +46,21 @@ module.exports = function $reviewerRepository(dbUtils, errors, knex) {
    * Updates reviewers for project
    */
   async function updateForProject(projectId, newReviewers) {
-    const promises = [];
-
-    // Remove
     const removed = await removedReviewers(projectId, newReviewers);
-    if (removed.length)
-      promises.push(
-        knex('reviewers')
-          .where({ project_id: projectId })
-          .whereIn('reviewer_id', _.union(removed, newReviewers))
-          .del()
-      );
 
-    // Remove old statuses
+    await knex('reviewers')
+      .where({ project_id: projectId })
+      .whereIn('reviewer_id', _.union(removed, newReviewers))
+      .del();
+
     if (newReviewers.length)
-      promises.push(
-        knex('reviewers').insert(
-          newReviewers.map((reviewer) => ({
-            reviewer_id: reviewer,
-            project_id: projectId,
-            status: 'PENDING'
-          }))
-        )
+      await knex('reviewers').insert(
+        newReviewers.map((reviewer) => ({
+          reviewer_id: reviewer,
+          project_id: projectId,
+          status: 'PENDING'
+        }))
       );
-
-    await Promise.all(promises);
   }
 
   // Aux

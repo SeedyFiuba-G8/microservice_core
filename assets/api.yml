@@ -41,6 +41,19 @@ paths:
             type: string
           description: The userId of whom we want to retrieve projects.
         - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            example: 'social'
+          description: Type of project to retrieve.
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ProjectStatus'
+          description: Status of project to retrieve.
+        - in: query
           name: limit
           required: false
           schema:
@@ -300,8 +313,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PutReviewRequest'
-
-  
+ 
   # ---------------------------------------------------------------------------
   responses:
     Error:
@@ -486,7 +498,6 @@ components:
         - publishedOn
         - finalizedBy
         - tags
-        - reviewers
 
     ProjectPreview:
       type: object
@@ -570,6 +581,8 @@ components:
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
+        status:
+          $ref: '#/components/schemas/FundingProjectStatus'
         description:
           type: string
           example: 'No puede ser que haya gente que use Winbugs'
@@ -602,6 +615,18 @@ components:
       required:
         - id
       
+    ProjectStatus:
+      type: string
+      enum:
+        - DRAFT
+        - FUNDING
+        - FINALIZED
+
+    FundingProjectStatus:
+      type: string
+      enum:
+        - FUNDING
+    
     Tags:
       type: array
       items:
@@ -629,13 +654,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Id'
-
-    ProjectStatus:
-      type: string
-      enum:
-        - DRAFT
-        - PUBLISHED
-        - FINALIZED
 
     ReviewerStatus:
       type: string

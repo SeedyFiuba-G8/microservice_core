@@ -59,7 +59,8 @@ module.exports = function $reviewerService(
     await reviewerRepository.update({
       reviewerId,
       projectId,
-      status
+      status,
+      neededStatus: 'PENDING'
     });
   }
 

@@ -53,10 +53,11 @@ module.exports = function $projectService(
     let project = await getSimpleProject(projectId);
     project = _.omitBy(project, _.isNull);
 
-    project.reviewers = await reviewerRepository.get({
-      filters: { projectId: project.id },
-      select: ['reviewerId', 'status']
-    });
+    if (!project.reviewerId)
+      project.reviewers = await reviewerRepository.get({
+        filters: { projectId: project.id },
+        select: ['reviewerId', 'status']
+      });
 
     return project;
   }
@@ -94,6 +95,41 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function update(projectId, rawProjectInfo, requesterId) {
+    return rawProjectInfo.status === 'FUNDING'
+      ? publish(projectId, requesterId)
+      : innerUpdate(projectId, rawProjectInfo, requesterId);
+  }
+
+  /**
+   * Deletes an existing project
+   *
+   * @returns {Promise} uuid
+   */
+  async function remove(projectId, requesterId) {
+    const { status } = await getSimpleProject(projectId);
+    if (status !== 'DRAFT')
+      throw errors.create(
+        409,
+        'Projects that have been already published cannot be deleted.'
+      );
+
+    await projectRepository.remove(projectId, requesterId);
+
+    // Remove tags and reviewers
+    await Promise.all([
+      tagRepository.removeForProject(projectId),
+      reviewerRepository.removeForProject(projectId)
+    ]);
+
+    return projectId;
+  }
+
+  // Aux
+
+  /**
+   * Updates project info
+   */
+  async function innerUpdate(projectId, rawProjectInfo, requesterId) {
     let projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
     validationUtils.validateProjectInfo(projectInfo);
 
@@ -120,28 +156,32 @@ module.exports = function $projectService(
   }
 
   /**
-   * Deletes an existing project
-   *
-   * @returns {Promise} uuid
+   * Tries to publish the project
    */
-  async function remove(projectId, requesterId) {
-    // TODO: Error si el proyecto está publicado, fallar
-    const { status } = await getSimpleProject(projectId);
-    if (status === 'PUBLISHED')
-      throw errors.create(409, 'Published projects cannot be deleted.');
+  async function publish(projectId, requesterId) {
+    const possibleReviewers = await reviewerRepository.get({
+      filters: { projectId, status: 'ACCEPTED' },
+      select: ['reviewerId']
+    });
 
-    await projectRepository.remove(projectId, requesterId);
+    if (!possibleReviewers.length)
+      throw errors.create(404, 'There is no project with the specified id.');
 
-    // Remove tags and reviewers
-    await Promise.all([
-      tagRepository.removeForProject(projectId),
-      reviewerRepository.removeForProject(projectId)
-    ]);
+    // 404 will be returned if project is not in draft
+    // or if user is not the owner
+    await projectRepository.updateBy(
+      { id: projectId, status: 'DRAFT', userId: requesterId },
+      {
+        status: 'FUNDING',
+        reviewerId: _.sample(
+          possibleReviewers.map((reviewer) => reviewer.reviewerId)
+        )
+      }
+    );
 
-    return projectId;
+    // We remove all reviewers for this project
+    await reviewerRepository.removeForProject(projectId);
   }
-
-  // Aux
 
   /**
    * Gets a project from repository if it exists
