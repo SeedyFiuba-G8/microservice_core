@@ -78,7 +78,8 @@ module.exports = function $projectService(
       'country',
       'city',
       'finalizedBy',
-      'tags'
+      'tags',
+      'coverPicUrl'
     ];
 
     return projectRepository.get({

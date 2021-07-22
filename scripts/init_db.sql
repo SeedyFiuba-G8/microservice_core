@@ -12,6 +12,7 @@ CREATE TABLE public.projects (
 	reviewer_id			VARCHAR(36),
 	title				VARCHAR(100)				NOT NULL,
 	description			VARCHAR(255)				NOT NULL,
+	cover_pic_url		VARCHAR(255),
 	type				VARCHAR(20)					NOT NULL,
 	objective			VARCHAR(255)				NOT NULL,
 	country				VARCHAR(20)					NOT NULL,

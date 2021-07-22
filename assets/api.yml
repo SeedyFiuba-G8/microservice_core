@@ -376,6 +376,10 @@ components:
       format: uuid
       example: '123e4567-e89b-12d3-a456-426614174000'
 
+    Picture:
+      type: string
+      example: 'https://imgur.com/gallery/rFvivtw'
+
     # PROJECTS
     AllProjects:
       type: object
@@ -404,6 +408,8 @@ components:
         description:
           type: string
           example: 'No puede ser que haya gente que use Winbugs'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
         type:
           type: string
           example: 'social'
@@ -451,6 +457,8 @@ components:
         description:
           type: string
           example: 'No puede ser que haya gente que use Winbugs'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
         type:
           type: string
           example: 'social'
@@ -485,6 +493,8 @@ components:
         description:
           type: string
           example: 'No puede ser que haya gente que use Winbugs'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
         type:
           type: string
           example: 'social'
@@ -525,6 +535,8 @@ components:
         description:
           type: string
           example: 'No puede ser que haya gente que use Winbugs'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
         type:
           type: string
           example: 'social'

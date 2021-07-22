@@ -16,6 +16,10 @@ module.exports = {
         min: 0,
         max: 255
       },
+      coverPicUrl: {
+        min: 1,
+        max: 255
+      },
       type: {
         min: 0,
         max: 20

@@ -20,18 +20,24 @@ module.exports = function projectUtils(errors) {
       'country',
       'finalizedBy',
       'tags',
-      'reviewers'
+      'reviewers',
+      'coverPicUrl'
     ]);
 
     // We make sure there are no duplicated tags
     if (projectInfo.tags) projectInfo.tags = _.uniq(projectInfo.tags);
 
     if (addFinalizationDate && projectInfo.finalizedBy) {
-      projectInfo.finalizedBy = new Date(projectInfo.finalizedBy);
+      const finalizedByDate = new Date(projectInfo.finalizedBy);
 
       // eslint-disable-next-line
-      if (isNaN(projectInfo.finalizedBy))
+      if (isNaN(finalizedByDate))
         throw errors.create(400, 'finalizedBy Date format is invalid.');
+
+      if (finalizedByDate < new Date())
+        throw errors.create(400, 'finalizedBy Date is in the past!');
+
+      projectInfo.finalizedBy = finalizedByDate;
     }
 
     return projectInfo;
