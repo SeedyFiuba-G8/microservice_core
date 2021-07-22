@@ -30,6 +30,7 @@
     "@seedyfiuba/api_components": "^1.0.3",
     "@seedyfiuba/db_components": "^1.1.1",
     "@seedyfiuba/error_components": "^1.3.0",
+    "@seedyfiuba/gateway_components": "^1.2.0",
     "@seedyfiuba/logging_components": "^1.0.2",
     "config": "^3.3.6",
     "dependable": "^1.1.0",

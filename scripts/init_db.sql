@@ -40,6 +40,11 @@ CREATE TABLE public.tags (
       ON DELETE CASCADE
 );
 
+CREATE TABLE public.wallets (
+	user_id				VARCHAR(36)					NOT NULL		 PRIMARY KEY,
+	wallet_id			VARCHAR(36)					NOT NULL
+);
+
 
 -- Insert values
 INSERT INTO public.projects(

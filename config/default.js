@@ -3,7 +3,7 @@ const _ = require('lodash');
 module.exports = {
   express: {
     host: '0.0.0.0',
-    port: _.get(process.env, 'PORT', 3000)
+    port: _.get(process.env, 'PORT', 3002)
   },
   /* Any value changed here should be changed in database too */
   constraints: {
@@ -40,6 +40,10 @@ module.exports = {
     reviewers: {
       max: 10
     }
+  },
+  fetch: {
+    forwardHeaders: [],
+    timeout: 10000 // ms
   },
   knex: {
     client: 'pg',
