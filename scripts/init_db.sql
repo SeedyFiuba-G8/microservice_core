@@ -1,4 +1,5 @@
 -- Drop pre-existent dbs
+DROP TABLE IF EXISTS public.wallets;
 DROP TABLE IF EXISTS public.tags;
 DROP TABLE IF EXISTS public.reviewers;
 DROP TABLE IF EXISTS public.projects;
@@ -46,40 +47,39 @@ CREATE TABLE public.wallets (
 	wallet_id			VARCHAR(36)					NOT NULL
 );
 
-
 -- Insert values
-INSERT INTO public.projects(
-	id, status, user_id, title, description, type, objective, country, city, tags)
-	VALUES
-	(
-		'123e4567-e89b-12d3-a456-426614174001',
-		'DRAFT',
-		'ca718a21-a126-484f-bc50-145126a6f75b',
-		'Titulo 1',
-		'Descripcion 1',
-		'social',
-		'Objetivo 1',
-		'Argentina',
-		'Buenos Aires',
-        ARRAY [ 'javascript', 'python' ]
-	);
+-- INSERT INTO public.projects(
+-- 	id, status, user_id, title, description, type, objective, country, city, tags)
+-- 	VALUES
+-- 	(
+-- 		'123e4567-e89b-12d3-a456-426614174001',
+-- 		'DRAFT',
+-- 		'ca718a21-a126-484f-bc50-145126a6f75b',
+-- 		'Titulo 1',
+-- 		'Descripcion 1',
+-- 		'social',
+-- 		'Objetivo 1',
+-- 		'Argentina',
+-- 		'Buenos Aires',
+--         ARRAY [ 'javascript', 'python' ]
+-- 	);
 
-INSERT INTO public.projects(
-	id, status, user_id, title, description, type, objective, country, city)
-	VALUES
-	(
-		'9bb37345-41ad-471e-adc3-980fd05e5b63',
-		'DRAFT',
-		'ca718a21-a126-484f-bc50-145126a6f76b',
-		'Titulo 2',
-		'Descripcion 2',
-		'education',
-		'Objetivo 2',
-		'Argentina',
-		'Buenos Aires'
-	);
+-- INSERT INTO public.projects(
+-- 	id, status, user_id, title, description, type, objective, country, city)
+-- 	VALUES
+-- 	(
+-- 		'9bb37345-41ad-471e-adc3-980fd05e5b63',
+-- 		'DRAFT',
+-- 		'ca718a21-a126-484f-bc50-145126a6f76b',
+-- 		'Titulo 2',
+-- 		'Descripcion 2',
+-- 		'education',
+-- 		'Objetivo 2',
+-- 		'Argentina',
+-- 		'Buenos Aires'
+-- 	);
 
-INSERT INTO public.tags(
+-- INSERT INTO public.tags(
     tag, project_id
     )
 	VALUES
