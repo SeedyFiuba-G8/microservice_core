@@ -80,14 +80,14 @@ CREATE TABLE public.wallets (
 -- 	);
 
 -- INSERT INTO public.tags(
-    tag, project_id
-    )
-	VALUES
-	(
-		'javascript',
-        '123e4567-e89b-12d3-a456-426614174001'
-	),
-    (
-		'python',
-        '123e4567-e89b-12d3-a456-426614174001'
-	);
+--     tag, project_id
+--     )
+-- 	VALUES
+-- 	(
+-- 		'javascript',
+--         '123e4567-e89b-12d3-a456-426614174001'
+-- 	),
+--     (
+-- 		'python',
+--         '123e4567-e89b-12d3-a456-426614174001'
+-- 	);
