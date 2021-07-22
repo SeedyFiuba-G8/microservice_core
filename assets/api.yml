@@ -23,6 +23,7 @@ servers:
 tags:
   - name: Projects
   - name: Reviews
+  - name: Wallets
 
 # =============================================================================
 
@@ -228,6 +229,43 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  # WALLETS
+  /wallets:
+    post:
+      summary: Create a new wallet
+      description: Allows a user to create a new wallet.
+      tags:
+        - Wallets
+      parameters:
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+      responses:
+        201:
+          $ref: '#/components/responses/postWallet'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /wallets/{userId}:
+    get:
+      summary: Get a wallet by its user id.
+      description: Allows a user to retrieve a wallet's information by its id.
+      tags:
+        - Wallets
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: id of the user whom wallet we want to retrieve
+      responses:
+        200:
+          $ref: '#/components/responses/getWallet'
+        default:
+          $ref: '#/components/responses/Error'
   
   # STATUS
   /health:
@@ -330,6 +368,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ReviewRequests'
+
+    # WALLETS
+    getWallet:
+      description: Wallet retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Wallet'
+
+    postWallet:
+      description: Wallet created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Address'
     
     # STATUS
     health:
@@ -366,10 +419,18 @@ components:
         - status
         - name
     
+    Address:
+      type: string
+      example: '0xf018Be4Fe4fBD4cA1B1162A44bB139a343C2087b'
+
     Date:
       type: string
       format: date-time
       example: '2021-06-13T21:29:29.330Z'
+
+    ETHAmount:
+      type: number
+      example: 0.000001
 
     Id:
       type: string
@@ -681,6 +742,17 @@ components:
       required:
         - status
 
+    # WALLETS
+    Wallet:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/Address'
+        balance:
+          $ref: '#/components/schemas/ETHAmount'
+      required:
+        - address
+        - balance
     
     # STATUS
     Ping:

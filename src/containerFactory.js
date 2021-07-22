@@ -3,6 +3,7 @@ const path = require('path');
 const apiComponents = require('@seedyfiuba/api_components');
 const dbComponents = require('@seedyfiuba/db_components');
 const errorComponents = require('@seedyfiuba/error_components');
+const gatewayComponents = require('@seedyfiuba/gateway_components');
 const loggingComponents = require('@seedyfiuba/logging_components');
 
 function createContainer() {
@@ -11,6 +12,7 @@ function createContainer() {
     'app.js',
     'controllers',
     'middlewares',
+    'gateways',
     'repositories',
     'routers',
     'services',
@@ -50,6 +52,10 @@ function createContainer() {
     return errorComponents.errors();
   });
 
+  container.register('fetch', function $commonFetch(config, errors) {
+    return gatewayComponents.fetch(config, errors);
+  });
+
   container.register(
     'errorHandlerMiddleware',
     function $errorHandlerMiddleware(logger) {
@@ -74,6 +80,14 @@ function createContainer() {
 
   container.register('loggingMiddleware', function $loggingMiddleware(logger) {
     return loggingComponents.loggingMiddleware(logger);
+  });
+
+  container.register('services', function $services(config) {
+    return config.services;
+  });
+
+  container.register('urlFactory', function $commonUrlFactory() {
+    return gatewayComponents.urlFactory();
   });
 
   entries.forEach((entry) => container.load(path.join(__dirname, entry)));

@@ -4,7 +4,8 @@ module.exports = function apiRouter(
   apiValidatorMiddleware,
   projectController,
   reviewerController,
-  statusController
+  statusController,
+  walletController
 ) {
   return (
     express
@@ -34,5 +35,9 @@ module.exports = function apiRouter(
         '/reviewrequests/:reviewerId/:projectId',
         reviewerController.updateRequest
       )
+
+      // Wallets
+      .post('/wallets', walletController.create)
+      .get('/wallets/:userId', walletController.get)
   );
 };
