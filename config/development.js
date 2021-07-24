@@ -20,6 +20,7 @@ module.exports = {
       level: 'debug'
     }
   },
+  monitoring: false,
   services: {
     sc: {
       baseUrl: _.get(

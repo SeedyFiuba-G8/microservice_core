@@ -66,5 +66,11 @@ module.exports = {
       stringify: false,
       label: 'microservice_users'
     }
+  },
+  monitoring: true,
+  services: {
+    sc: {
+      baseUrl: _.get(process.env, 'SC_URL', 'https://sf-tdp2-sc.herokuapp.com/')
+    }
   }
 };

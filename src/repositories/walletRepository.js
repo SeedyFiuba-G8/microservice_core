@@ -34,6 +34,11 @@ module.exports = function $walletRepository(dbUtils, errors, knex, logger) {
     const wallet = await knex('wallets')
       .where(dbUtils.mapToDb({ userId }))
       .then(dbUtils.mapFromDb);
+
+    if (!wallet.length) {
+      throw errors.create(404, 'There is no wallet of the specified user.');
+    }
+
     return wallet[0];
   }
 

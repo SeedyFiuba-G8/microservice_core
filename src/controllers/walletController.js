@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 module.exports = function $walletController(expressify, walletService) {
   return expressify({
     create,
@@ -10,7 +12,7 @@ module.exports = function $walletController(expressify, walletService) {
    * @returns {Promise}
    */
   async function create(req, res) {
-    const userId = req.headers.uid;
+    const userId = req.body.uid;
     const walletData = await walletService.create(userId);
     return res.status(201).json(walletData);
   }
@@ -23,6 +25,6 @@ module.exports = function $walletController(expressify, walletService) {
   async function get(req, res) {
     const { userId } = req.params;
     const walletData = await walletService.get(userId);
-    return res.status(200).json(walletData);
+    return res.status(200).json(_.pick(walletData, ['address', 'balance']));
   }
 };

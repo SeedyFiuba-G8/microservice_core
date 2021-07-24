@@ -236,12 +236,8 @@ paths:
       description: Allows a user to create a new wallet.
       tags:
         - Wallets
-      parameters:
-        - in: header
-          name: uid
-          schema:
-            $ref: '#/components/schemas/Id'
-          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/postWalletData'
       responses:
         201:
           $ref: '#/components/responses/postWallet'
@@ -313,6 +309,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PutReviewRequest'
+
+    postWalletData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostWalletData'
  
   # ---------------------------------------------------------------------------
   responses:
@@ -441,6 +444,13 @@ components:
       type: string
       example: 'https://imgur.com/gallery/rFvivtw'
 
+    StagesCost:
+      type: array
+      items:
+        type: number
+      minItems: 1
+      example: [0.1, 0.0023, 1]
+
     # PROJECTS
     AllProjects:
       type: object
@@ -491,6 +501,8 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/Reviewers'
+        stagesCost:
+          $ref: '#/components/schemas/StagesCost'
       required:
         - id
         - status
@@ -504,6 +516,7 @@ components:
         - publishedOn
         - finalizedBy
         - tags
+        - stagesCost
 
     ProjectPreview:
       type: object
@@ -533,6 +546,8 @@ components:
           $ref: '#/components/schemas/Date'
         tags:
           $ref: '#/components/schemas/Tags'
+        stagesCost:
+          $ref: '#/components/schemas/StagesCost'
       required:
         - id
         - status
@@ -544,6 +559,7 @@ components:
         - city
         - finalizedBy
         - tags
+        - stagesCost
 
     PostProjectData:
       type: object
@@ -574,6 +590,8 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
+        stagesCost:
+          $ref: '#/components/schemas/StagesCost'
       required:
         - title
         - description
@@ -584,6 +602,7 @@ components:
         - finalizedBy
         - tags
         - reviewers
+        - stagesCost
 
     PatchProjectData:
       type: object
@@ -615,7 +634,9 @@ components:
         tags:
           $ref: '#/components/schemas/Tags'
         reviewers:
-          $ref: '#/components/schemas/ReviewersRaw'          
+          $ref: '#/components/schemas/ReviewersRaw'
+        stagesCost:
+          $ref: '#/components/schemas/StagesCost'          
       minProperties: 1
 
     ProjectId:
@@ -753,6 +774,14 @@ components:
       required:
         - address
         - balance
+
+    PostWalletData:
+      type: object
+      properties:
+        uid:
+          $ref: '#/components/schemas/Id'
+      required:
+        - uid
     
     # STATUS
     Ping:
