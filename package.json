@@ -37,6 +37,7 @@
     "express": "^4.17.1",
     "expressify": "^2.0.0",
     "lodash": "^4.17.21",
+    "newrelic": "^7.5.2",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
