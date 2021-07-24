@@ -21,7 +21,8 @@ module.exports = function projectUtils(errors) {
       'finalizedBy',
       'tags',
       'reviewers',
-      'coverPicUrl'
+      'coverPicUrl',
+      'stagesCost'
     ]);
 
     // We make sure there are no duplicated tags
