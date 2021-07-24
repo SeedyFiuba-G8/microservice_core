@@ -1,9 +1,8 @@
-const _ = require('lodash');
-
 module.exports = function $walletService(scGateway, walletRepository) {
   return {
     create,
-    get
+    get,
+    getWalletId
   };
 
   async function create(userId) {
@@ -13,8 +12,13 @@ module.exports = function $walletService(scGateway, walletRepository) {
   }
 
   async function get(userId) {
-    const { walletId } = await walletRepository.get(userId);
+    const walletId = await getWalletId(userId);
     const walletData = await scGateway.getWallet(walletId);
-    return _.pick(walletData, ['address', 'balance']);
+    return walletData;
+  }
+
+  async function getWalletId(userId) {
+    const { walletId } = await walletRepository.get(userId);
+    return walletId;
   }
 };

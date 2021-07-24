@@ -6,8 +6,10 @@ module.exports = function $projectService(
   projectRepository,
   projectUtils,
   reviewerRepository,
+  scGateway,
   tagRepository,
-  validationUtils
+  validationUtils,
+  walletService
 ) {
   return {
     create,
@@ -168,20 +170,35 @@ module.exports = function $projectService(
     if (!possibleReviewers.length)
       throw errors.create(404, 'There is no project with the specified id.');
 
+    const projectInfo = await getSimpleProject(projectId);
+
     // 404 will be returned if project is not in draft
     // or if user is not the owner
+    const reviewerId = _.sample(
+      possibleReviewers.map((reviewer) => reviewer.reviewerId)
+    );
+
     await projectRepository.updateBy(
       { id: projectId, status: 'DRAFT', userId: requesterId },
       {
         status: 'FUNDING',
-        reviewerId: _.sample(
-          possibleReviewers.map((reviewer) => reviewer.reviewerId)
-        )
+        reviewerId
       }
     );
 
-    // We remove all reviewers for this project
+    // We can now create the smart contract's project
+    const projectTxHash = await scGateway.createProject({
+      ownerId: await walletService.getWalletId(projectInfo.userId),
+      reviewerId: await walletService.getWalletId(reviewerId),
+      stagesCost: projectInfo.stagesCost
+    });
+
+    await projectRepository.registerTxHash(projectId, projectTxHash);
+
+    // We remove all reviewers and (local) stageCosts for this project
+    // stageCosts source of truth will now be the sc microservice
     await reviewerRepository.removeForProject(projectId);
+    await projectRepository.removeStagesForProject(projectId);
   }
 
   /**
