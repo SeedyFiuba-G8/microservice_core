@@ -15,10 +15,8 @@ module.exports = {
       )
     }
   },
-  log: {
-    console: {
-      level: 'debug'
-    }
+  logger: {
+    format: 'local'
   },
   monitoring: false,
   services: {

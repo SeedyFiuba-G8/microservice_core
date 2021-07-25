@@ -55,16 +55,11 @@ module.exports = {
       connectionString: _.get(process.env, 'DATABASE_URL')
     }
   },
-  log: {
+  logger: {
     console: {
       enabled: true,
-      level: 'info',
-      timestamp: true,
-      prettyPrint: true,
-      json: false,
-      colorize: true,
-      stringify: false,
-      label: 'microservice_users'
+      level: _.get(process.env, 'LOGGER_LEVEL', 'info'),
+      prettyPrint: true
     }
   },
   monitoring: true,
