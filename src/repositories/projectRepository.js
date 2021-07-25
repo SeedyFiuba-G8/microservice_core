@@ -1,12 +1,6 @@
 const _ = require('lodash');
 
-module.exports = function $projectRepository(
-  dbUtils,
-  errors,
-  knex,
-  logger,
-  scGateway
-) {
+module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
   return {
     create,
     get,
