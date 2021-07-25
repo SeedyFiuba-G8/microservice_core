@@ -1,6 +1,12 @@
 const _ = require('lodash');
 
-module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
+module.exports = function $projectRepository(
+  dbUtils,
+  errors,
+  knex,
+  logger,
+  scGateway
+) {
   return {
     create,
     get,
@@ -65,6 +71,7 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
 
     const projects = (await query.then(dbUtils.mapFromDb)).map(
       async (project) => {
+        // Gather stages info
         const stages = (
           await knex('stages')
             .where('project_id', project.id)
@@ -72,7 +79,8 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
             .then(dbUtils.mapFromDb)
         ).map((stage) => ({ ...stage, cost: Number(stage.cost) }));
 
-        return { ...project, stages };
+        // Gather funding info
+        return { ...(await addFundingInfo(project)), stages };
       }
     );
 
@@ -121,12 +129,21 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
    * @returns projectTxHash
    */
   async function getTxHash(projectId) {
-    return (
+    const projectHash = (
       await knex('project_hashes')
         .where(dbUtils.mapToDb({ projectId }))
         .select('tx_hash')
         .then(dbUtils.mapFromDb)
-    )[0].txHash;
+    )[0];
+
+    if (!projectHash) {
+      throw errors.create(
+        500,
+        `The project with id ${projectId} was not processed by blockchain`
+      );
+    }
+
+    return projectHash.txHash;
   }
 
   /**
@@ -170,13 +187,15 @@ module.exports = function $projectRepository(dbUtils, errors, knex, logger) {
     }
   }
 
-  //   /**
-  //    * If a project is not DRAFT, we need to gather the funding information from
-  //    * the sc microservice.
-  //    */
-  //   async function addFundingInfo(project) {
-  //     const { stagesCost, totalFunded, totalStages, currentStatus } =
-  //       await scGateway.getProject(await getTxHash(project.id));
-  //     return { ...project, stagesCost, totalFunded, totalStages, currentStatus };
-  //   }
+  async function addFundingInfo(project) {
+    if (project.status === 'DRAFT') {
+      return { ...project, totalFunded: 0 };
+    }
+    console.log('adding funding info of project: ', project);
+    console.log('txHash: ', await getTxHash(project.id));
+    const { totalFunded, currentStatus } = await scGateway.getProject(
+      await getTxHash(project.id)
+    );
+    return { ...project, totalFunded, status: currentStatus };
+  }
 };
