@@ -37,22 +37,7 @@ module.exports = function $projectRepository(
         throw errors.UnknownError;
       });
 
-    const stagesList = projectInfo.stages.map((stageInfo, i) => {
-      const stage = {
-        projectId: projectInfo.id,
-        stage: i,
-        ...stageInfo
-      };
-
-      return stage;
-    });
-
-    return knex('stages')
-      .insert(dbUtils.mapToDb(stagesList))
-      .catch((err) => {
-        logger.error(err);
-        throw errors.UnknownError;
-      });
+    return addStages(projectInfo.id, projectInfo.stages);
   }
 
   /**
@@ -70,18 +55,11 @@ module.exports = function $projectRepository(
     if (offset) query.offset(offset);
 
     const projects = (await query.then(dbUtils.mapFromDb)).map(
-      async (project) => {
-        // Gather stages info
-        const stages = (
-          await knex('stages')
-            .where('project_id', project.id)
-            .orderBy('stage', 'asc')
-            .then(dbUtils.mapFromDb)
-        ).map((stage) => ({ ...stage, cost: Number(stage.cost) }));
-
-        // Gather funding info
-        return { ...(await addFundingInfo(project)), stages };
-      }
+      async (project) => ({
+        ...project,
+        ...(await getFundingInfo(project.id, project.status)),
+        stages: await getStages(project.id)
+      })
     );
 
     return Promise.all(projects);
@@ -94,7 +72,7 @@ module.exports = function $projectRepository(
    */
   async function update(projectId, updateFields, requesterId) {
     const result = await knex('projects')
-      .update(dbUtils.mapToDb(updateFields))
+      .update(dbUtils.mapToDb(_.omit(updateFields, ['stages'])))
       .where({
         id: projectId,
         user_id: requesterId
@@ -103,6 +81,8 @@ module.exports = function $projectRepository(
     if (!result) {
       throw errors.create(404, 'There is no project with the specified id.');
     }
+
+    if (updateFields.stages) updateStages(projectId, updateFields.stages);
   }
 
   /**
@@ -161,18 +141,6 @@ module.exports = function $projectRepository(
   }
 
   /**
-   * This function should be called when a project exits DRAFT status.
-   *
-   * It removes its local stages cost information, because it will now be
-   * stored in the smart contract's microservice
-   *
-   * @param {String} projectId
-   */
-  async function removeStagesForProject(projectId) {
-    return knex('stages').where(dbUtils.mapToDb({ projectId })).del();
-  }
-
-  /**
    * Removes a project with specified id from projects table
    *
    * @returns {Promise}
@@ -187,12 +155,84 @@ module.exports = function $projectRepository(
     }
   }
 
-  async function addFundingInfo(project) {
-    if (project.status === 'DRAFT')
-      return { ...project, totalFunded: 0, currentStage: 0 };
+  // HELPER FUNCTIONS
+  /**
+   * Adds funding info of a project.
+   *
+   * If it is not draft, it gathers it from the smart contract microservice.
+   *
+   * @param {String} projectId
+   * @param {String} status
+   * @returns {Promise} Project
+   */
+  async function getFundingInfo(projectId, status) {
+    if (status === 'DRAFT') return { totalFunded: 0, currentStage: 0 };
 
     const { totalFunded, currentStatus, currentStage } =
-      await scGateway.getProject(await getTxHash(project.id));
-    return { ...project, totalFunded, status: currentStatus, currentStage };
+      await scGateway.getProject(await getTxHash(projectId));
+    return { totalFunded, status: currentStatus, currentStage };
+  }
+
+  /**
+   * Adds the stages of a project to the database
+   *
+   * @param {String} projectId
+   * @param {List} stages
+   * @returns {Promise}
+   */
+  async function addStages(projectId, stages) {
+    const stagesList = stages.map((stageInfo, i) => {
+      const stage = {
+        projectId,
+        stage: i,
+        ...stageInfo
+      };
+
+      return stage;
+    });
+
+    return knex('stages')
+      .insert(dbUtils.mapToDb(stagesList))
+      .catch((err) => {
+        logger.error(err);
+        throw errors.UnknownError;
+      });
+  }
+
+  /**
+   * Gets the stages of a project from the database
+   *
+   * @param {String} projectId
+   * @returns {Promise}
+   */
+  async function getStages(projectId) {
+    return (
+      await knex('stages')
+        .where('project_id', projectId)
+        .orderBy('stage', 'asc')
+        .then(dbUtils.mapFromDb)
+    ).map((stage) => ({ ...stage, cost: Number(stage.cost) }));
+  }
+
+  /**
+   * Updates the stages of a project in the database
+   *
+   * @param {String} projectId
+   * @param {List} stages
+   * @returns {Promise}
+   */
+  async function updateStages(projectId, stages) {
+    await removeStagesForProject(projectId);
+    return addStages(projectId, stages);
+  }
+
+  /**
+   * Removes the stages of a project from the database
+   *
+   * @param {String} projectId
+   * @returns {Promise}
+   */
+  async function removeStagesForProject(projectId) {
+    return knex('stages').where(dbUtils.mapToDb({ projectId })).del();
   }
 };

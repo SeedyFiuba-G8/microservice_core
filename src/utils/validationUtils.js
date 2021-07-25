@@ -20,7 +20,7 @@ module.exports = function $validationUtils(config, errors) {
         );
     });
 
-    const { tags, reviewers } = projectInfo;
+    const { tags, reviewers, stages } = projectInfo;
 
     // Reviewers validation
     if (reviewers !== undefined) {
@@ -45,6 +45,26 @@ module.exports = function $validationUtils(config, errors) {
           throw errors.create(
             400,
             `Tag too long. Its length must be less than ${maxTagLength}`
+          );
+      });
+    }
+
+    // Stages validation
+    if (stages !== undefined) {
+      const { max: maxStages, maxDescriptionLength } =
+        config.constraints.stages;
+
+      if (stages.length > maxStages)
+        throw errors.create(
+          400,
+          `Too many stages! Up to ${maxStages} are allowed`
+        );
+
+      stages.forEach((stage) => {
+        if (!validLength(stage.description, 0, maxDescriptionLength))
+          throw errors.create(
+            400,
+            `Stage description too long. Its length must be less than ${maxDescriptionLength}`
           );
       });
     }
