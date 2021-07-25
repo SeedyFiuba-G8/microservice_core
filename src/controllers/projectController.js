@@ -3,6 +3,7 @@ const _ = require('lodash');
 module.exports = function $projectController(expressify, projectService) {
   return expressify({
     create,
+    fund,
     get,
     getPreviewsBy,
     update,
@@ -20,6 +21,21 @@ module.exports = function $projectController(expressify, projectService) {
     const id = await projectService.create(userId, projectInfo);
 
     return res.status(200).json({ id });
+  }
+
+  /**
+   * Starts a project funding transaction, and returns it hash.
+   *
+   * @returns {Promise}
+   */
+  async function fund(req, res) {
+    const { amount } = req.body;
+    const { projectId } = req.params;
+    const userId = req.headers.uid;
+
+    const txHash = await projectService.fund(userId, projectId, amount);
+
+    return res.status(200).json({ txHash });
   }
 
   /**

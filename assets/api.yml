@@ -170,6 +170,34 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /projects/{projectId}/funds:
+    post:
+      summary: Fund a project
+      description: Allows a user to fund a project.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to fund
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that wants to fund the project
+      requestBody:
+        $ref: '#/components/requestBodies/fundProjectData'
+      responses:
+        200:
+          $ref: '#/components/responses/fundProject'
+        default:
+          $ref: '#/components/responses/Error'
+
   # REVIEWERS
   /reviewrequests/{reviewerId}:
     get:
@@ -289,6 +317,13 @@ paths:
 components:
   # ---------------------------------------------------------------------------
   requestBodies:
+    fundProjectData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FundProjectData'
+
     postProject:
       required: true
       content:
@@ -329,6 +364,13 @@ components:
             $ref: '#/components/schemas/Error'
 
     # PROJECTS
+    fundProject:
+      description: Transaction initiated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TxHash'
+
     getProjects:
       description: Projects info retrieved successfully.
       content:
@@ -463,6 +505,10 @@ components:
         $ref: '#/components/schemas/Stage'
       minItems: 1
 
+    Hash:
+      type: string
+      example: '0x30b003c570eccaf1705acd4621f72993acb51715f8decbf61535f21376cfe1d2'
+
     # PROJECTS
     AllProjects:
       type: object
@@ -473,6 +519,14 @@ components:
             $ref: '#/components/schemas/ProjectPreview'
       required:
         - projects
+
+    FundProjectData:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/ETHAmount'
+      required:
+        - amount
 
     Project:
       type: object
@@ -688,6 +742,14 @@ components:
       items:
         type: string
       example: ['javascript', 'python', 'food']
+
+    TxHash:
+      type: object
+      properties:
+        txHash:
+          $ref: '#/components/schemas/Hash'
+      required:
+        - txHash
     
     # REVIEWERS
     Reviewer:
@@ -773,6 +835,8 @@ components:
           $ref: '#/components/schemas/ProjectStatus'
         currentStage:
           $ref: '#/components/schemas/StageId'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
       required:
         - projectId
         - userId
@@ -789,6 +853,7 @@ components:
         - coverPicUrl
         - projectStatus
         - currentStage
+        - totalFunded
 
     PutReviewRequest:
       type: object

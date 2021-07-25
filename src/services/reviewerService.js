@@ -43,7 +43,8 @@ module.exports = function $reviewerService(
           'finalizedBy',
           'stages',
           'coverPicUrl',
-          'currentStage'
+          'currentStage',
+          'totalFunded'
         ]),
         projectStatus: project.status
       };
