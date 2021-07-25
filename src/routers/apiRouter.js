@@ -28,6 +28,7 @@ module.exports = function apiRouter(
       .get('/projects/:projectId', projectController.get)
       .patch('/projects/:projectId', projectController.update)
       .delete('/projects/:projectId', projectController.remove)
+      .post('/projects/:projectId/funds', projectController.fund)
 
       // Reviewers
       .get('/reviewrequests/:reviewerId', reviewerController.getRequests)

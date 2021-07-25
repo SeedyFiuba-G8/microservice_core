@@ -138,8 +138,8 @@ module.exports = function $projectRepository(
 
     if (!projectHash) {
       throw errors.create(
-        500,
-        `The project with id ${projectId} was not processed by blockchain`
+        404,
+        `The project with id ${projectId} was not found in the smart contract`
       );
     }
 

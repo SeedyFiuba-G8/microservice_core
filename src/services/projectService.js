@@ -13,6 +13,7 @@ module.exports = function $projectService(
 ) {
   return {
     create,
+    fund,
     get,
     getPreviewsBy,
     getSimpleProject,
@@ -44,6 +45,17 @@ module.exports = function $projectService(
     ]);
 
     return id;
+  }
+
+  /**
+   * Creates a new funding transaction in sc microservice
+   *
+   * @returns {Promise} uuid
+   */
+  async function fund(userId, projectId, amount) {
+    const projectTxHash = await projectRepository.getTxHash(projectId);
+    const walletId = await walletService.getWalletId(userId);
+    return scGateway.fundProject(walletId, projectTxHash, amount);
   }
 
   /**

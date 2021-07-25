@@ -505,7 +505,7 @@ components:
         $ref: '#/components/schemas/Stage'
       minItems: 1
 
-    TxHash:
+    Hash:
       type: string
       example: '0x30b003c570eccaf1705acd4621f72993acb51715f8decbf61535f21376cfe1d2'
 
@@ -742,6 +742,14 @@ components:
       items:
         type: string
       example: ['javascript', 'python', 'food']
+
+    TxHash:
+      type: object
+      properties:
+        txHash:
+          $ref: '#/components/schemas/Hash'
+      required:
+        - txHash
     
     # REVIEWERS
     Reviewer:
