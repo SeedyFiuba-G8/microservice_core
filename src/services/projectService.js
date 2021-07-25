@@ -190,15 +190,13 @@ module.exports = function $projectService(
     const projectTxHash = await scGateway.createProject({
       ownerId: await walletService.getWalletId(projectInfo.userId),
       reviewerId: await walletService.getWalletId(reviewerId),
-      stagesCost: projectInfo.stagesCost
+      stagesCost: projectInfo.stages.map((stage) => stage.cost)
     });
 
     await projectRepository.registerTxHash(projectId, projectTxHash);
 
-    // We remove all reviewers and (local) stageCosts for this project
-    // stageCosts source of truth will now be the sc microservice
+    // We remove all reviewers
     await reviewerRepository.removeForProject(projectId);
-    await projectRepository.removeStagesForProject(projectId);
   }
 
   /**
