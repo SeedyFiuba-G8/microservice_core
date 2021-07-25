@@ -38,13 +38,13 @@ paths:
           name: userId
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Id'
           description: The userId of whom we want to retrieve projects.
         - in: query
           name: reviewerId
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Id'
           description: The id of the reviewer of whom we want to retrieve projects.
         - in: query
           name: type
