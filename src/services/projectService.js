@@ -93,7 +93,10 @@ module.exports = function $projectService(
       'city',
       'finalizedBy',
       'tags',
-      'coverPicUrl'
+      'coverPicUrl',
+      'stages',
+      'totalFunded',
+      'currentStage'
     ];
 
     return projectRepository.get({
