@@ -93,10 +93,7 @@ module.exports = function $projectService(
       'city',
       'finalizedBy',
       'tags',
-      'coverPicUrl',
-      'stages',
-      'totalFunded',
-      'currentStage'
+      'coverPicUrl'
     ];
 
     return projectRepository.get({
@@ -113,9 +110,9 @@ module.exports = function $projectService(
    * @returns {Promise} Project
    */
   async function update(projectId, rawProjectInfo, requesterId) {
-    return rawProjectInfo.status === 'FUNDING'
-      ? publish(projectId, requesterId)
-      : innerUpdate(projectId, rawProjectInfo, requesterId);
+    if (rawProjectInfo.status === 'FUNDING')
+      return publish(projectId, requesterId);
+    return innerUpdate(projectId, rawProjectInfo, requesterId);
   }
 
   /**
