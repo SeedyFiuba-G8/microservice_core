@@ -41,6 +41,12 @@ paths:
             type: string
           description: The userId of whom we want to retrieve projects.
         - in: query
+          name: reviewerId
+          required: false
+          schema:
+            type: string
+          description: The id of the reviewer of whom we want to retrieve projects.
+        - in: query
           name: type
           required: false
           schema:
