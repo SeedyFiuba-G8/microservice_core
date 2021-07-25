@@ -25,7 +25,7 @@ module.exports = function $projectRepository(
    */
   async function create(projectInfo) {
     await knex('projects')
-      .insert(dbUtils.mapToDb(_.omit(projectInfo, ['stagesCost'])))
+      .insert(dbUtils.mapToDb(_.omit(projectInfo, ['stages'])))
       .catch((err) => {
         if (err.code === '23505')
           throw errors.create(
@@ -37,16 +37,17 @@ module.exports = function $projectRepository(
         throw errors.UnknownError;
       });
 
-    const stagesList = projectInfo.stagesCost.map((cost, i) => {
-      const stageCost = {
+    const stagesList = projectInfo.stages.map((stageInfo, i) => {
+      const stage = {
         projectId: projectInfo.id,
         stage: i,
-        cost
+        ...stageInfo
       };
-      return stageCost;
+
+      return stage;
     });
 
-    return knex('draft_stages_cost')
+    return knex('stages')
       .insert(dbUtils.mapToDb(stagesList))
       .catch((err) => {
         logger.error(err);
@@ -68,7 +69,20 @@ module.exports = function $projectRepository(
     if (limit) query.limit(limit);
     if (offset) query.offset(offset);
 
-    const projects = addFundingInfo(await query.then(dbUtils.mapFromDb));
+    const projects = (await query.then(dbUtils.mapFromDb)).map(
+      async (project) => {
+        // Gather stages info
+        const stages = (
+          await knex('stages')
+            .where('project_id', project.id)
+            .orderBy('stage', 'asc')
+            .then(dbUtils.mapFromDb)
+        ).map((stage) => ({ ...stage, cost: Number(stage.cost) }));
+
+        // Gather funding info
+        return { ...(await addFundingInfo(project)), stages };
+      }
+    );
 
     return Promise.all(projects);
   }
@@ -115,12 +129,21 @@ module.exports = function $projectRepository(
    * @returns projectTxHash
    */
   async function getTxHash(projectId) {
-    return (
+    const projectHash = (
       await knex('project_hashes')
         .where(dbUtils.mapToDb({ projectId }))
         .select('tx_hash')
         .then(dbUtils.mapFromDb)
-    )[0].txHash;
+    )[0];
+
+    if (!projectHash) {
+      throw errors.create(
+        404,
+        `The project with id ${projectId} was not found in the smart contract`
+      );
+    }
+
+    return projectHash.txHash;
   }
 
   /**
@@ -146,9 +169,7 @@ module.exports = function $projectRepository(
    * @param {String} projectId
    */
   async function removeStagesForProject(projectId) {
-    return knex('draft_stages_cost')
-      .where(dbUtils.mapToDb({ projectId }))
-      .del();
+    return knex('stages').where(dbUtils.mapToDb({ projectId })).del();
   }
 
   /**
@@ -166,39 +187,12 @@ module.exports = function $projectRepository(
     }
   }
 
-  // HELPER FUNCTIONS
-  function addFundingInfo(projects) {
-    return projects.map((project) => {
-      if (project.status === 'DRAFT') {
-        return addDraftFundingInfo(project);
-      }
-      return addNonDraftFundingInfo(project);
-    });
-  }
+  async function addFundingInfo(project) {
+    if (project.status === 'DRAFT')
+      return { ...project, totalFunded: 0, currentStage: 0 };
 
-  /**
-   * If a project is in DRAFT status, since the project is not present in the sc
-   * microservice yet, core keeps its draft stagesCost information, until it changes
-   * its status to FUNDING. So we need to add stagesCost here
-   */
-  async function addDraftFundingInfo(project) {
-    const stages = await knex('draft_stages_cost')
-      .where('project_id', project.id)
-      .orderBy('stage', 'asc')
-      .then(dbUtils.mapFromDb);
-
-    const stagesCost = stages.map((stage) => Number(stage.cost));
-
-    return { ...project, stagesCost };
-  }
-
-  /**
-   * If a project is not DRAFT, we need to gather the funding information from
-   * the sc microservice.
-   */
-  async function addNonDraftFundingInfo(project) {
-    const { stagesCost, totalFunded, totalStages, currentStatus } =
+    const { totalFunded, currentStatus, currentStage } =
       await scGateway.getProject(await getTxHash(project.id));
-    return { ...project, stagesCost, totalFunded, totalStages, currentStatus };
+    return { ...project, totalFunded, status: currentStatus, currentStage };
   }
 };

@@ -170,6 +170,34 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /projects/{projectId}/funds:
+    post:
+      summary: Fund a project
+      description: Allows a user to fund a project.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to fund
+        - in: header
+          name: uid
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: uuid of the user that wants to fund the project
+      requestBody:
+        $ref: '#/components/requestBodies/fundProjectData'
+      responses:
+        200:
+          $ref: '#/components/responses/fundProject'
+        default:
+          $ref: '#/components/responses/Error'
+
   # REVIEWERS
   /reviewrequests/{reviewerId}:
     get:
@@ -289,6 +317,13 @@ paths:
 components:
   # ---------------------------------------------------------------------------
   requestBodies:
+    fundProjectData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FundProjectData'
+
     postProject:
       required: true
       content:
@@ -329,6 +364,13 @@ components:
             $ref: '#/components/schemas/Error'
 
     # PROJECTS
+    fundProject:
+      description: Transaction initiated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TxHash'
+
     getProjects:
       description: Projects info retrieved successfully.
       content:
@@ -444,12 +486,28 @@ components:
       type: string
       example: 'https://imgur.com/gallery/rFvivtw'
 
-    StagesCost:
+    Stage:
+      type: object
+      properties:
+        cost:
+          $ref: '#/components/schemas/ETHAmount'
+        description:
+          type: string
+          example: 'In this stage, we will buy the equipment.'
+    
+    StageId:
+      type: integer
+      example: 1
+
+    Stages:
       type: array
       items:
-        type: number
+        $ref: '#/components/schemas/Stage'
       minItems: 1
-      example: [0.1, 0.0023, 1]
+
+    Hash:
+      type: string
+      example: '0x30b003c570eccaf1705acd4621f72993acb51715f8decbf61535f21376cfe1d2'
 
     # PROJECTS
     AllProjects:
@@ -461,6 +519,14 @@ components:
             $ref: '#/components/schemas/ProjectPreview'
       required:
         - projects
+
+    FundProjectData:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/ETHAmount'
+      required:
+        - amount
 
     Project:
       type: object
@@ -501,8 +567,12 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/Reviewers'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - id
         - status
@@ -516,7 +586,9 @@ components:
         - publishedOn
         - finalizedBy
         - tags
-        - stagesCost
+        - stages
+        - totalFunded
+        - currentStage
 
     ProjectPreview:
       type: object
@@ -546,8 +618,12 @@ components:
           $ref: '#/components/schemas/Date'
         tags:
           $ref: '#/components/schemas/Tags'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - id
         - status
@@ -559,7 +635,9 @@ components:
         - city
         - finalizedBy
         - tags
-        - stagesCost
+        - stages
+        - totalFunded
+        - currentStage
 
     PostProjectData:
       type: object
@@ -590,8 +668,8 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'
+        stages:
+          $ref: '#/components/schemas/Stages'
       required:
         - title
         - description
@@ -602,7 +680,7 @@ components:
         - finalizedBy
         - tags
         - reviewers
-        - stagesCost
+        - stages
 
     PatchProjectData:
       type: object
@@ -635,16 +713,15 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'          
+        stages:
+          $ref: '#/components/schemas/Stages'    
       minProperties: 1
 
     ProjectId:
       type: object
       properties:
         id:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
+          $ref: '#/components/schemas/Id'
       required:
         - id
       
@@ -665,6 +742,14 @@ components:
       items:
         type: string
       example: ['javascript', 'python', 'food']
+
+    TxHash:
+      type: object
+      properties:
+        txHash:
+          $ref: '#/components/schemas/Hash'
+      required:
+        - txHash
     
     # REVIEWERS
     Reviewer:
@@ -741,7 +826,17 @@ components:
         finalizedBy:
           $ref: '#/components/schemas/Date'
         status:
-          $ref: '#/components/schemas/ReviewerStatus'  
+          $ref: '#/components/schemas/ReviewerStatus'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
+        projectStatus:
+          $ref: '#/components/schemas/ProjectStatus'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
       required:
         - projectId
         - userId
@@ -754,6 +849,11 @@ components:
         - publishedOn
         - finalizedBy
         - status
+        - stages
+        - coverPicUrl
+        - projectStatus
+        - currentStage
+        - totalFunded
 
     PutReviewRequest:
       type: object

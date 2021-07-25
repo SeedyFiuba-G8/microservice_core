@@ -13,6 +13,7 @@ module.exports = function $projectService(
 ) {
   return {
     create,
+    fund,
     get,
     getPreviewsBy,
     getSimpleProject,
@@ -44,6 +45,17 @@ module.exports = function $projectService(
     ]);
 
     return id;
+  }
+
+  /**
+   * Creates a new funding transaction in sc microservice
+   *
+   * @returns {Promise} uuid
+   */
+  async function fund(userId, projectId, amount) {
+    const projectTxHash = await projectRepository.getTxHash(projectId);
+    const walletId = await walletService.getWalletId(userId);
+    return scGateway.fundProject(walletId, projectTxHash, amount);
   }
 
   /**
@@ -190,15 +202,13 @@ module.exports = function $projectService(
     const projectTxHash = await scGateway.createProject({
       ownerId: await walletService.getWalletId(projectInfo.userId),
       reviewerId: await walletService.getWalletId(reviewerId),
-      stagesCost: projectInfo.stagesCost
+      stagesCost: projectInfo.stages.map((stage) => stage.cost)
     });
 
     await projectRepository.registerTxHash(projectId, projectTxHash);
 
-    // We remove all reviewers and (local) stageCosts for this project
-    // stageCosts source of truth will now be the sc microservice
+    // We remove all reviewers
     await reviewerRepository.removeForProject(projectId);
-    await projectRepository.removeStagesForProject(projectId);
   }
 
   /**
