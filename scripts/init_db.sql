@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS public.wallets;
 DROP TABLE IF EXISTS public.tags;
 DROP TABLE IF EXISTS public.reviewers;
 DROP TABLE IF EXISTS public.project_hashes;
-DROP TABLE IF EXISTS public.draft_stages_cost;
+DROP TABLE IF EXISTS public.stages;
 DROP TABLE IF EXISTS public.projects;
 
 -- Create tables
@@ -49,10 +49,11 @@ CREATE TABLE public.wallets (
 	wallet_id			VARCHAR(36)					NOT NULL
 );
 
-CREATE TABLE public.draft_stages_cost (
-	project_id	VARCHAR(36)			NOT NULL	REFERENCES public.projects (id) ON DELETE RESTRICT,
-	stage				INTEGER					NOT NULL	DEFAULT 0,
-	cost				NUMERIC					NOT NULL,
+CREATE TABLE public.stages (
+	project_id			VARCHAR(36)			NOT NULL	REFERENCES public.projects (id) ON DELETE RESTRICT,
+	stage						INTEGER					NOT NULL	DEFAULT 0,
+	cost						NUMERIC					NOT NULL,
+	description			VARCHAR(255)		NOT NULL,
 	PRIMARY KEY (project_id, stage)
 );
 
