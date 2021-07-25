@@ -573,6 +573,7 @@ components:
         - finalizedBy
         - tags
         - stages
+        - totalFunded
 
     PostProjectData:
       type: object
