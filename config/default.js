@@ -47,7 +47,7 @@ module.exports = {
   },
   fetch: {
     forwardHeaders: [],
-    timeout: 10000 // ms
+    timeout: 60000 // ms
   },
   knex: {
     client: 'pg',
