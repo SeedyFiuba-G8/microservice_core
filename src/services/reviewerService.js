@@ -40,8 +40,12 @@ module.exports = function $reviewerService(
           'country',
           'city',
           'publishedOn',
-          'finalizedBy'
-        ])
+          'finalizedBy',
+          'stages',
+          'coverPicUrl',
+          'currentStage'
+        ]),
+        projectStatus: project.status
       };
     });
 

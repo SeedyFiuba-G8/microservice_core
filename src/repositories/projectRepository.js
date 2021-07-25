@@ -188,14 +188,11 @@ module.exports = function $projectRepository(
   }
 
   async function addFundingInfo(project) {
-    if (project.status === 'DRAFT') {
-      return { ...project, totalFunded: 0 };
-    }
-    console.log('adding funding info of project: ', project);
-    console.log('txHash: ', await getTxHash(project.id));
-    const { totalFunded, currentStatus } = await scGateway.getProject(
-      await getTxHash(project.id)
-    );
-    return { ...project, totalFunded, status: currentStatus };
+    if (project.status === 'DRAFT')
+      return { ...project, totalFunded: 0, currentStage: 0 };
+
+    const { totalFunded, currentStatus, currentStage } =
+      await scGateway.getProject(await getTxHash(project.id));
+    return { ...project, totalFunded, status: currentStatus, currentStage };
   }
 };

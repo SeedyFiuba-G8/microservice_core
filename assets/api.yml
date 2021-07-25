@@ -452,6 +452,10 @@ components:
         description:
           type: string
           example: 'In this stage, we will buy the equipment.'
+    
+    StageId:
+      type: integer
+      example: 1
 
     Stages:
       type: array
@@ -513,6 +517,8 @@ components:
           $ref: '#/components/schemas/Stages'
         totalFunded:
           $ref: '#/components/schemas/ETHAmount'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - id
         - status
@@ -528,6 +534,7 @@ components:
         - tags
         - stages
         - totalFunded
+        - currentStage
 
     ProjectPreview:
       type: object
@@ -561,6 +568,8 @@ components:
           $ref: '#/components/schemas/Stages'
         totalFunded:
           $ref: '#/components/schemas/ETHAmount'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - id
         - status
@@ -574,6 +583,7 @@ components:
         - tags
         - stages
         - totalFunded
+        - currentStage
 
     PostProjectData:
       type: object
@@ -650,7 +660,7 @@ components:
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
         stages:
-          $ref: '#/components/schemas/Stages'          
+          $ref: '#/components/schemas/Stages'    
       minProperties: 1
 
     ProjectId:
@@ -754,7 +764,15 @@ components:
         finalizedBy:
           $ref: '#/components/schemas/Date'
         status:
-          $ref: '#/components/schemas/ReviewerStatus'  
+          $ref: '#/components/schemas/ReviewerStatus'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
+        projectStatus:
+          $ref: '#/components/schemas/ProjectStatus'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - projectId
         - userId
@@ -767,6 +785,10 @@ components:
         - publishedOn
         - finalizedBy
         - status
+        - stages
+        - coverPicUrl
+        - projectStatus
+        - currentStage
 
     PutReviewRequest:
       type: object
