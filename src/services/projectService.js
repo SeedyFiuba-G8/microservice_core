@@ -145,6 +145,10 @@ module.exports = function $projectService(
    * Updates project info
    */
   async function innerUpdate(projectId, rawProjectInfo, requesterId) {
+    const currentProjectInfo = await getSimpleProject(projectId);
+    if (currentProjectInfo.status !== 'DRAFT')
+      throw errors.create(409, 'You can only edit DRAFT projects');
+
     let projectInfo = projectUtils.buildProjectInfo(rawProjectInfo);
     validationUtils.validateProjectInfo(projectInfo);
 

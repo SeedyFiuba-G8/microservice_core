@@ -43,6 +43,10 @@ module.exports = {
     },
     reviewers: {
       max: 10
+    },
+    stages: {
+      max: 20,
+      maxDescriptionLength: 255
     }
   },
   fetch: {
