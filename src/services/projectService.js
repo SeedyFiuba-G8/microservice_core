@@ -93,7 +93,8 @@ module.exports = function $projectService(
       'city',
       'finalizedBy',
       'tags',
-      'coverPicUrl'
+      'coverPicUrl',
+      'approvedStage'
     ];
 
     return projectRepository.get({
@@ -112,6 +113,18 @@ module.exports = function $projectService(
   async function update(projectId, rawProjectInfo, requesterId) {
     if (rawProjectInfo.status === 'FUNDING')
       return publish(projectId, requesterId);
+
+    if (rawProjectInfo.approvedStage)
+      return approveStage(projectId, rawProjectInfo.approvedStage, requesterId);
+
+    if (rawProjectInfo.lastCompletedStage !== undefined) {
+      return updateLastCompletedStage(
+        projectId,
+        rawProjectInfo.lastCompletedStage,
+        requesterId
+      );
+    }
+
     return innerUpdate(projectId, rawProjectInfo, requesterId);
   }
 
@@ -140,6 +153,106 @@ module.exports = function $projectService(
   }
 
   // Aux
+  /**
+   * Sets the current stage of a project.
+   * Must be called by entrepeneur.
+   * Project must be IN_PROGRESS.
+   *
+   * @param {String} projectId
+   * @param {Integer} newStage
+   * @param {String} requesterId
+   * @returns {Promise}
+   */
+  async function updateLastCompletedStage(
+    projectId,
+    lastCompletedStage,
+    requesterId
+  ) {
+    const { status, userId, approvedStage, currentStage, reviewerId, stages } =
+      await getSimpleProject(projectId);
+
+    if (status !== 'IN_PROGRESS')
+      throw errors.create(
+        409,
+        'Only projects in progress can have stages advanced.'
+      );
+
+    if (requesterId !== userId)
+      throw errors.create(401, 'Only entrepeneur can advance stages.');
+
+    if (
+      lastCompletedStage + 1 > approvedStage &&
+      !(
+        currentStage === lastCompletedStage &&
+        currentStage + 1 === stages.length
+      ) // when it's the last stage, it does not require reviewer's approval
+    )
+      throw errors.create(
+        400,
+        `Cannot set stage as completed because next stage was not approved by reviewer. (Last stage approved: ${approvedStage} lastCompletedStage (erroneous): ${lastCompletedStage} => nextStage = ${
+          lastCompletedStage + 1
+        } > approvedStage)`
+      );
+
+    if (currentStage - 1 >= lastCompletedStage)
+      throw errors.create(
+        400,
+        `Stage ${lastCompletedStage} has already been marked as completed. Current stage: ${currentStage}. LastCompletedStage: ${
+          currentStage - 1
+        }`
+      );
+
+    // the sc endpoint works setting completed stage. The project's currentStage will be lastCompletedStage + 1
+    // (or will be marked) as COMPLETED, if lastCompletedStage is the last stage.
+    // funds of the stages in range [currentStage + 1, (lastCompletedStage + 1)] will be transferred to entrepeneur if transaction succeeds.
+    return scGateway.setProjectLastCompletedStage(
+      await walletService.getWalletId(reviewerId),
+      await projectRepository.getTxHash(projectId),
+      lastCompletedStage
+    );
+  }
+
+  /**
+   * Sets the approved stage of a project.
+   * Must be called by reviewer.
+   * Project must be IN_PROGRESS.
+   *
+   * @param {String} projectId
+   * @param {Integer} newApprovedStage
+   * @param {String} requesterId
+   * @returns {Promise}
+   */
+  async function approveStage(projectId, newApprovedStage, requesterId) {
+    const { reviewerId, status, userId, approvedStage, stages } =
+      await getSimpleProject(projectId);
+
+    if (status !== 'IN_PROGRESS')
+      throw errors.create(
+        409,
+        'Only projects in progress can have stages approved.'
+      );
+
+    if (requesterId !== reviewerId)
+      throw errors.create(401, 'Only reviewer can approve stages.');
+
+    if (stages.length < newApprovedStage)
+      throw errors.create(
+        400,
+        `Cannot approve more stages than the project has. (${stages.length} < ${newApprovedStage})`
+      );
+
+    if (approvedStage >= newApprovedStage)
+      throw errors.create(
+        400,
+        `Stage ${newApprovedStage} has already been approved. Last stage approved: ${approvedStage}`
+      );
+
+    projectRepository.update(
+      projectId,
+      { approvedStage: newApprovedStage },
+      userId
+    );
+  }
 
   /**
    * Updates project info
