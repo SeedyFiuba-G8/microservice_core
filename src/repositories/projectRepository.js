@@ -8,6 +8,7 @@ module.exports = function $projectRepository(
   scGateway
 ) {
   return {
+    count,
     create,
     get,
     getTxHash,
@@ -17,6 +18,18 @@ module.exports = function $projectRepository(
     remove,
     removeStagesForProject
   };
+
+  /**
+   * Counts values
+   *
+   * @returns {Promise}
+   */
+  function count({ filters = {} } = {}) {
+    return knex('projects')
+      .where(dbUtils.mapToDb(filters))
+      .count('id')
+      .then((result) => Number(result[0].count));
+  }
 
   /**
    * Inserts a new project to the db

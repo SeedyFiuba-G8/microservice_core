@@ -3,6 +3,9 @@ const { v4: uuidv4 } = require('uuid');
 
 module.exports = function $projectService(
   errors,
+  events,
+  eventRepository,
+  logger,
   projectRepository,
   projectUtils,
   reviewerRepository,
@@ -43,6 +46,16 @@ module.exports = function $projectService(
       reviewerRepository.updateForProject(id, reviewers),
       tagRepository.updateForProject(id, tags)
     ]);
+
+    eventRepository.log(events.CREATE, userId);
+    logger.info({
+      message: 'Project created',
+      project: {
+        id,
+        userId,
+        ..._.omit(projectInfo, ['reviewers'])
+      }
+    });
 
     return id;
   }
@@ -326,6 +339,17 @@ module.exports = function $projectService(
 
     // We remove all reviewers
     await reviewerRepository.removeForProject(projectId);
+
+    // We log project publication
+    eventRepository.log(events.PUBLISH, requesterId);
+    logger.info({
+      message: 'Project published',
+      project: {
+        id: projectId,
+        userId: requesterId,
+        reviewerId
+      }
+    });
   }
 
   /**

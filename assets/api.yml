@@ -15,15 +15,17 @@ servers:
     description: 'Production'
   - url: https://sf-tdp2-core-dev.herokuapp.com/
     description: 'Staging'
-  - url: http://localhost:3000/
+  - url: http://localhost:3002/
     description: 'Local development'
 
 # =============================================================================
 
 tags:
   - name: Projects
-  - name: Reviews
+  - name: Reviewers
   - name: Wallets
+  - name: Metrics
+  - name: Status
 
 # =============================================================================
 
@@ -88,8 +90,7 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that requests
       requestBody:
@@ -192,8 +193,7 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that wants to fund the project
       requestBody:
@@ -260,6 +260,57 @@ paths:
       responses:
         204:
           description: 'Review request updated successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+  # METRICS
+  /metrics:
+    get:
+      summary: Get basic metrics
+      description: Get metrics from projects.
+      tags:
+        - Metrics
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            $ref: '#/components/schemas/Id'
+          description: The userId of whom we want to retrieve metrics.
+      responses:
+        200:
+          $ref: '#/components/responses/getBasicMetrics'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /metrics/events:
+    get:
+      summary: Get event metrics
+      description: Get event metrics from projects.
+      tags:
+        - Metrics
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            $ref: '#/components/schemas/Id'
+          description: The userId of whom we want to retrieve metrics.
+        - in: query
+          name: initialDate
+          required: true
+          schema:
+            $ref: '#/components/schemas/Date'
+          description: Initial date to retrieve metrics.
+        - in: query
+          name: finalDate
+          required: false
+          schema:
+            $ref: '#/components/schemas/Date'
+          description: Final date to retrieve metrics.
+      responses:
+        200:
+          $ref: '#/components/responses/getEventMetrics'
         default:
           $ref: '#/components/responses/Error'
 
@@ -434,6 +485,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Address'
+    
+    # METRICS
+    getBasicMetrics:
+      description: Metrics retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BasicMetrics'
+
+    getEventMetrics:
+      description: Metrics retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventMetrics'
     
     # STATUS
     health:
@@ -902,6 +968,45 @@ components:
           $ref: '#/components/schemas/Id'
       required:
         - uid
+    
+    # METRICS
+    BasicMetrics:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 6045
+        draft:
+          type: integer
+          example: 2014
+        funding:
+          type: integer
+          example: 2000
+        inProgress:
+          type: integer
+          example: 2031
+        completed:
+          type: integer
+          example: 2031
+      required:
+        - total
+        - draft
+        - funding
+        - inProgress
+        - completed
+
+    EventMetrics:
+      type: object
+      properties:
+        create:
+          type: integer
+          example: 223
+        publish:
+          type: integer
+          example: 54
+      required:
+        - create
+        - publish
     
     # STATUS
     Ping:

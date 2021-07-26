@@ -1,10 +1,6 @@
 const _ = require('lodash');
 
 module.exports = {
-  express: {
-    host: '0.0.0.0',
-    port: _.get(process.env, 'PORT', 3002)
-  },
   /* Any value changed here should be changed in database too */
   constraints: {
     project: {
@@ -48,6 +44,15 @@ module.exports = {
       max: 20,
       maxDescriptionLength: 255
     }
+  },
+  express: {
+    host: '0.0.0.0',
+    port: _.get(process.env, 'PORT', 3002)
+  },
+  events: {
+    // Projects
+    CREATE: 'Create Project',
+    PUBLISH: 'Publish Project'
   },
   fetch: {
     forwardHeaders: [],

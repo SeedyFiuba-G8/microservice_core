@@ -52,6 +52,10 @@ function createContainer() {
     return errorComponents.errors();
   });
 
+  container.register('events', function $events(config) {
+    return config.events;
+  });
+
   container.register('fetch', function $commonFetch(config, errors) {
     return gatewayComponents.fetch(config, errors);
   });

@@ -2,6 +2,7 @@ const express = require('express');
 
 module.exports = function apiRouter(
   apiValidatorMiddleware,
+  metricController,
   projectController,
   reviewerController,
   statusController,
@@ -40,5 +41,9 @@ module.exports = function apiRouter(
       // Wallets
       .post('/wallets', walletController.create)
       .get('/wallets/:userId', walletController.get)
+
+      // Metrics
+      .get('/metrics', metricController.getBasic)
+      .get('/metrics/events', metricController.getEvents)
   );
 };
