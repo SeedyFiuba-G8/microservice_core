@@ -29,7 +29,7 @@ CREATE TABLE public.projects (
 CREATE TABLE public.reviewers (
 	project_id			VARCHAR(36)					NOT NULL,
 	reviewer_id			VARCHAR(36)					NOT NULL,
-	status					VARCHAPostUserDataR(20)					NOT NULL,
+	status					VARCHAR(20)					NOT NULL,
 
     PRIMARY KEY (project_id, reviewer_id)
 );
