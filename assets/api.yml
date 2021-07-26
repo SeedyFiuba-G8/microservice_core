@@ -121,7 +121,7 @@ paths:
 
     patch:
       summary: Modify the information of the project.
-      description: Allows an owner of a project or an admin to modify the information of a project.
+      description: Allows an owner of a project or an admin to modify the information of a project. Allows a reviewer of a project to approve stage(s), by patching approvedStage. Allows an entrepeneur to mark stage(s) as completed, by patching lastCompletedStage.
       tags:
         - Projects
       parameters:
@@ -579,6 +579,8 @@ components:
           $ref: '#/components/schemas/ETHAmount'
         currentStage:
           $ref: '#/components/schemas/StageId'
+        approvedStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - id
         - status
@@ -595,6 +597,7 @@ components:
         - stages
         - totalFunded
         - currentStage
+        - approvedStage
 
     ProjectPreview:
       type: object
@@ -630,6 +633,8 @@ components:
           $ref: '#/components/schemas/ETHAmount'
         currentStage:
           $ref: '#/components/schemas/StageId'
+        approvedStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - id
         - status
@@ -644,6 +649,7 @@ components:
         - stages
         - totalFunded
         - currentStage
+        - approvedStage
 
     PostProjectData:
       type: object
@@ -720,7 +726,11 @@ components:
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
         stages:
-          $ref: '#/components/schemas/Stages'    
+          $ref: '#/components/schemas/Stages'
+        approvedStage:
+          $ref: '#/components/schemas/StageId' 
+        lastCompletedStage:
+          $ref: '#/components/schemas/StageId'
       minProperties: 1
 
     ProjectId:
@@ -736,7 +746,8 @@ components:
       enum:
         - DRAFT
         - FUNDING
-        - FINALIZED
+        - IN_PROGRESS
+        - COMPLETED
 
     FundingProjectStatus:
       type: string
@@ -843,6 +854,8 @@ components:
           $ref: '#/components/schemas/StageId'
         totalFunded:
           $ref: '#/components/schemas/ETHAmount'
+        approvedStage:
+          $ref: '#/components/schemas/StageId'
       required:
         - projectId
         - userId
@@ -860,6 +873,7 @@ components:
         - projectStatus
         - currentStage
         - totalFunded
+        - approvedStage
 
     PutReviewRequest:
       type: object
