@@ -10,21 +10,22 @@ DROP TABLE IF EXISTS public.events;
 -- Create tables
 CREATE TABLE public.projects (
 	-- Name				Type
-	id								VARCHAR(36)								NOT NULL	PRIMARY KEY,
-	status						VARCHAR(20)								NOT NULL	DEFAULT 'DRAFT',
-	user_id						VARCHAR(36)								NOT NULL,
-	reviewer_id				VARCHAR(36),
-	title							VARCHAR(100)							NOT NULL,
-	description				VARCHAR(255)							NOT NULL,
-	cover_pic_url			VARCHAR(255),
-	type							VARCHAR(20)								NOT NULL,
-	objective					VARCHAR(255)							NOT NULL,
-	country						VARCHAR(20)								NOT NULL,
-	city							VARCHAR(20)								NOT NULL,
-	published_on			TIMESTAMP WITH TIME ZONE	NOT NULL	DEFAULT CURRENT_TIMESTAMP(2),
-	finalized_by			TIMESTAMP WITH TIME ZONE	NOT NULL	DEFAULT CURRENT_TIMESTAMP(2),
-	tags							VARCHAR(20) ARRAY[12]			NOT NULL  DEFAULT '{}',
-	approved_stage 		INTEGER 									NOT NULL 	DEFAULT 0
+	id					VARCHAR(36)					NOT NULL	PRIMARY KEY,
+	status				VARCHAR(20)					NOT NULL	DEFAULT 'DRAFT',
+	blocked				BOOLEAN						NOT NULL	DEFAULT FALSE,
+	user_id				VARCHAR(36)					NOT NULL,
+	reviewer_id			VARCHAR(36),
+	title				VARCHAR(100)				NOT NULL,
+	description			VARCHAR(255)				NOT NULL,
+	cover_pic_url		VARCHAR(255),
+	type				VARCHAR(20)					NOT NULL,
+	objective			VARCHAR(255)				NOT NULL,
+	country				VARCHAR(20)					NOT NULL,
+	city				VARCHAR(20)					NOT NULL,
+	published_on		TIMESTAMP WITH TIME ZONE	NOT NULL	DEFAULT CURRENT_TIMESTAMP(2),
+	finalized_by		TIMESTAMP WITH TIME ZONE	NOT NULL	DEFAULT CURRENT_TIMESTAMP(2),
+	tags				VARCHAR(20) ARRAY[12]		NOT NULL 	DEFAULT '{}',
+	approved_stage 		INTEGER 					NOT NULL 	DEFAULT 0
 );
 
 CREATE TABLE public.reviewers (

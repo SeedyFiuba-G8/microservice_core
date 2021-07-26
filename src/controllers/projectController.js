@@ -2,13 +2,27 @@ const _ = require('lodash');
 
 module.exports = function $projectController(expressify, projectService) {
   return expressify({
+    block,
     create,
     fund,
     get,
     getPreviewsBy,
+    unblock,
     update,
     remove
   });
+
+  /**
+   * Blocks a project
+   *
+   * @returns {Promise}
+   */
+  async function block(req, res) {
+    const { projectId } = req.params;
+    await projectService.block(projectId);
+
+    return res.status(204).send();
+  }
 
   /**
    * Creates a new project and returns its id
@@ -62,6 +76,18 @@ module.exports = function $projectController(expressify, projectService) {
     const projects = await projectService.getPreviewsBy(filters, limit, offset);
 
     return res.status(200).json({ projects });
+  }
+
+  /**
+   * Unblocks a project
+   *
+   * @returns {Promise}
+   */
+  async function unblock(req, res) {
+    const { projectId } = req.params;
+    await projectService.unblock(projectId);
+
+    return res.status(204).send();
   }
 
   /**

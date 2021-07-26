@@ -1,11 +1,11 @@
 const express = require('express');
 
 module.exports = function $app(
+  apiRouter,
   config,
-  loggingMiddleware,
-  errorHandlerMiddleware,
   docsRouter,
-  apiRouter
+  errorHandlerMiddleware,
+  loggingMiddleware
 ) {
   // eslint-disable-next-line global-require
   if (config.monitoring) require('newrelic');

@@ -210,6 +210,44 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /projects/{projectId}/block:
+    post:
+      summary: Block a project
+      description: Allow admins to block projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to block
+      responses:
+        204:
+          description: 'Project blocked successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+    delete:
+      summary: Unblock a user
+      description: Allow admins to unblock projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to block
+      responses:
+        204:
+          description: 'Project unblocked successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+
   # REVIEWERS
   /reviewrequests/{reviewerId}:
     get:

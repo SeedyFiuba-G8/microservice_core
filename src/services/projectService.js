@@ -15,14 +15,64 @@ module.exports = function $projectService(
   walletService
 ) {
   return {
+    block,
     create,
     fund,
     get,
     getPreviewsBy,
     getSimpleProject,
+    unblock,
     update,
     remove
   };
+
+  /**
+   * Blocks a project
+   *
+   * @returns {Promise}
+   */
+  async function block(projectId) {
+    await projectRepository.updateBy(
+      {
+        id: projectId,
+        blocked: false
+      },
+      {
+        blocked: true
+      }
+    );
+
+    logger.info({
+      message: 'Project blocked',
+      project: {
+        id: projectId
+      }
+    });
+  }
+
+  /**
+   * Unblocks a project
+   *
+   * @returns {Promise}
+   */
+  async function unblock(projectId) {
+    await projectRepository.updateBy(
+      {
+        id: projectId,
+        blocked: true
+      },
+      {
+        blocked: false
+      }
+    );
+
+    logger.info({
+      message: 'Project unblocked',
+      project: {
+        id: projectId
+      }
+    });
+  }
 
   /**
    * Creates a new project
@@ -119,7 +169,7 @@ module.exports = function $projectService(
     }
 
     return projectRepository.get({
-      filters: parsedFilters,
+      filters: { ...parsedFilters, blocked: false },
       select: previewFields,
       limit,
       offset,
