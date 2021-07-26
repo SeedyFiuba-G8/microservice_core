@@ -132,6 +132,7 @@ module.exports = function $projectController(expressify, projectService) {
     return {
       filters: _.pick(filters, [
         'userId',
+        'blocked',
         'type',
         'tags',
         'status',

@@ -148,6 +148,7 @@ module.exports = function $projectService(
     const previewFields = [
       'id',
       'status',
+      'blocked',
       'title',
       'description',
       'type',
@@ -169,7 +170,7 @@ module.exports = function $projectService(
     }
 
     return projectRepository.get({
-      filters: { ...parsedFilters, blocked: false },
+      filters: parsedFilters,
       select: previewFields,
       limit,
       offset,
