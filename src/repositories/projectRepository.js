@@ -61,22 +61,31 @@ module.exports = function $projectRepository(
   async function get({ select, filters = {}, limit, offset, projectIds } = {}) {
     const query = knex('projects')
       .select(_.isArray(select) ? dbUtils.mapToDb(select) : '*')
-      .where(dbUtils.mapToDb(filters))
+      .where(dbUtils.mapToDb(_.omit(filters, ['status'])))
       .orderBy('published_on', 'desc');
 
     if (projectIds) query.whereIn('id', projectIds);
     if (limit) query.limit(limit);
     if (offset) query.offset(offset);
 
-    const projects = (await query.then(dbUtils.mapFromDb)).map(
-      async (project) => ({
+    let projects = await Promise.all(
+      (
+        await query.then(dbUtils.mapFromDb)
+      ).map(async (project) => ({
         ...project,
         ...(await getFundingInfo(project.id, project.status)),
         stages: await getStages(project.id)
-      })
+      }))
     );
 
-    return Promise.all(projects);
+    // Status source of truth is the sc
+    if (filters.status) {
+      projects = projects.filter(
+        (project) => project.status === filters.status
+      );
+    }
+
+    return projects;
   }
 
   /**
