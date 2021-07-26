@@ -56,6 +56,12 @@ paths:
             example: 'social'
           description: Type of project to retrieve.
         - in: query
+          name: tags
+          required: false
+          schema:
+            $ref: '#/components/schemas/Tags'
+          description: Tags of project to retrieve.
+        - in: query
           name: status
           required: false
           schema:

@@ -58,12 +58,13 @@ module.exports = function $projectRepository(
    *
    * @returns {Promise}
    */
-  async function get({ select, filters = {}, limit, offset } = {}) {
+  async function get({ select, filters = {}, limit, offset, projectIds } = {}) {
     const query = knex('projects')
       .select(_.isArray(select) ? dbUtils.mapToDb(select) : '*')
       .where(dbUtils.mapToDb(filters))
       .orderBy('published_on', 'desc');
 
+    if (projectIds) query.whereIn('id', projectIds);
     if (limit) query.limit(limit);
     if (offset) query.offset(offset);
 

@@ -104,7 +104,13 @@ module.exports = function $projectController(expressify, projectService) {
    */
   function parseFilters(filters) {
     return {
-      filters: _.pick(filters, ['userId', 'type', 'status', 'reviewerId']),
+      filters: _.pick(filters, [
+        'userId',
+        'type',
+        'tags',
+        'status',
+        'reviewerId'
+      ]),
       limit: _.get(filters, 'limit'),
       offset: _.get(filters, 'offset')
     };

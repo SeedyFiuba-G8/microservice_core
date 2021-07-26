@@ -109,12 +109,21 @@ module.exports = function $projectService(
       'coverPicUrl',
       'approvedStage'
     ];
+    const { tags } = filters;
+    const parsedFilters = _.omit(filters, 'tags');
+
+    // Search by tags
+    let projectIds;
+    if (tags) {
+      projectIds = await tagRepository.getProjects(tags);
+    }
 
     return projectRepository.get({
-      filters,
+      filters: parsedFilters,
       select: previewFields,
       limit,
-      offset
+      offset,
+      projectIds
     });
   }
 
