@@ -1,6 +1,7 @@
 const dependable = require('dependable');
 const path = require('path');
 const apiComponents = require('@seedyfiuba/api_components');
+const apikeysComponents = require('@seedyfiuba/apikeys_components');
 const dbComponents = require('@seedyfiuba/db_components');
 const errorComponents = require('@seedyfiuba/error_components');
 const gatewayComponents = require('@seedyfiuba/gateway_components');
@@ -24,6 +25,31 @@ function createContainer() {
     'apiValidatorMiddleware',
     function $apiValidatorMiddleware() {
       return apiComponents.apiValidatorMiddleware(apiPath);
+    }
+  );
+
+  container.register('apikeysCache', function $apikeysCache() {
+    return apikeysComponents.cache();
+  });
+
+  container.register(
+    'validateApikeyMiddleware',
+    function $validateApikeyMiddleware(
+      apikeysCache,
+      config,
+      errors,
+      fetch,
+      logger,
+      urlFactory
+    ) {
+      return apikeysComponents.middleware(
+        apikeysCache,
+        config,
+        errors,
+        fetch,
+        logger,
+        urlFactory
+      );
     }
   );
 
@@ -56,10 +82,6 @@ function createContainer() {
     return config.events;
   });
 
-  container.register('fetch', function $commonFetch(config, errors) {
-    return gatewayComponents.fetch(config, errors);
-  });
-
   container.register(
     'errorHandlerMiddleware',
     function $errorHandlerMiddleware(logger) {
@@ -72,6 +94,10 @@ function createContainer() {
   container.register('expressify', function $expressify() {
     // eslint-disable-next-line global-require
     return require('expressify')();
+  });
+
+  container.register('fetch', function $commonFetch(config, errors) {
+    return gatewayComponents.fetch(config, errors);
   });
 
   container.register('knex', function $knex(config) {

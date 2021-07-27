@@ -4,13 +4,20 @@ const containerFactory = require('../testContainerFactory');
 const container = containerFactory.createContainer();
 
 describe('statusController', () => {
+  let config;
   let dbService;
   let request;
   let res;
+  let fakeApikey;
+  let apikeyHeader;
 
   beforeEach(() => {
+    config = container.get('config');
     dbService = container.get('dbService');
     request = supertest(container.get('app'));
+
+    fakeApikey = 'fake-apikey';
+    apikeyHeader = config.services.apikeys.header;
   });
 
   afterEach(() => {
@@ -24,6 +31,7 @@ describe('statusController', () => {
       it('should respond with correct status and body', () =>
         request
           .get(path)
+          .set(apikeyHeader, fakeApikey)
           .expect('Content-Type', /json/)
           .expect(200, { status: 'ok' }));
     });
@@ -41,7 +49,7 @@ describe('statusController', () => {
             .spyOn(dbService, 'getDatabaseHealth')
             .mockReturnValue(true);
 
-          res = await request.get(path);
+          res = await request.get(path).set(apikeyHeader, fakeApikey);
         });
 
         it('should respond with correct status and body', () => {
@@ -60,7 +68,7 @@ describe('statusController', () => {
             .spyOn(dbService, 'getDatabaseHealth')
             .mockReturnValue(false);
 
-          res = await request.get(path);
+          res = await request.get(path).set(apikeyHeader, fakeApikey);
         });
 
         it('should respond with correct status and body', () => {

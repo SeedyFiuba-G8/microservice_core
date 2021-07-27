@@ -7,6 +7,9 @@ module.exports = {
   },
   monitoring: false,
   services: {
+    apikeys: {
+      baseUrl: 'http://apikeys-test/'
+    },
     sc: {
       baseUrl: 'http://sc-test/'
     }

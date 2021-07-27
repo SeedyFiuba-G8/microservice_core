@@ -23,6 +23,13 @@ module.exports = {
   },
   monitoring: false,
   services: {
+    apikeys: {
+      baseUrl: _.get(
+        process.env,
+        'APIKEYS_URL',
+        'https://sf-tdp2-apikeys-dev.herokuapp.com/'
+      )
+    },
     sc: {
       baseUrl: _.get(
         process.env,
