@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 module.exports = {
   knex: {
     connection: {
@@ -7,12 +5,11 @@ module.exports = {
     }
   },
   services: {
+    apikeys: {
+      baseUrl: 'https://sf-tdp2-apikeys-dev.herokuapp.com/'
+    },
     sc: {
-      baseUrl: _.get(
-        process.env,
-        'SC_URL',
-        'https://sf-tdp2-sc-dev.herokuapp.com/'
-      )
+      baseUrl: 'https://sf-tdp2-sc-dev.herokuapp.com/'
     }
   }
 };

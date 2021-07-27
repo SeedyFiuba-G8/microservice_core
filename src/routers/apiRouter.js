@@ -7,6 +7,7 @@ module.exports = function apiRouter(
   reviewerController,
   statusController,
   walletController,
+  validateApikeyMiddleware,
   validProjectMiddleware
 ) {
   return (
@@ -17,6 +18,7 @@ module.exports = function apiRouter(
 
       // OpenAPI Validator Middleware
       .use(apiValidatorMiddleware)
+      .use(validateApikeyMiddleware)
 
       // STATUS
       .get('/ping', statusController.ping)
