@@ -79,6 +79,12 @@ paths:
             $ref: '#/components/schemas/ProjectStatus'
           description: Status of project to retrieve.
         - in: query
+          name: onlyFavorites
+          required: false
+          schema:
+            $ref: '#/components/schemas/Boolean'
+          description: Flag to retrieve only favorite projects.
+        - in: query
           name: limit
           required: false
           schema:
@@ -90,6 +96,12 @@ paths:
           schema:
             type: integer
           description: The number of projects we want to take as offset.
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user
       tags:
         - Projects
       responses:
@@ -916,6 +928,8 @@ components:
         status:
           $ref: '#/components/schemas/ProjectStatus'
         blocked:
+          $ref: '#/components/schemas/Boolean'
+        liked:
           $ref: '#/components/schemas/Boolean'
         title:
           type: string

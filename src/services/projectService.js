@@ -112,7 +112,13 @@ module.exports = function $projectService(
    *
    * @returns {Promise} Project[]
    */
-  async function getPreviewsBy(filters, limit, offset) {
+  async function getPreviewsBy(
+    filters,
+    limit,
+    offset,
+    onlyFavorites,
+    requesterId
+  ) {
     const previewFields = [
       'id',
       'status',
@@ -136,13 +142,30 @@ module.exports = function $projectService(
       projectIds = await tagRepository.getProjects(tags);
     }
 
-    return projectRepository.get({
+    const rawProjects = await projectRepository.get({
       filters: parsedFilters,
       select: previewFields,
       limit,
       offset,
       projectIds
     });
+
+    const projects = [];
+    const promises = [];
+    rawProjects.forEach(async (project) => {
+      const promise = likeRepository.check({
+        projectId: project.id,
+        userId: requesterId
+      });
+      promises.push(promise);
+      const liked = await promise;
+
+      if (!liked && onlyFavorites === true) return;
+      projects.push({ ...project, liked });
+    });
+
+    await Promise.all(promises);
+    return projects;
   }
 
   // MODIFY -------------------------------------------------------------------
