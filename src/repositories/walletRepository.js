@@ -2,6 +2,7 @@ module.exports = function $walletRepository(dbUtils, errors, knex, logger) {
   return {
     create,
     get,
+    getUserId,
     remove
   };
 
@@ -40,6 +41,30 @@ module.exports = function $walletRepository(dbUtils, errors, knex, logger) {
     }
 
     return wallet[0];
+  }
+
+  /**
+   * Gets the userId of a wallet, by its id.
+   *
+   * @param {String} walletId
+   * @returns {Promise} userId
+   */
+  async function getUserId(walletId) {
+    const userId = (
+      await knex('wallets')
+        .where(dbUtils.mapToDb({ walletId }))
+        .select('user_id')
+        .then(dbUtils.mapFromDb)
+    )[0];
+
+    if (!userId) {
+      throw errors.create(
+        404,
+        `The wallet with id ${walletId} was not found in the database. UserId could not be retrieved.`
+      );
+    }
+
+    return userId.userId;
   }
 
   /**

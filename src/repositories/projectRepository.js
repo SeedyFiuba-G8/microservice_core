@@ -11,6 +11,7 @@ module.exports = function $projectRepository(
     count,
     create,
     get,
+    getProjectId,
     getTxHash,
     update,
     updateBy,
@@ -147,6 +148,32 @@ module.exports = function $projectRepository(
     }
 
     return projectHash.txHash;
+  }
+
+  /**
+   * Gets the txHash of a project, by its id.
+   *
+   * The txHash is the smart contract's id of the project.
+   *
+   * @param {String} projectTxHash
+   * @returns {Promise} projectId
+   */
+  async function getProjectId(txHash) {
+    const projectId = (
+      await knex('project_hashes')
+        .where(dbUtils.mapToDb({ txHash }))
+        .select('project_id')
+        .then(dbUtils.mapFromDb)
+    )[0];
+
+    if (!projectId) {
+      throw errors.create(
+        404,
+        `The project with ${txHash} was not found in the database`
+      );
+    }
+
+    return projectId.projectId;
   }
 
   /**

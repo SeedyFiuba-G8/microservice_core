@@ -260,7 +260,6 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
-
   # REVIEWERS
   /reviewrequests/{reviewerId}:
     get:
@@ -402,6 +401,37 @@ paths:
       responses:
         200:
           $ref: '#/components/responses/getWallet'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /wallets/{userId}/fundings:
+    get:
+      summary: Get the project fundings made by a user.
+      description: Allows a user to retrieve a the project funding information of a user by its id.
+      tags:
+        - Wallets
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: id of the user whose project fundings we want to retrieve
+      responses:
+        200:
+          $ref: '#/components/responses/getWalletFundings'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /wallets/fundings:
+    get:
+      summary: Get the project fundings made by a user.
+      description: Allows a user to retrieve all project funding information.
+      tags:
+        - Wallets
+      responses:
+        200:
+          $ref: '#/components/responses/getAllFundings'
         default:
           $ref: '#/components/responses/Error'
   
@@ -549,6 +579,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Address'
+
+    getWalletFundings:
+      description: Wallet fundings retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fundings'
+
+    getAllFundings:
+      description: Fundings retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fundings'
     
     # METRICS
     getBasicMetrics:
@@ -1061,6 +1105,31 @@ components:
           $ref: '#/components/schemas/Id'
       required:
         - uid
+
+    Funding:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/Id'
+        txHash:
+          $ref: '#/components/schemas/Hash'
+        projectId:
+          $ref: '#/components/schemas/Id'
+        amount:
+          $ref: '#/components/schemas/ETHAmount'
+        date:
+          $ref: '#/components/schemas/Date'
+      required:
+        - userId
+        - txHash
+        - projectId
+        - amount
+        - date
+
+    Fundings:
+      type: array
+      items:
+        $ref: '#/components/schemas/Funding'
     
     # METRICS
     BasicMetrics:

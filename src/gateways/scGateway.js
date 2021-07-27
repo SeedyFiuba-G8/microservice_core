@@ -10,6 +10,8 @@ module.exports = function $scGateway(
     createProject,
     createWallet,
     fundProject,
+    getFundings,
+    getAllFundings,
     getProject,
     getWallet
   };
@@ -72,6 +74,29 @@ module.exports = function $scGateway(
     return fetch(url, {
       method: 'POST',
       body: { walletId, amount },
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
+  }
+
+  async function getFundings(walletId) {
+    const url = urlFactory(
+      `/wallets/${walletId}/fundings`,
+      services.sc.baseUrl
+    );
+    const { sc: apikey } = await apikeys;
+
+    return fetch(url, {
+      method: 'GET',
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
+  }
+
+  async function getAllFundings() {
+    const url = urlFactory(`/wallets/fundings`, services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
+
+    return fetch(url, {
+      method: 'GET',
       headers: apikeyUtils.headers(apikey)
     }).then(({ data }) => data);
   }
