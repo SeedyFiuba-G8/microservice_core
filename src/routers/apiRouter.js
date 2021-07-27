@@ -51,6 +51,7 @@ module.exports = function apiRouter(
       // Wallets
       .post('/wallets', walletController.create)
       .get('/wallets/:userId', walletController.get)
+      .post('/wallets/:walletAddress/funds', walletController.transfer)
 
       // Fundings
       .get('/users/:userId/fundings', walletController.getFundings)

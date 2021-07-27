@@ -9,7 +9,8 @@ module.exports = function $walletService(
     get,
     getFundings,
     getAllFundings,
-    getWalletId
+    getWalletId,
+    transfer
   };
 
   async function create(userId) {
@@ -38,6 +39,21 @@ module.exports = function $walletService(
   async function getWalletId(userId) {
     const { walletId } = await walletRepository.get(userId);
     return walletId;
+  }
+  /**
+   * Transfers amount from userId wallet to address
+   * @param {String} userId
+   * @param {String} address
+   * @param {Integer} amount
+   * @returns {Promise} txHash
+   */
+  async function transfer(userId, address, amount) {
+    const { walletId } = await walletRepository.get(userId);
+    logger.info(
+      `transfering ${amount} from user: ${userId} to address ${address}`
+    );
+    const txHash = await scGateway.transfer(walletId, address, amount);
+    return txHash;
   }
 
   // HELPER FUNCTIONS
