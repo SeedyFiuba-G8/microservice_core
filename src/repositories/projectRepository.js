@@ -191,9 +191,22 @@ module.exports = function $projectRepository(
   async function getFundingInfo(projectId, status) {
     if (status === 'DRAFT') return { totalFunded: 0, currentStage: 0 };
 
-    const { totalFunded, currentStatus, currentStage } =
-      await scGateway.getProject(await getTxHash(projectId));
-    return { totalFunded, status: currentStatus, currentStage };
+    let scProjectInfo;
+    try {
+      scProjectInfo = await scGateway.getProject(await getTxHash(projectId));
+    } catch (err) {
+      // Project could not be published in smart contract => it is still draft
+      logger.error(err);
+      return { totalFunded: 0, currentStage: 0 };
+    }
+
+    const { totalFunded, currentStage, currentStatus } = scProjectInfo;
+
+    return {
+      totalFunded,
+      status: currentStatus,
+      currentStage
+    };
   }
 
   /**
