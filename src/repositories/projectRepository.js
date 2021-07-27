@@ -189,7 +189,14 @@ module.exports = function $projectRepository(
    * @returns {Promise} Project
    */
   async function getFundingInfo(projectId, status) {
-    if (status === 'DRAFT') return { totalFunded: 0, currentStage: 0 };
+    const draftInfo = {
+      totalFunded: 0,
+      currentStage: 0,
+      contributions: 0,
+      contributors: 0
+    };
+
+    if (status === 'DRAFT') return draftInfo;
 
     let scProjectInfo;
     try {
@@ -197,15 +204,23 @@ module.exports = function $projectRepository(
     } catch (err) {
       // Project could not be published in smart contract => it is still draft
       logger.error(err);
-      return { totalFunded: 0, currentStage: 0 };
+      return { ...draftInfo, status: 'DRAFT' };
     }
 
-    const { totalFunded, currentStage, currentStatus } = scProjectInfo;
+    const {
+      totalFunded,
+      currentStage,
+      currentStatus,
+      contributions,
+      contributors
+    } = scProjectInfo;
 
     return {
       totalFunded,
       status: currentStatus,
-      currentStage
+      currentStage,
+      contributions,
+      contributors
     };
   }
 

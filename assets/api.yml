@@ -701,6 +701,14 @@ components:
           $ref: '#/components/schemas/ETHAmount'
         currentStage:
           $ref: '#/components/schemas/StageId'
+        contributors:
+          type: integer
+          example: 2
+          description: Number of distinct users that contributed to the project.
+        contributions:
+          type: integer
+          example: 5
+          description: Number of contributions made to the project.
       required:
         - id
         - status
@@ -717,6 +725,8 @@ components:
         - stages
         - totalFunded
         - currentStage
+        - contributors
+        - contributions
 
     ProjectPreview:
       type: object
@@ -754,6 +764,14 @@ components:
           $ref: '#/components/schemas/ETHAmount'
         currentStage:
           $ref: '#/components/schemas/StageId'
+        contributors:
+          type: integer
+          example: 2
+          description: Number of distinct users that contributed to the project.
+        contributions:
+          type: integer
+          example: 5
+          description: Number of contributions made to the project.
       required:
         - id
         - status
@@ -769,6 +787,8 @@ components:
         - stages
         - totalFunded
         - currentStage
+        - contributors
+        - contributions
 
     PostProjectData:
       type: object
@@ -971,6 +991,14 @@ components:
           $ref: '#/components/schemas/StageId'
         totalFunded:
           $ref: '#/components/schemas/ETHAmount'
+        contributors:
+          type: integer
+          example: 2
+          description: Number of distinct users that contributed to the project.
+        contributions:
+          type: integer
+          example: 5
+          description: Number of contributions made to the project.
       required:
         - projectId
         - userId
@@ -988,6 +1016,8 @@ components:
         - projectStatus
         - currentStage
         - totalFunded
+        - contributors
+        - contributions
 
     PutReviewRequest:
       type: object
