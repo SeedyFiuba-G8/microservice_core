@@ -127,6 +127,14 @@ function createContainer() {
     return config.services;
   });
 
+  container.register('serviceInfo', function $serverInfo() {
+    return {
+      creationDate: new Date(),
+      description:
+        'Core microservice that manages projects with its tags, reviewers, funders, and so on.'
+    };
+  });
+
   container.register('urlFactory', function $commonUrlFactory() {
     return gatewayComponents.urlFactory();
   });
