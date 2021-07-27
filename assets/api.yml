@@ -841,6 +841,9 @@ components:
           $ref: '#/components/schemas/Id'
         liked:
           $ref: '#/components/schemas/Boolean'
+        likes:
+          type: integer
+          example: 345
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -889,6 +892,7 @@ components:
         - blocked
         - userId
         - liked
+        - likes
         - title
         - description
         - type
