@@ -1,6 +1,7 @@
 module.exports = function $walletService(
-  scGateway,
+  logger,
   projectRepository,
+  scGateway,
   walletRepository
 ) {
   return {
@@ -44,14 +45,24 @@ module.exports = function $walletService(
    * Maps the fundings received from the sc microservice to the core API
    */
   async function mapFundings(fundings) {
-    return Promise.all(
-      fundings.map(async (funding) => ({
-        projectId: await projectRepository.getProjectId(funding.projectId),
-        userId: await walletRepository.getUserId(funding.walletId),
-        date: funding.date,
-        amount: funding.amount,
-        txHash: funding.txHash
-      }))
-    );
+    return (await Promise.all(fundings.map(mapFunding))).filter(Boolean);
+  }
+
+  async function mapFunding(funding) {
+    let projectId;
+    let userId;
+    const { date, amount, txHash } = funding;
+
+    try {
+      projectId = await projectRepository.getProjectId(funding.projectId);
+      userId = await walletRepository.getUserId(funding.walletId);
+    } catch (err) {
+      logger.warn(
+        'There are projects in the smart contract that are not in core database'
+      );
+      return undefined;
+    }
+
+    return { userId, projectId, date, amount, txHash };
   }
 };
