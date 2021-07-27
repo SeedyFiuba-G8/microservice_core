@@ -31,9 +31,9 @@ module.exports = function apiRouter(
       .post('/projects', projectController.create)
       .post('/projects/:projectId/block', projectController.block)
       .delete('/projects/:projectId/block', projectController.unblock)
+      .get('/projects/:projectId', projectController.get)
 
       .use('/projects/:projectId', validProjectMiddleware)
-      .get('/projects/:projectId', projectController.get)
       .patch('/projects/:projectId', projectController.update)
       .delete('/projects/:projectId', projectController.remove)
       .post('/projects/:projectId/funds', projectController.fund)
