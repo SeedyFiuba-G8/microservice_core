@@ -2,15 +2,11 @@ module.exports = function $likeRepository(dbUtils, errors, knex, logger) {
   return {
     add,
     check,
+    countForProject,
     remove
   };
 
   async function add(likeData) {
-    logger.debug({
-      message: 'Adding like to project',
-      likeData
-    });
-
     await knex('likes')
       .insert(dbUtils.mapToDb(likeData))
       .catch((err) => {
@@ -31,11 +27,6 @@ module.exports = function $likeRepository(dbUtils, errors, knex, logger) {
   }
 
   async function check(likeData) {
-    logger.debug({
-      message: 'Checking if user likes project',
-      likeData
-    });
-
     const result = await knex('likes')
       .where(dbUtils.mapToDb(likeData))
       .select('*')
@@ -45,6 +36,18 @@ module.exports = function $likeRepository(dbUtils, errors, knex, logger) {
       });
 
     return !!result.length;
+  }
+
+  async function countForProject(projectId) {
+    const result = await knex('likes')
+      .where(dbUtils.mapToDb({ projectId }))
+      .select('*')
+      .catch((err) => {
+        logger.error(err);
+        throw errors.UnknownError;
+      });
+
+    return result.length;
   }
 
   async function remove(likeData) {
