@@ -404,7 +404,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
-  /wallets/{userId}/fundings:
+  /users/{userId}/fundings:
     get:
       summary: Get the project fundings made by a user.
       description: Allows a user to retrieve a the project funding information of a user by its id.
@@ -423,7 +423,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
-  /wallets/fundings:
+  /users/fundings:
     get:
       summary: Get the project fundings made by a user.
       description: Allows a user to retrieve all project funding information.
