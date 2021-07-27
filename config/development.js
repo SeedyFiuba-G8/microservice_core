@@ -15,9 +15,10 @@ module.exports = {
       )
     }
   },
-  log: {
-    console: {
-      level: 'debug'
+  logger: {
+    format: 'local',
+    http: {
+      enabled: false
     }
   },
   monitoring: false,

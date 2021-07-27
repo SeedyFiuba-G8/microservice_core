@@ -2,10 +2,12 @@ const express = require('express');
 
 module.exports = function apiRouter(
   apiValidatorMiddleware,
+  metricController,
   projectController,
   reviewerController,
   statusController,
-  walletController
+  walletController,
+  validProjectMiddleware
 ) {
   return (
     express
@@ -25,9 +27,14 @@ module.exports = function apiRouter(
       // Projects
       .get('/projects', projectController.getPreviewsBy)
       .post('/projects', projectController.create)
+      .post('/projects/:projectId/block', projectController.block)
+      .delete('/projects/:projectId/block', projectController.unblock)
+
+      .use('/projects/:projectId', validProjectMiddleware)
       .get('/projects/:projectId', projectController.get)
       .patch('/projects/:projectId', projectController.update)
       .delete('/projects/:projectId', projectController.remove)
+      .post('/projects/:projectId/funds', projectController.fund)
 
       // Reviewers
       .get('/reviewrequests/:reviewerId', reviewerController.getRequests)
@@ -39,5 +46,9 @@ module.exports = function apiRouter(
       // Wallets
       .post('/wallets', walletController.create)
       .get('/wallets/:userId', walletController.get)
+
+      // Metrics
+      .get('/metrics', metricController.getBasic)
+      .get('/metrics/events', metricController.getEvents)
   );
 };

@@ -2,12 +2,27 @@ const _ = require('lodash');
 
 module.exports = function $projectController(expressify, projectService) {
   return expressify({
+    block,
     create,
+    fund,
     get,
     getPreviewsBy,
+    unblock,
     update,
     remove
   });
+
+  /**
+   * Blocks a project
+   *
+   * @returns {Promise}
+   */
+  async function block(req, res) {
+    const { projectId } = req.params;
+    await projectService.block(projectId);
+
+    return res.status(204).send();
+  }
 
   /**
    * Creates a new project and returns its id
@@ -20,6 +35,21 @@ module.exports = function $projectController(expressify, projectService) {
     const id = await projectService.create(userId, projectInfo);
 
     return res.status(200).json({ id });
+  }
+
+  /**
+   * Starts a project funding transaction, and returns it hash.
+   *
+   * @returns {Promise}
+   */
+  async function fund(req, res) {
+    const { amount } = req.body;
+    const { projectId } = req.params;
+    const userId = req.headers.uid;
+
+    const txHash = await projectService.fund(userId, projectId, amount);
+
+    return res.status(200).json({ txHash });
   }
 
   /**
@@ -46,6 +76,18 @@ module.exports = function $projectController(expressify, projectService) {
     const projects = await projectService.getPreviewsBy(filters, limit, offset);
 
     return res.status(200).json({ projects });
+  }
+
+  /**
+   * Unblocks a project
+   *
+   * @returns {Promise}
+   */
+  async function unblock(req, res) {
+    const { projectId } = req.params;
+    await projectService.unblock(projectId);
+
+    return res.status(204).send();
   }
 
   /**
@@ -88,7 +130,14 @@ module.exports = function $projectController(expressify, projectService) {
    */
   function parseFilters(filters) {
     return {
-      filters: _.pick(filters, ['userId', 'type', 'status']),
+      filters: _.pick(filters, [
+        'userId',
+        'blocked',
+        'type',
+        'tags',
+        'status',
+        'reviewerId'
+      ]),
       limit: _.get(filters, 'limit'),
       offset: _.get(filters, 'offset')
     };

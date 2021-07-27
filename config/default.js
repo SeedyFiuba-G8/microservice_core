@@ -1,10 +1,6 @@
 const _ = require('lodash');
 
 module.exports = {
-  express: {
-    host: '0.0.0.0',
-    port: _.get(process.env, 'PORT', 3002)
-  },
   /* Any value changed here should be changed in database too */
   constraints: {
     project: {
@@ -43,11 +39,24 @@ module.exports = {
     },
     reviewers: {
       max: 10
+    },
+    stages: {
+      max: 20,
+      maxDescriptionLength: 255
     }
+  },
+  express: {
+    host: '0.0.0.0',
+    port: _.get(process.env, 'PORT', 3002)
+  },
+  events: {
+    // Projects
+    CREATE: 'Create Project',
+    PUBLISH: 'Publish Project'
   },
   fetch: {
     forwardHeaders: [],
-    timeout: 10000 // ms
+    timeout: 300000 // ms
   },
   knex: {
     client: 'pg',
@@ -55,16 +64,18 @@ module.exports = {
       connectionString: _.get(process.env, 'DATABASE_URL')
     }
   },
-  log: {
+  logger: {
     console: {
       enabled: true,
-      level: 'info',
-      timestamp: true,
-      prettyPrint: true,
-      json: false,
-      colorize: true,
-      stringify: false,
-      label: 'microservice_users'
+      level: _.get(process.env, 'LOGGER_LEVEL', 'info'),
+      prettyPrint: true
+    },
+    http: {
+      enabled: true,
+      level: _.get(process.env, 'LOGGER_LEVEL', 'info'),
+      host: _.get(process.env, 'SUMOLOGIC_HOST'),
+      path: _.get(process.env, 'SUMOLOGIC_PATH'),
+      ssl: true
     }
   },
   monitoring: true,

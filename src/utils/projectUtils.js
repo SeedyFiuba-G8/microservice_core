@@ -22,7 +22,7 @@ module.exports = function projectUtils(errors) {
       'tags',
       'reviewers',
       'coverPicUrl',
-      'stagesCost'
+      'stages'
     ]);
 
     // We make sure there are no duplicated tags

@@ -1,7 +1,9 @@
 module.exports = function $scGateway(fetch, services, urlFactory) {
   return {
+    setProjectLastCompletedStage,
     createProject,
     createWallet,
+    fundProject,
     getProject,
     getWallet
   };
@@ -20,10 +22,34 @@ module.exports = function $scGateway(fetch, services, urlFactory) {
   }
 
   // PROJECTS
+  function setProjectLastCompletedStage(
+    reviewerWalletId,
+    projectTxHash,
+    newStage
+  ) {
+    const url = urlFactory(`/projects/${projectTxHash}`, services.sc.baseUrl);
+
+    return fetch(url, {
+      method: 'PATCH',
+      body: { reviewerId: reviewerWalletId, completedStage: newStage }
+    });
+  }
+
   function createProject(projectInfo) {
     const url = urlFactory('/projects', services.sc.baseUrl);
 
     return fetch(url, { method: 'POST', body: projectInfo }).then(
+      ({ data }) => data
+    );
+  }
+
+  function fundProject(walletId, projectTxHash, amount) {
+    const url = urlFactory(
+      `/projects/${projectTxHash}/funds`,
+      services.sc.baseUrl
+    );
+
+    return fetch(url, { method: 'POST', body: { walletId, amount } }).then(
       ({ data }) => data
     );
   }

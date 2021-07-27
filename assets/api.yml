@@ -15,15 +15,17 @@ servers:
     description: 'Production'
   - url: https://sf-tdp2-core-dev.herokuapp.com/
     description: 'Staging'
-  - url: http://localhost:3000/
+  - url: http://localhost:3002/
     description: 'Local development'
 
 # =============================================================================
 
 tags:
   - name: Projects
-  - name: Reviews
+  - name: Reviewers
   - name: Wallets
+  - name: Metrics
+  - name: Status
 
 # =============================================================================
 
@@ -38,8 +40,20 @@ paths:
           name: userId
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/Id'
           description: The userId of whom we want to retrieve projects.
+        - in: query
+          name: reviewerId
+          required: false
+          schema:
+            $ref: '#/components/schemas/Id'
+          description: The id of the reviewer of whom we want to retrieve projects.
+        - in: query
+          name: blocked
+          required: false
+          schema:
+            $ref: '#/components/schemas/Blocked'
+          description: Whether the project is blocked or not.
         - in: query
           name: type
           required: false
@@ -47,6 +61,12 @@ paths:
             type: string
             example: 'social'
           description: Type of project to retrieve.
+        - in: query
+          name: tags
+          required: false
+          schema:
+            $ref: '#/components/schemas/Tags'
+          description: Tags of project to retrieve.
         - in: query
           name: status
           required: false
@@ -82,8 +102,7 @@ paths:
         - in: header
           name: uid
           schema:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the user that requests
       requestBody:
@@ -115,7 +134,9 @@ paths:
 
     patch:
       summary: Modify the information of the project.
-      description: Allows an owner of a project or an admin to modify the information of a project.
+      description: Allows an owner of a project or an admin to modify >
+       the information of a project. Allows a reviewer of a project to >
+       mark stage(s) as completed, by patching lastCompletedStage.
       tags:
         - Projects
       parameters:
@@ -169,6 +190,71 @@ paths:
           $ref: '#/components/responses/deleteProject'
         default:
           $ref: '#/components/responses/Error'
+
+  /projects/{projectId}/funds:
+    post:
+      summary: Fund a project
+      description: Allows a user to fund a project.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to fund
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user that wants to fund the project
+      requestBody:
+        $ref: '#/components/requestBodies/fundProjectData'
+      responses:
+        200:
+          $ref: '#/components/responses/fundProject'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /projects/{projectId}/block:
+    post:
+      summary: Block a project
+      description: Allow admins to block projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to block
+      responses:
+        204:
+          description: 'Project blocked successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+    delete:
+      summary: Unblock a user
+      description: Allow admins to unblock projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project to block
+      responses:
+        204:
+          description: 'Project unblocked successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
 
   # REVIEWERS
   /reviewrequests/{reviewerId}:
@@ -226,6 +312,57 @@ paths:
       responses:
         204:
           description: 'Review request updated successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+  # METRICS
+  /metrics:
+    get:
+      summary: Get basic metrics
+      description: Get metrics from projects.
+      tags:
+        - Metrics
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            $ref: '#/components/schemas/Id'
+          description: The userId of whom we want to retrieve metrics.
+      responses:
+        200:
+          $ref: '#/components/responses/getBasicMetrics'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /metrics/events:
+    get:
+      summary: Get event metrics
+      description: Get event metrics from projects.
+      tags:
+        - Metrics
+      parameters:
+        - in: query
+          name: userId
+          required: false
+          schema:
+            $ref: '#/components/schemas/Id'
+          description: The userId of whom we want to retrieve metrics.
+        - in: query
+          name: initialDate
+          required: true
+          schema:
+            $ref: '#/components/schemas/Date'
+          description: Initial date to retrieve metrics.
+        - in: query
+          name: finalDate
+          required: false
+          schema:
+            $ref: '#/components/schemas/Date'
+          description: Final date to retrieve metrics.
+      responses:
+        200:
+          $ref: '#/components/responses/getEventMetrics'
         default:
           $ref: '#/components/responses/Error'
 
@@ -289,6 +426,13 @@ paths:
 components:
   # ---------------------------------------------------------------------------
   requestBodies:
+    fundProjectData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FundProjectData'
+
     postProject:
       required: true
       content:
@@ -329,6 +473,13 @@ components:
             $ref: '#/components/schemas/Error'
 
     # PROJECTS
+    fundProject:
+      description: Transaction initiated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TxHash'
+
     getProjects:
       description: Projects info retrieved successfully.
       content:
@@ -387,6 +538,21 @@ components:
           schema:
             $ref: '#/components/schemas/Address'
     
+    # METRICS
+    getBasicMetrics:
+      description: Metrics retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BasicMetrics'
+
+    getEventMetrics:
+      description: Metrics retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventMetrics'
+    
     # STATUS
     health:
       description: Microservice general health state reported.
@@ -426,6 +592,10 @@ components:
       type: string
       example: '0xf018Be4Fe4fBD4cA1B1162A44bB139a343C2087b'
 
+    Blocked:
+      type: boolean
+      example: false
+    
     Date:
       type: string
       format: date-time
@@ -444,12 +614,28 @@ components:
       type: string
       example: 'https://imgur.com/gallery/rFvivtw'
 
-    StagesCost:
+    Stage:
+      type: object
+      properties:
+        cost:
+          $ref: '#/components/schemas/ETHAmount'
+        description:
+          type: string
+          example: 'In this stage, we will buy the equipment.'
+    
+    StageId:
+      type: integer
+      example: 1
+
+    Stages:
       type: array
       items:
-        type: number
+        $ref: '#/components/schemas/Stage'
       minItems: 1
-      example: [0.1, 0.0023, 1]
+
+    Hash:
+      type: string
+      example: '0x30b003c570eccaf1705acd4621f72993acb51715f8decbf61535f21376cfe1d2'
 
     # PROJECTS
     AllProjects:
@@ -461,6 +647,14 @@ components:
             $ref: '#/components/schemas/ProjectPreview'
       required:
         - projects
+
+    FundProjectData:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/ETHAmount'
+      required:
+        - amount
 
     Project:
       type: object
@@ -501,8 +695,20 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/Reviewers'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
+        contributors:
+          type: integer
+          example: 2
+          description: Number of distinct users that contributed to the project.
+        contributions:
+          type: integer
+          example: 5
+          description: Number of contributions made to the project.
       required:
         - id
         - status
@@ -516,7 +722,11 @@ components:
         - publishedOn
         - finalizedBy
         - tags
-        - stagesCost
+        - stages
+        - totalFunded
+        - currentStage
+        - contributors
+        - contributions
 
     ProjectPreview:
       type: object
@@ -525,6 +735,8 @@ components:
           $ref: '#/components/schemas/Id'
         status:
           $ref: '#/components/schemas/ProjectStatus'
+        blocked:
+          $ref: '#/components/schemas/Blocked'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -546,11 +758,24 @@ components:
           $ref: '#/components/schemas/Date'
         tags:
           $ref: '#/components/schemas/Tags'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
+        contributors:
+          type: integer
+          example: 2
+          description: Number of distinct users that contributed to the project.
+        contributions:
+          type: integer
+          example: 5
+          description: Number of contributions made to the project.
       required:
         - id
         - status
+        - blocked
         - title
         - description
         - type
@@ -559,7 +784,11 @@ components:
         - city
         - finalizedBy
         - tags
-        - stagesCost
+        - stages
+        - totalFunded
+        - currentStage
+        - contributors
+        - contributions
 
     PostProjectData:
       type: object
@@ -590,8 +819,8 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'
+        stages:
+          $ref: '#/components/schemas/Stages'
       required:
         - title
         - description
@@ -602,7 +831,7 @@ components:
         - finalizedBy
         - tags
         - reviewers
-        - stagesCost
+        - stages
 
     PatchProjectData:
       type: object
@@ -635,16 +864,17 @@ components:
           $ref: '#/components/schemas/Tags'
         reviewers:
           $ref: '#/components/schemas/ReviewersRaw'
-        stagesCost:
-          $ref: '#/components/schemas/StagesCost'          
+        stages:
+          $ref: '#/components/schemas/Stages'
+        lastCompletedStage:
+          $ref: '#/components/schemas/StageId'
       minProperties: 1
 
     ProjectId:
       type: object
       properties:
         id:
-          type: string
-          example: '670b9562-b30d-52d5-b827-655787665500'
+          $ref: '#/components/schemas/Id'
       required:
         - id
       
@@ -653,7 +883,8 @@ components:
       enum:
         - DRAFT
         - FUNDING
-        - FINALIZED
+        - IN_PROGRESS
+        - COMPLETED
 
     FundingProjectStatus:
       type: string
@@ -665,6 +896,14 @@ components:
       items:
         type: string
       example: ['javascript', 'python', 'food']
+
+    TxHash:
+      type: object
+      properties:
+        txHash:
+          $ref: '#/components/schemas/Hash'
+      required:
+        - txHash
     
     # REVIEWERS
     Reviewer:
@@ -741,7 +980,25 @@ components:
         finalizedBy:
           $ref: '#/components/schemas/Date'
         status:
-          $ref: '#/components/schemas/ReviewerStatus'  
+          $ref: '#/components/schemas/ReviewerStatus'
+        stages:
+          $ref: '#/components/schemas/Stages'
+        coverPicUrl:
+          $ref: '#/components/schemas/Picture'
+        projectStatus:
+          $ref: '#/components/schemas/ProjectStatus'
+        currentStage:
+          $ref: '#/components/schemas/StageId'
+        totalFunded:
+          $ref: '#/components/schemas/ETHAmount'
+        contributors:
+          type: integer
+          example: 2
+          description: Number of distinct users that contributed to the project.
+        contributions:
+          type: integer
+          example: 5
+          description: Number of contributions made to the project.
       required:
         - projectId
         - userId
@@ -754,6 +1011,13 @@ components:
         - publishedOn
         - finalizedBy
         - status
+        - stages
+        - coverPicUrl
+        - projectStatus
+        - currentStage
+        - totalFunded
+        - contributors
+        - contributions
 
     PutReviewRequest:
       type: object
@@ -782,6 +1046,45 @@ components:
           $ref: '#/components/schemas/Id'
       required:
         - uid
+    
+    # METRICS
+    BasicMetrics:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 6045
+        draft:
+          type: integer
+          example: 2014
+        funding:
+          type: integer
+          example: 2000
+        inProgress:
+          type: integer
+          example: 2031
+        completed:
+          type: integer
+          example: 2031
+      required:
+        - total
+        - draft
+        - funding
+        - inProgress
+        - completed
+
+    EventMetrics:
+      type: object
+      properties:
+        create:
+          type: integer
+          example: 223
+        publish:
+          type: integer
+          example: 54
+      required:
+        - create
+        - publish
     
     # STATUS
     Ping:
