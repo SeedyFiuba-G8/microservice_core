@@ -2,27 +2,28 @@ const _ = require('lodash');
 
 module.exports = function $projectController(expressify, projectService) {
   return expressify({
-    block,
+    // Create
     create,
-    fund,
+
+    // Get
     get,
     getPreviewsBy,
-    unblock,
+
+    // Modify
+    fund,
     update,
-    remove
+    remove,
+
+    // Likes
+    like,
+    dislike,
+
+    // Block
+    block,
+    unblock
   });
 
-  /**
-   * Blocks a project
-   *
-   * @returns {Promise}
-   */
-  async function block(req, res) {
-    const { projectId } = req.params;
-    await projectService.block(projectId);
-
-    return res.status(204).send();
-  }
+  // CREATE -------------------------------------------------------------------
 
   /**
    * Creates a new project and returns its id
@@ -37,20 +38,7 @@ module.exports = function $projectController(expressify, projectService) {
     return res.status(200).json({ id });
   }
 
-  /**
-   * Starts a project funding transaction, and returns it hash.
-   *
-   * @returns {Promise}
-   */
-  async function fund(req, res) {
-    const { amount } = req.body;
-    const { projectId } = req.params;
-    const userId = req.headers.uid;
-
-    const txHash = await projectService.fund(userId, projectId, amount);
-
-    return res.status(200).json({ txHash });
-  }
+  // GET ----------------------------------------------------------------------
 
   /**
    * Gets a project by its id
@@ -59,7 +47,8 @@ module.exports = function $projectController(expressify, projectService) {
    */
   async function get(req, res) {
     const { projectId } = req.params;
-    const projectInfo = await projectService.get(projectId);
+    const requesterId = req.headers.uid;
+    const projectInfo = await projectService.get(projectId, requesterId);
 
     return res.status(200).json(projectInfo);
   }
@@ -78,16 +67,21 @@ module.exports = function $projectController(expressify, projectService) {
     return res.status(200).json({ projects });
   }
 
+  // MODIFY -------------------------------------------------------------------
+
   /**
-   * Unblocks a project
+   * Starts a project funding transaction, and returns it hash.
    *
    * @returns {Promise}
    */
-  async function unblock(req, res) {
+  async function fund(req, res) {
+    const { amount } = req.body;
     const { projectId } = req.params;
-    await projectService.unblock(projectId);
+    const userId = req.headers.uid;
 
-    return res.status(204).send();
+    const txHash = await projectService.fund(userId, projectId, amount);
+
+    return res.status(200).json({ txHash });
   }
 
   /**
@@ -119,7 +113,41 @@ module.exports = function $projectController(expressify, projectService) {
     return res.status(200).json({ id: projectId });
   }
 
-  // Aux
+  // LIKES --------------------------------------------------------------------
+
+  async function like(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    await projectService.like(projectId, requesterId);
+
+    return res.status(204).send();
+  }
+
+  async function dislike(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    await projectService.dislike(projectId, requesterId);
+
+    return res.status(204).send();
+  }
+
+  // BLOCK --------------------------------------------------------------------
+
+  async function block(req, res) {
+    const { projectId } = req.params;
+    await projectService.block(projectId);
+
+    return res.status(204).send();
+  }
+
+  async function unblock(req, res) {
+    const { projectId } = req.params;
+    await projectService.unblock(projectId);
+
+    return res.status(204).send();
+  }
+
+  // AUX ----------------------------------------------------------------------
 
   /**
    * Parse the filters and pick the valid ones

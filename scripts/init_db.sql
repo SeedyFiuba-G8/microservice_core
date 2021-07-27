@@ -1,6 +1,7 @@
 -- Drop pre-existent dbs
 DROP TABLE IF EXISTS public.wallets;
 DROP TABLE IF EXISTS public.tags;
+DROP TABLE IF EXISTS public.likes;
 DROP TABLE IF EXISTS public.reviewers;
 DROP TABLE IF EXISTS public.project_hashes;
 DROP TABLE IF EXISTS public.stages;
@@ -40,6 +41,17 @@ CREATE TABLE public.tags (
 	project_id			VARCHAR(36)					NOT NULL,
 
     PRIMARY KEY (tag, project_id),
+    CONSTRAINT fk_project
+      FOREIGN KEY(project_id) 
+	  REFERENCES public.projects(id)
+      ON DELETE CASCADE
+);
+
+CREATE TABLE public.likes (
+	project_id			VARCHAR(36)					NOT NULL,
+	user_id				VARCHAR(36)					NOT NULL,
+
+    PRIMARY KEY (project_id, user_id),
     CONSTRAINT fk_project
       FOREIGN KEY(project_id) 
 	  REFERENCES public.projects(id)

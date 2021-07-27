@@ -6,6 +6,7 @@ module.exports = function $projectService(
   events,
   eventRepository,
   logger,
+  likeRepository,
   projectRepository,
   projectUtils,
   reviewerRepository,
@@ -15,64 +16,29 @@ module.exports = function $projectService(
   walletService
 ) {
   return {
-    block,
+    // Create
     create,
-    fund,
+
+    // Get
     get,
     getPreviewsBy,
     getSimpleProject,
-    unblock,
+
+    // Modify
+    fund,
     update,
-    remove
+    remove,
+
+    // Likes
+    like,
+    dislike,
+
+    // Block
+    block,
+    unblock
   };
 
-  /**
-   * Blocks a project
-   *
-   * @returns {Promise}
-   */
-  async function block(projectId) {
-    await projectRepository.updateBy(
-      {
-        id: projectId,
-        blocked: false
-      },
-      {
-        blocked: true
-      }
-    );
-
-    logger.info({
-      message: 'Project blocked',
-      project: {
-        id: projectId
-      }
-    });
-  }
-
-  /**
-   * Unblocks a project
-   *
-   * @returns {Promise}
-   */
-  async function unblock(projectId) {
-    await projectRepository.updateBy(
-      {
-        id: projectId,
-        blocked: true
-      },
-      {
-        blocked: false
-      }
-    );
-
-    logger.info({
-      message: 'Project unblocked',
-      project: {
-        id: projectId
-      }
-    });
-  }
+  // CREATE -------------------------------------------------------------------
 
   /**
    * Creates a new project
@@ -110,31 +76,21 @@ module.exports = function $projectService(
     return id;
   }
 
-  /**
-   * Creates a new funding transaction in sc microservice
-   *
-   * @returns {Promise} uuid
-   */
-  async function fund(userId, projectId, amount) {
-    const projectTxHash = await projectRepository.getTxHash(projectId);
-    const walletId = await walletService.getWalletId(userId);
-    const txHash = await scGateway.fundProject(walletId, projectTxHash, amount);
-
-    logger.info(
-      `user ${userId} funded ${amount} ETHs in project ${projectId}. Transaction: ${txHash}`
-    );
-
-    return txHash;
-  }
+  // GET ----------------------------------------------------------------------
 
   /**
    * Fetchs project data of projectId
    *
    * @returns {Promise} Project
    */
-  async function get(projectId) {
+  async function get(projectId, requesterId) {
     let project = await getSimpleProject(projectId);
     project = _.omitBy(project, _.isNull);
+
+    project.liked = await likeRepository.check({
+      projectId,
+      userId: requesterId
+    });
 
     if (!project.reviewerId)
       project.reviewers = await reviewerRepository.get({
@@ -183,6 +139,25 @@ module.exports = function $projectService(
     });
   }
 
+  // MODIFY -------------------------------------------------------------------
+
+  /**
+   * Creates a new funding transaction in sc microservice
+   *
+   * @returns {Promise} uuid
+   */
+  async function fund(userId, projectId, amount) {
+    const projectTxHash = await projectRepository.getTxHash(projectId);
+    const walletId = await walletService.getWalletId(userId);
+    const txHash = await scGateway.fundProject(walletId, projectTxHash, amount);
+
+    logger.info(
+      `user ${userId} funded ${amount} ETHs in project ${projectId}. Transaction: ${txHash}`
+    );
+
+    return txHash;
+  }
+
   /**
    * Modifies project data
    *
@@ -227,7 +202,81 @@ module.exports = function $projectService(
     return projectId;
   }
 
-  // Aux
+  // LIKES --------------------------------------------------------------------
+
+  async function like(projectId, requesterId) {
+    await likeRepository.add({ projectId, userId: requesterId });
+
+    logger.info({
+      message: 'Project liked by user',
+      project: {
+        id: projectId
+      },
+      user: {
+        id: requesterId
+      }
+    });
+  }
+
+  async function dislike(projectId, requesterId) {
+    await likeRepository.remove({
+      projectId,
+      userId: requesterId
+    });
+
+    logger.info({
+      message: 'Project disliked by user',
+      project: {
+        id: projectId
+      },
+      user: {
+        id: requesterId
+      }
+    });
+  }
+
+  // BLOCK --------------------------------------------------------------------
+
+  async function block(projectId) {
+    await projectRepository.updateBy(
+      {
+        id: projectId,
+        blocked: false
+      },
+      {
+        blocked: true
+      }
+    );
+
+    logger.info({
+      message: 'Project blocked',
+      project: {
+        id: projectId
+      }
+    });
+  }
+
+  async function unblock(projectId) {
+    await projectRepository.updateBy(
+      {
+        id: projectId,
+        blocked: true
+      },
+      {
+        blocked: false
+      }
+    );
+
+    logger.info({
+      message: 'Project unblocked',
+      project: {
+        id: projectId
+      }
+    });
+  }
+
+  // AUX ----------------------------------------------------------------------
+
   /**
    * Sets the current stage of a project.
    * Must be called by reviewer.

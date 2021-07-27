@@ -32,6 +32,8 @@ module.exports = function apiRouter(
       .post('/projects', projectController.create)
       .post('/projects/:projectId/block', projectController.block)
       .delete('/projects/:projectId/block', projectController.unblock)
+      .post('/projects/:projectId/like', projectController.like)
+      .delete('/projects/:projectId/like', projectController.dislike)
       .get('/projects/:projectId', projectController.get)
 
       .use('/projects/:projectId', validProjectMiddleware)
