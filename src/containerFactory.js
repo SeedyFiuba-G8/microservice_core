@@ -96,8 +96,8 @@ function createContainer() {
     return require('expressify')();
   });
 
-  container.register('fetch', function $commonFetch(config, errors) {
-    return gatewayComponents.fetch(config, errors);
+  container.register('fetch', function $commonFetch(config, errors, logger) {
+    return gatewayComponents.fetch(config, errors, logger);
   });
 
   container.register('knex', function $knex(config) {
