@@ -1,4 +1,10 @@
-module.exports = function $scGateway(fetch, services, urlFactory) {
+module.exports = function $scGateway(
+  apikeys,
+  apikeyUtils,
+  fetch,
+  services,
+  urlFactory
+) {
   return {
     setProjectLastCompletedStage,
     createProject,
@@ -9,54 +15,74 @@ module.exports = function $scGateway(fetch, services, urlFactory) {
   };
 
   // WALLETS
-  function createWallet() {
+  async function createWallet() {
     const url = urlFactory('/wallets', services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
 
-    return fetch(url, { method: 'POST' }).then(({ data }) => data);
+    return fetch(url, {
+      method: 'POST',
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
   }
 
-  function getWallet(walletId) {
+  async function getWallet(walletId) {
     const url = urlFactory(`/wallets/${walletId}`, services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
 
-    return fetch(url, { method: 'GET' }).then(({ data }) => data);
+    return fetch(url, {
+      method: 'GET',
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
   }
 
   // PROJECTS
-  function setProjectLastCompletedStage(
+  async function setProjectLastCompletedStage(
     reviewerWalletId,
     projectTxHash,
     newStage
   ) {
     const url = urlFactory(`/projects/${projectTxHash}`, services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
 
     return fetch(url, {
       method: 'PATCH',
-      body: { reviewerId: reviewerWalletId, completedStage: newStage }
+      body: { reviewerId: reviewerWalletId, completedStage: newStage },
+      headers: apikeyUtils.headers(apikey)
     });
   }
 
-  function createProject(projectInfo) {
+  async function createProject(projectInfo) {
     const url = urlFactory('/projects', services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
 
-    return fetch(url, { method: 'POST', body: projectInfo }).then(
-      ({ data }) => data
-    );
+    return fetch(url, {
+      method: 'POST',
+      body: projectInfo,
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
   }
 
-  function fundProject(walletId, projectTxHash, amount) {
+  async function fundProject(walletId, projectTxHash, amount) {
     const url = urlFactory(
       `/projects/${projectTxHash}/funds`,
       services.sc.baseUrl
     );
+    const { sc: apikey } = await apikeys;
 
-    return fetch(url, { method: 'POST', body: { walletId, amount } }).then(
-      ({ data }) => data
-    );
+    return fetch(url, {
+      method: 'POST',
+      body: { walletId, amount },
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
   }
 
-  function getProject(txHash) {
+  async function getProject(txHash) {
     const url = urlFactory(`/projects/${txHash}`, services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
 
-    return fetch(url, { method: 'GET' }).then(({ data }) => data);
+    return fetch(url, {
+      method: 'GET',
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
   }
 };

@@ -28,8 +28,19 @@ function createContainer() {
     }
   );
 
+  container.register(
+    'apikeys',
+    function $apikeys(config, fetch, logger, urlFactory) {
+      return apikeysComponents.apikeys(config, fetch, logger, urlFactory);
+    }
+  );
+
   container.register('apikeysCache', function $apikeysCache() {
     return apikeysComponents.cache();
+  });
+
+  container.register('apikeyUtils', function $apikeyUtils(config, errors) {
+    return apikeysComponents.utils(config, errors);
   });
 
   container.register(
