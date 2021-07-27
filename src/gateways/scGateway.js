@@ -13,7 +13,8 @@ module.exports = function $scGateway(
     getFundings,
     getAllFundings,
     getProject,
-    getWallet
+    getWallet,
+    transfer
   };
 
   // WALLETS
@@ -107,6 +108,17 @@ module.exports = function $scGateway(
 
     return fetch(url, {
       method: 'GET',
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
+  }
+
+  async function transfer(walletId, address, amount) {
+    const url = urlFactory(`/wallets/${address}/funds`, services.sc.baseUrl);
+    const { sc: apikey } = await apikeys;
+
+    return fetch(url, {
+      method: 'POST',
+      body: { walletId, amount },
       headers: apikeyUtils.headers(apikey)
     }).then(({ data }) => data);
   }

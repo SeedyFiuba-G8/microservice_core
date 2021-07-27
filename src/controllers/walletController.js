@@ -5,7 +5,8 @@ module.exports = function $walletController(expressify, walletService) {
     create,
     get,
     getFundings,
-    getAllFundings
+    getAllFundings,
+    transfer
   });
 
   /**
@@ -49,5 +50,18 @@ module.exports = function $walletController(expressify, walletService) {
   async function getAllFundings(req, res) {
     const fundings = await walletService.getAllFundings();
     return res.status(200).json(fundings);
+  }
+
+  /**
+   * Transfer funds of a user's wallet to an address specified
+   *
+   * @returns {Promise}
+   */
+  async function transfer(req, res) {
+    const { uid } = req.headers;
+    const { walletAddress } = req.params;
+    const { amount } = req.body;
+    const txHash = await walletService.transfer(uid, walletAddress, amount);
+    return res.status(200).json({ txHash });
   }
 };

@@ -404,6 +404,33 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /wallets/{walletAddress}/funds:
+    post:
+      summary: Transfer funds to an external wallet
+      description: Allows a user to transfer funds to walletAddress.
+      tags:
+        - Wallets
+      parameters:
+        - in: path
+          name: walletAddress
+          schema:
+            $ref: '#/components/schemas/Address'
+          required: true
+          description: address of the wallet we want to transfer funds
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user that wants to transfer the funds
+      requestBody:
+        $ref: '#/components/requestBodies/transferFunds'
+      responses:
+        200:
+          $ref: '#/components/responses/transferFunds'
+        default:
+          $ref: '#/components/responses/Error'
+
   /users/{userId}/fundings:
     get:
       summary: Get the project fundings made by a user.
@@ -483,7 +510,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FundProjectData'
+            $ref: '#/components/schemas/PostFundsData'
 
     postProject:
       required: true
@@ -512,6 +539,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/PostWalletData'
+
+    transferFunds:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostFundsData'
  
   # ---------------------------------------------------------------------------
   responses:
@@ -603,6 +637,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Fundings'
+
+    transferFunds:
+      description: Funds transferring transaction initialized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TxHash'
     
     # METRICS
     getBasicMetrics:
@@ -721,7 +762,7 @@ components:
       required:
         - projects
 
-    FundProjectData:
+    PostFundsData:
       type: object
       properties:
         amount:
