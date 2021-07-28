@@ -6,7 +6,8 @@ module.exports = function $notificationRepository(
 ) {
   return {
     get,
-    push
+    push,
+    remove
   };
 
   function push(userId, token) {
@@ -28,5 +29,11 @@ module.exports = function $notificationRepository(
       .select('token')
       .then(dbUtils.mapFromDb)
       .then((tokens) => tokens.map((token) => token.token));
+  }
+
+  function remove(userId, token) {
+    return knex('notification_tokens')
+      .where(dbUtils.mapToDb({ userId, token }))
+      .del();
   }
 };

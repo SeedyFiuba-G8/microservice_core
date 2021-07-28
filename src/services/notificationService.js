@@ -10,10 +10,12 @@ module.exports = function $notificationService(
 ) {
   return {
     pushMessage,
-    pushToken
+    pushToken,
+    removeToken
   };
 
   /**
+   * Add a user's expo push token
    *
    * @param {String} userId
    * @param {String} token
@@ -56,5 +58,25 @@ module.exports = function $notificationService(
     );
 
     return sendNotifications(notifications);
+  }
+
+  /**
+   * Remove a user's expo push token
+   *
+   * @param {String} userId
+   * @param {String} token
+   * @returns {Promise}
+   */
+  async function removeToken(userId, token) {
+    logger.info(`Removing ExpoToken for user ${userId}`);
+
+    await scGateway.removeToken(
+      (
+        await walletRepository.get(userId)
+      ).walletId,
+      token
+    );
+
+    return notificationRepository.remove(userId, token);
   }
 };

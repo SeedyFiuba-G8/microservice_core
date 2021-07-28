@@ -61,6 +61,7 @@ module.exports = function apiRouter(
 
       // Notifications
       .post('/users/:userId/pushToken', notificationController.pushToken)
+      .delete('/users/:userId/pushToken', notificationController.removeToken)
       .post('/users/:userId/message', notificationController.pushMessage)
 
       // Metrics
