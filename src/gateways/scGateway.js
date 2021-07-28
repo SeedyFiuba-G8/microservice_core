@@ -14,7 +14,8 @@ module.exports = function $scGateway(
     getAllFundings,
     getProject,
     getWallet,
-    transfer
+    transfer,
+    pushToken
   };
 
   // WALLETS
@@ -119,6 +120,20 @@ module.exports = function $scGateway(
     return fetch(url, {
       method: 'POST',
       body: { walletId, amount },
+      headers: apikeyUtils.headers(apikey)
+    }).then(({ data }) => data);
+  }
+
+  async function pushToken(walletId, token) {
+    const url = urlFactory(
+      `/wallets/${walletId}/pushToken`,
+      services.sc.baseUrl
+    );
+    const { sc: apikey } = await apikeys;
+
+    return fetch(url, {
+      method: 'POST',
+      body: { token },
       headers: apikeyUtils.headers(apikey)
     }).then(({ data }) => data);
   }

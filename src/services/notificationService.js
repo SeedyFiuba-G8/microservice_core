@@ -4,7 +4,9 @@ module.exports = function $notificationService(
   errors,
   logger,
   notificationRepository,
-  sendNotifications
+  sendNotifications,
+  scGateway,
+  walletRepository
 ) {
   return {
     pushMessage,
@@ -18,13 +20,15 @@ module.exports = function $notificationService(
    * @returns {Promise}
    */
   async function pushToken(userId, token) {
-    logger.info(`Adding ExpoToken for user ${userId}`);
-
     if (!Expo.isExpoPushToken(token))
       throw errors.create(
         400,
         `Push token ${token} is not a valid Expo push token`
       );
+
+    logger.info(`Adding ExpoToken for user ${userId}`);
+
+    await scGateway.pushToken(await walletRepository.get(userId), token);
 
     return notificationRepository.push(userId, token);
   }
