@@ -3,6 +3,7 @@ module.exports = function $likeRepository(dbUtils, errors, knex) {
     add,
     check,
     countForProject,
+    getProjectsForUser,
     remove
   };
 
@@ -37,6 +38,14 @@ module.exports = function $likeRepository(dbUtils, errors, knex) {
       .where(dbUtils.mapToDb({ projectId }))
       .select('*');
     return result.length;
+  }
+
+  async function getProjectsForUser(userId) {
+    return knex('likes')
+      .select(['project_id'])
+      .where(dbUtils.mapToDb({ userId }))
+      .then(dbUtils.mapFromDb)
+      .then((res) => res.map(({ projectId }) => projectId));
   }
 
   async function remove(likeData) {

@@ -10,6 +10,7 @@ module.exports = function $projectService(
   projectRepository,
   projectUtils,
   ratingRepository,
+  recommendationService,
   reviewerRepository,
   scGateway,
   tagRepository,
@@ -114,48 +115,43 @@ module.exports = function $projectService(
   }
 
   /**
-   * Fetchs all projects that match filters,
+   * Fetchs all projects that match filters
    *
    * @returns {Promise} Project[]
    */
   async function getPreviewsBy(
-    filters,
-    limit,
-    offset,
+    { filters, limit, offset },
+    { recommended, interests },
     onlyFavorites,
     requesterId
   ) {
-    const previewFields = [
-      'id',
-      'status',
-      'blocked',
-      'title',
-      'description',
-      'type',
-      'objective',
-      'country',
-      'city',
-      'finalizedBy',
-      'tags',
-      'coverPicUrl'
-    ];
     const { tags } = filters;
     const parsedFilters = _.omit(filters, 'tags');
 
+    // Recommendation System
+    let recommendedProjectIds;
+    if (recommended)
+      recommendedProjectIds = await recommendationService.recommendFor(
+        requesterId,
+        interests
+      );
+
     // Search by tags
-    let projectIds;
-    if (tags) {
-      projectIds = await tagRepository.getProjects(tags);
-    }
+    let tagSearchProjectIds;
+    if (tags) tagSearchProjectIds = await tagRepository.getProjects(tags);
 
     const rawProjects = await projectRepository.get({
       filters: parsedFilters,
-      select: previewFields,
+      select: projectUtils.previewFields,
       limit,
       offset,
-      projectIds
+      projectIds: projectUtils.getIdsToFilter(
+        recommendedProjectIds,
+        tagSearchProjectIds
+      )
     });
 
+    // Add `liked` to every project before returning
     const projects = [];
     const promises = [];
     rawProjects.forEach(async (project) => {

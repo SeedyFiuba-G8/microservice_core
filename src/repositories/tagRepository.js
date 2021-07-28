@@ -29,6 +29,8 @@ module.exports = function $tagRepository(knex) {
     // We remove existent tags for that project
     removeForProject(projectId);
 
+    if (!tags.length) return;
+
     // We add new ones
     const rows = tags.map((tag) => ({
       tag,
