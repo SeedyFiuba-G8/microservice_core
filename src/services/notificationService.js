@@ -1,7 +1,5 @@
 const { Expo } = require('expo-server-sdk');
 
-const expo = new Expo();
-
 module.exports = function $notificationService(
   errors,
   logger,
