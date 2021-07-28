@@ -9,6 +9,7 @@ module.exports = function $projectService(
   likeRepository,
   projectRepository,
   projectUtils,
+  ratingRepository,
   reviewerRepository,
   scGateway,
   tagRepository,
@@ -28,6 +29,9 @@ module.exports = function $projectService(
     fund,
     update,
     remove,
+
+    // Rating
+    rate,
 
     // Likes
     like,
@@ -87,16 +91,18 @@ module.exports = function $projectService(
     let project = await getSimpleProject(projectId);
     project = _.omitBy(project, _.isNull);
 
-    const [liked, likes] = await Promise.all([
+    const [liked, likes, rating] = await Promise.all([
       likeRepository.check({
         projectId,
         userId: requesterId
       }),
-      likeRepository.countForProject(projectId)
+      likeRepository.countForProject(projectId),
+      ratingRepository.get(projectId)
     ]);
 
     project.liked = liked;
     project.likes = likes;
+    project.rating = rating;
 
     if (!project.reviewerId)
       project.reviewers = await reviewerRepository.get({
@@ -229,6 +235,25 @@ module.exports = function $projectService(
     ]);
 
     return projectId;
+  }
+
+  // RATING -------------------------------------------------------------------
+
+  async function rate(projectId, rating, requesterId) {
+    validationUtils.validateRating(rating);
+
+    await ratingRepository.patch({ projectId, userId: requesterId, rating });
+
+    logger.info({
+      message: 'Project rated by user',
+      project: {
+        id: projectId
+      },
+      user: {
+        id: requesterId
+      },
+      rating
+    });
   }
 
   // LIKES --------------------------------------------------------------------

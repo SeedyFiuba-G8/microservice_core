@@ -1,4 +1,4 @@
-module.exports = function $likeRepository(dbUtils, errors, knex, logger) {
+module.exports = function $likeRepository(dbUtils, errors, knex) {
   return {
     add,
     check,
@@ -21,49 +21,26 @@ module.exports = function $likeRepository(dbUtils, errors, knex, logger) {
           // Row already exists
           throw errors.create(409, 'Project is already liked.');
 
-        logger.error(err);
-        throw errors.UnknownError;
+        throw err;
       });
   }
 
   async function check(likeData) {
     const result = await knex('likes')
       .where(dbUtils.mapToDb(likeData))
-      .select('*')
-      .catch((err) => {
-        logger.error(err);
-        throw errors.UnknownError;
-      });
-
+      .select('*');
     return !!result.length;
   }
 
   async function countForProject(projectId) {
     const result = await knex('likes')
       .where(dbUtils.mapToDb({ projectId }))
-      .select('*')
-      .catch((err) => {
-        logger.error(err);
-        throw errors.UnknownError;
-      });
-
+      .select('*');
     return result.length;
   }
 
   async function remove(likeData) {
-    logger.debug({
-      message: 'Removing like from project',
-      likeData
-    });
-
-    const result = await knex('likes')
-      .where(dbUtils.mapToDb(likeData))
-      .del()
-      .catch((err) => {
-        logger.error(err);
-        throw errors.UnknownError;
-      });
-
+    const result = await knex('likes').where(dbUtils.mapToDb(likeData)).del();
     if (!result) throw errors.create(409, 'Project was not liked');
   }
 };

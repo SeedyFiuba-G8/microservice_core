@@ -14,6 +14,9 @@ module.exports = function $projectController(expressify, projectService) {
     update,
     remove,
 
+    // Rating
+    rate,
+
     // Likes
     like,
     dislike,
@@ -118,6 +121,18 @@ module.exports = function $projectController(expressify, projectService) {
     await projectService.remove(projectId, requesterId);
 
     return res.status(200).json({ id: projectId });
+  }
+
+  // RATING -------------------------------------------------------------------
+
+  async function rate(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    const { rating } = req.body;
+
+    await projectService.rate(projectId, rating, requesterId);
+
+    return res.status(204).send();
   }
 
   // LIKES --------------------------------------------------------------------

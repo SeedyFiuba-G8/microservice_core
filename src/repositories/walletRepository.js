@@ -1,4 +1,4 @@
-module.exports = function $walletRepository(dbUtils, errors, knex, logger) {
+module.exports = function $walletRepository(dbUtils, errors, knex) {
   return {
     create,
     get,
@@ -21,8 +21,7 @@ module.exports = function $walletRepository(dbUtils, errors, knex, logger) {
             'There is an existing wallet of the user with specified id.'
           );
 
-        logger.error(err);
-        throw errors.UnknownError;
+        throw err;
       });
   }
 

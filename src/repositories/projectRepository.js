@@ -47,8 +47,7 @@ module.exports = function $projectRepository(
             'A project with specified ID already exists.'
           );
 
-        logger.error(err);
-        throw errors.UnknownError;
+        throw err;
       });
 
     return addStages(projectInfo.id, projectInfo.stages);
@@ -269,12 +268,7 @@ module.exports = function $projectRepository(
       return stage;
     });
 
-    return knex('stages')
-      .insert(dbUtils.mapToDb(stagesList))
-      .catch((err) => {
-        logger.error(err);
-        throw errors.UnknownError;
-      });
+    return knex('stages').insert(dbUtils.mapToDb(stagesList));
   }
 
   /**
