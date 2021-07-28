@@ -31,10 +31,13 @@ module.exports = function $recommendationService(
       tags: new Set(),
       types: new Set()
     });
-    const mergedTypes = new Set([...(interests || []), ...types]);
+
+    const mergeWithInterests = (data) => [
+      ...new Set([...(interests || []), ...data])
+    ];
 
     return projectRepository.getMatchingIds(
-      { tags: [...tags], types: [...mergedTypes] },
+      { tags: mergeWithInterests(tags), types: mergeWithInterests(types) },
       userId
     );
   }
