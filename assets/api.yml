@@ -54,6 +54,18 @@ paths:
             $ref: '#/components/schemas/Id'
           description: The id of the reviewer of whom we want to retrieve projects.
         - in: query
+          name: recommended
+          required: false
+          schema:
+            $ref: '#/components/schemas/Boolean'
+          description: Fetch only recommendations.
+        - in: query
+          name: interests
+          required: false
+          schema:
+            $ref: '#/components/schemas/Interests'
+          description: User interests to get recommendations.
+        - in: query
           name: blocked
           required: false
           schema:
@@ -824,6 +836,12 @@ components:
       type: string
       format: uuid
       example: '123e4567-e89b-12d3-a456-426614174000'
+
+    Interests:
+      type: array
+      items:
+        type: string
+      example: ['music', 'entertainment', 'productivity']
 
     Picture:
       type: string

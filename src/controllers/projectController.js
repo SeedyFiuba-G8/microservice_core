@@ -65,11 +65,12 @@ module.exports = function $projectController(expressify, projectService) {
    */
   async function getPreviewsBy(req, res) {
     const requesterId = req.headers.uid;
-    const { filters, limit, offset, onlyFavorites } = parseFilters(req.query);
+    const { filters, limit, offset, onlyFavorites, recommended, interests } =
+      parseFilters(req.query);
+
     const projects = await projectService.getPreviewsBy(
-      filters,
-      limit,
-      offset,
+      { filters, limit, offset },
+      { recommended, interests },
       onlyFavorites,
       requesterId
     );
@@ -190,7 +191,9 @@ module.exports = function $projectController(expressify, projectService) {
       ]),
       limit: _.get(filters, 'limit'),
       offset: _.get(filters, 'offset'),
-      onlyFavorites: _.get(filters, 'onlyFavorites')
+      onlyFavorites: _.get(filters, 'onlyFavorites'),
+      recommended: _.get(filters, 'recommended'),
+      interests: _.get(filters, 'interests')
     };
   }
 };
