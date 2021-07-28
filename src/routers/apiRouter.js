@@ -3,6 +3,7 @@ const express = require('express');
 module.exports = function apiRouter(
   apiValidatorMiddleware,
   metricController,
+  notificationController,
   projectController,
   reviewerController,
   statusController,
@@ -57,6 +58,10 @@ module.exports = function apiRouter(
       // Fundings
       .get('/users/:userId/fundings', walletController.getFundings)
       .get('/users/fundings', walletController.getAllFundings)
+
+      // Notifications
+      .post('/users/:userId/pushToken', notificationController.pushToken)
+      .post('/users/:userId/message', notificationController.pushMessage)
 
       // Metrics
       .get('/metrics', metricController.getBasic)

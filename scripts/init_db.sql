@@ -1,4 +1,5 @@
 -- Drop pre-existent dbs
+DROP TABLE IF EXISTS public.notification_tokens;
 DROP TABLE IF EXISTS public.wallets;
 DROP TABLE IF EXISTS public.tags;
 DROP TABLE IF EXISTS public.likes;
@@ -72,8 +73,14 @@ CREATE TABLE public.ratings (
 );
 
 CREATE TABLE public.wallets (
-	user_id				VARCHAR(36)					NOT NULL		 PRIMARY KEY,
-	wallet_id			VARCHAR(36)					NOT NULL
+	user_id							VARCHAR(36)					NOT NULL		 PRIMARY KEY,
+	wallet_id						VARCHAR(36)					NOT NULL
+);
+
+CREATE TABLE public.notification_tokens (
+	user_id							VARCHAR(36)					NOT NULL,
+	token 							VARCHAR(255)				NOT NULL,
+	PRIMARY KEY (user_id, token)
 );
 
 CREATE TABLE public.stages (
