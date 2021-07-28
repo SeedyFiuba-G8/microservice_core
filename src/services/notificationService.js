@@ -28,7 +28,12 @@ module.exports = function $notificationService(
 
     logger.info(`Adding ExpoToken for user ${userId}`);
 
-    await scGateway.pushToken(await walletRepository.get(userId), token);
+    await scGateway.pushToken(
+      (
+        await walletRepository.get(userId)
+      ).walletId,
+      token
+    );
 
     return notificationRepository.push(userId, token);
   }
