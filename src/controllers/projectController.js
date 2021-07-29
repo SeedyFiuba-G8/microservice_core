@@ -2,27 +2,31 @@ const _ = require('lodash');
 
 module.exports = function $projectController(expressify, projectService) {
   return expressify({
-    block,
+    // Create
     create,
-    fund,
+
+    // Get
     get,
     getPreviewsBy,
-    unblock,
+
+    // Modify
+    fund,
     update,
-    remove
+    remove,
+
+    // Rating
+    rate,
+
+    // Likes
+    like,
+    dislike,
+
+    // Block
+    block,
+    unblock
   });
 
-  /**
-   * Blocks a project
-   *
-   * @returns {Promise}
-   */
-  async function block(req, res) {
-    const { projectId } = req.params;
-    await projectService.block(projectId);
-
-    return res.status(204).send();
-  }
+  // CREATE -------------------------------------------------------------------
 
   /**
    * Creates a new project and returns its id
@@ -37,6 +41,45 @@ module.exports = function $projectController(expressify, projectService) {
     return res.status(200).json({ id });
   }
 
+  // GET ----------------------------------------------------------------------
+
+  /**
+   * Gets a project by its id
+   *
+   * @returns {Promise}
+   */
+  async function get(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    const projectInfo = await projectService.get(projectId, requesterId);
+
+    return res.status(200).json(projectInfo);
+  }
+
+  /**
+   * Fetchs projects data from db that match filters specified in req.query.
+   *
+   * If no filters are specified, it retrieves all projects.
+   *
+   * @returns {Promise}
+   */
+  async function getPreviewsBy(req, res) {
+    const requesterId = req.headers.uid;
+    const { filters, limit, offset, onlyFavorites, recommended, interests } =
+      parseFilters(req.query);
+
+    const projects = await projectService.getPreviewsBy(
+      { filters, limit, offset },
+      { recommended, interests },
+      onlyFavorites,
+      requesterId
+    );
+
+    return res.status(200).json({ projects });
+  }
+
+  // MODIFY -------------------------------------------------------------------
+
   /**
    * Starts a project funding transaction, and returns it hash.
    *
@@ -50,44 +93,6 @@ module.exports = function $projectController(expressify, projectService) {
     const txHash = await projectService.fund(userId, projectId, amount);
 
     return res.status(200).json({ txHash });
-  }
-
-  /**
-   * Gets a project by its id
-   *
-   * @returns {Promise}
-   */
-  async function get(req, res) {
-    const { projectId } = req.params;
-    const projectInfo = await projectService.get(projectId);
-
-    return res.status(200).json(projectInfo);
-  }
-
-  /**
-   * Fetchs projects data from db that match filters specified in req.query.
-   *
-   * If no filters are specified, it retrieves all projects.
-   *
-   * @returns {Promise}
-   */
-  async function getPreviewsBy(req, res) {
-    const { filters, limit, offset } = parseFilters(req.query);
-    const projects = await projectService.getPreviewsBy(filters, limit, offset);
-
-    return res.status(200).json({ projects });
-  }
-
-  /**
-   * Unblocks a project
-   *
-   * @returns {Promise}
-   */
-  async function unblock(req, res) {
-    const { projectId } = req.params;
-    await projectService.unblock(projectId);
-
-    return res.status(204).send();
   }
 
   /**
@@ -119,7 +124,53 @@ module.exports = function $projectController(expressify, projectService) {
     return res.status(200).json({ id: projectId });
   }
 
-  // Aux
+  // RATING -------------------------------------------------------------------
+
+  async function rate(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    const { rating } = req.body;
+
+    await projectService.rate(projectId, rating, requesterId);
+
+    return res.status(204).send();
+  }
+
+  // LIKES --------------------------------------------------------------------
+
+  async function like(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    await projectService.like(projectId, requesterId);
+
+    return res.status(204).send();
+  }
+
+  async function dislike(req, res) {
+    const { projectId } = req.params;
+    const requesterId = req.headers.uid;
+    await projectService.dislike(projectId, requesterId);
+
+    return res.status(204).send();
+  }
+
+  // BLOCK --------------------------------------------------------------------
+
+  async function block(req, res) {
+    const { projectId } = req.params;
+    await projectService.block(projectId);
+
+    return res.status(204).send();
+  }
+
+  async function unblock(req, res) {
+    const { projectId } = req.params;
+    await projectService.unblock(projectId);
+
+    return res.status(204).send();
+  }
+
+  // AUX ----------------------------------------------------------------------
 
   /**
    * Parse the filters and pick the valid ones
@@ -139,7 +190,10 @@ module.exports = function $projectController(expressify, projectService) {
         'reviewerId'
       ]),
       limit: _.get(filters, 'limit'),
-      offset: _.get(filters, 'offset')
+      offset: _.get(filters, 'offset'),
+      onlyFavorites: _.get(filters, 'onlyFavorites'),
+      recommended: _.get(filters, 'recommended'),
+      interests: _.get(filters, 'interests')
     };
   }
 };

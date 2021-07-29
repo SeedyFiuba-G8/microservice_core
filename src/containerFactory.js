@@ -1,10 +1,12 @@
 const dependable = require('dependable');
 const path = require('path');
 const apiComponents = require('@seedyfiuba/api_components');
+const apikeysComponents = require('@seedyfiuba/apikeys_components');
 const dbComponents = require('@seedyfiuba/db_components');
 const errorComponents = require('@seedyfiuba/error_components');
 const gatewayComponents = require('@seedyfiuba/gateway_components');
 const loggingComponents = require('@seedyfiuba/logging_components');
+const notificationComponents = require('@seedyfiuba/notification_components');
 
 function createContainer() {
   const container = dependable.container();
@@ -24,6 +26,42 @@ function createContainer() {
     'apiValidatorMiddleware',
     function $apiValidatorMiddleware() {
       return apiComponents.apiValidatorMiddleware(apiPath);
+    }
+  );
+
+  container.register(
+    'apikeys',
+    function $apikeys(config, fetch, logger, urlFactory) {
+      return apikeysComponents.apikeys(config, fetch, logger, urlFactory);
+    }
+  );
+
+  container.register('apikeysCache', function $apikeysCache() {
+    return apikeysComponents.cache();
+  });
+
+  container.register('apikeyUtils', function $apikeyUtils(config, errors) {
+    return apikeysComponents.utils(config, errors);
+  });
+
+  container.register(
+    'validateApikeyMiddleware',
+    function $validateApikeyMiddleware(
+      apikeysCache,
+      config,
+      errors,
+      fetch,
+      logger,
+      urlFactory
+    ) {
+      return apikeysComponents.middleware(
+        apikeysCache,
+        config,
+        errors,
+        fetch,
+        logger,
+        urlFactory
+      );
     }
   );
 
@@ -56,10 +94,6 @@ function createContainer() {
     return config.events;
   });
 
-  container.register('fetch', function $commonFetch(config, errors) {
-    return gatewayComponents.fetch(config, errors);
-  });
-
   container.register(
     'errorHandlerMiddleware',
     function $errorHandlerMiddleware(logger) {
@@ -72,6 +106,14 @@ function createContainer() {
   container.register('expressify', function $expressify() {
     // eslint-disable-next-line global-require
     return require('expressify')();
+  });
+
+  container.register('fetch', function $commonFetch(config, errors, logger) {
+    return gatewayComponents.fetch(config, errors, logger);
+  });
+
+  container.register('sendNotifications', function $sendNotifications(logger) {
+    return notificationComponents.send(logger);
   });
 
   container.register('knex', function $knex(config) {
@@ -88,6 +130,14 @@ function createContainer() {
 
   container.register('services', function $services(config) {
     return config.services;
+  });
+
+  container.register('serviceInfo', function $serverInfo() {
+    return {
+      creationDate: new Date(),
+      description:
+        'Core microservice that manages projects with its tags, reviewers, funders, and so on.'
+    };
   });
 
   container.register('urlFactory', function $commonUrlFactory() {

@@ -80,6 +80,14 @@ module.exports = {
   },
   monitoring: true,
   services: {
+    apikeys: {
+      header: 'x-api-key',
+      baseUrl: 'https://sf-tdp2-apikeys-main.herokuapp.com/',
+      key: {
+        name: 'apikeys-validation-key',
+        value: _.get(process.env, 'APIKEYS_KEY', 'SeedyFiubaCore')
+      }
+    },
     sc: {
       baseUrl: _.get(process.env, 'SC_URL', 'https://sf-tdp2-sc.herokuapp.com/')
     }

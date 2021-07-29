@@ -6,8 +6,11 @@ module.exports = function $projectService(
   events,
   eventRepository,
   logger,
+  likeRepository,
   projectRepository,
   projectUtils,
+  ratingRepository,
+  recommendationService,
   reviewerRepository,
   scGateway,
   tagRepository,
@@ -15,64 +18,32 @@ module.exports = function $projectService(
   walletService
 ) {
   return {
-    block,
+    // Create
     create,
-    fund,
+
+    // Get
     get,
     getPreviewsBy,
     getSimpleProject,
-    unblock,
+
+    // Modify
+    fund,
     update,
-    remove
+    remove,
+
+    // Rating
+    rate,
+
+    // Likes
+    like,
+    dislike,
+
+    // Block
+    block,
+    unblock
   };
 
-  /**
-   * Blocks a project
-   *
-   * @returns {Promise}
-   */
-  async function block(projectId) {
-    await projectRepository.updateBy(
-      {
-        id: projectId,
-        blocked: false
-      },
-      {
-        blocked: true
-      }
-    );
-
-    logger.info({
-      message: 'Project blocked',
-      project: {
-        id: projectId
-      }
-    });
-  }
-
-  /**
-   * Unblocks a project
-   *
-   * @returns {Promise}
-   */
-  async function unblock(projectId) {
-    await projectRepository.updateBy(
-      {
-        id: projectId,
-        blocked: true
-      },
-      {
-        blocked: false
-      }
-    );
-
-    logger.info({
-      message: 'Project unblocked',
-      project: {
-        id: projectId
-      }
-    });
-  }
+  // CREATE -------------------------------------------------------------------
 
   /**
    * Creates a new project
@@ -110,6 +81,105 @@ module.exports = function $projectService(
     return id;
   }
 
+  // GET ----------------------------------------------------------------------
+
+  /**
+   * Fetchs project data of projectId
+   *
+   * @returns {Promise} Project
+   */
+  async function get(projectId, requesterId) {
+    let project = await getSimpleProject(projectId);
+    project = _.omitBy(project, _.isNull);
+
+    const [liked, likes, rated, rating] = await Promise.all([
+      likeRepository.check({
+        projectId,
+        userId: requesterId
+      }),
+      likeRepository.countForProject(projectId),
+      ratingRepository.get({
+        projectId,
+        userId: requesterId
+      }),
+      ratingRepository.getForProject(projectId)
+    ]);
+
+    project = {
+      ...project,
+      liked,
+      likes,
+      rated,
+      rating
+    };
+
+    if (!project.reviewerId)
+      project.reviewers = await reviewerRepository.get({
+        filters: { projectId: project.id },
+        select: ['reviewerId', 'status']
+      });
+
+    return project;
+  }
+
+  /**
+   * Fetchs all projects that match filters
+   *
+   * @returns {Promise} Project[]
+   */
+  async function getPreviewsBy(
+    { filters, limit, offset },
+    { recommended, interests },
+    onlyFavorites,
+    requesterId
+  ) {
+    const { tags } = filters;
+    const parsedFilters = _.omit(filters, 'tags');
+
+    // Recommendation System
+    let recommendedProjectIds;
+    if (recommended)
+      recommendedProjectIds = await recommendationService.recommendFor(
+        requesterId,
+        interests
+      );
+
+    // Search by tags
+    let tagSearchProjectIds;
+    if (tags) tagSearchProjectIds = await tagRepository.getProjects(tags);
+
+    const rawProjects = await projectRepository.get({
+      filters: parsedFilters,
+      select: projectUtils.previewFields,
+      limit,
+      offset,
+      projectIds: projectUtils.getIdsToFilter(
+        recommendedProjectIds,
+        tagSearchProjectIds
+      )
+    });
+
+    // Add `liked` to every project before returning
+    const projects = [];
+    const promises = [];
+    rawProjects.forEach(async (project) => {
+      const promise = likeRepository.check({
+        projectId: project.id,
+        userId: requesterId
+      });
+      promises.push(promise);
+      const liked = await promise;
+
+      if (!liked && onlyFavorites === true) return;
+      projects.push({ ...project, liked });
+    });
+
+    await Promise.all(promises);
+    return projects;
+  }
+
+  // MODIFY -------------------------------------------------------------------
+
   /**
    * Creates a new funding transaction in sc microservice
    *
@@ -125,62 +195,6 @@ module.exports = function $projectService(
     );
 
     return txHash;
-  }
-
-  /**
-   * Fetchs project data of projectId
-   *
-   * @returns {Promise} Project
-   */
-  async function get(projectId) {
-    let project = await getSimpleProject(projectId);
-    project = _.omitBy(project, _.isNull);
-
-    if (!project.reviewerId)
-      project.reviewers = await reviewerRepository.get({
-        filters: { projectId: project.id },
-        select: ['reviewerId', 'status']
-      });
-
-    return project;
-  }
-
-  /**
-   * Fetchs all projects that match filters,
-   *
-   * @returns {Promise} Project[]
-   */
-  async function getPreviewsBy(filters, limit, offset) {
-    const previewFields = [
-      'id',
-      'status',
-      'blocked',
-      'title',
-      'description',
-      'type',
-      'objective',
-      'country',
-      'city',
-      'finalizedBy',
-      'tags',
-      'coverPicUrl'
-    ];
-    const { tags } = filters;
-    const parsedFilters = _.omit(filters, 'tags');
-
-    // Search by tags
-    let projectIds;
-    if (tags) {
-      projectIds = await tagRepository.getProjects(tags);
-    }
-
-    return projectRepository.get({
-      filters: parsedFilters,
-      select: previewFields,
-      limit,
-      offset,
-      projectIds
-    });
   }
 
   /**
@@ -227,7 +241,100 @@ module.exports = function $projectService(
     return projectId;
   }
 
-  // Aux
+  // RATING -------------------------------------------------------------------
+
+  async function rate(projectId, rating, requesterId) {
+    validationUtils.validateRating(rating);
+
+    await ratingRepository.patch({ projectId, userId: requesterId, rating });
+
+    logger.info({
+      message: 'Project rated by user',
+      project: {
+        id: projectId
+      },
+      user: {
+        id: requesterId
+      },
+      rating
+    });
+  }
+
+  // LIKES --------------------------------------------------------------------
+
+  async function like(projectId, requesterId) {
+    await likeRepository.add({ projectId, userId: requesterId });
+
+    logger.info({
+      message: 'Project liked by user',
+      project: {
+        id: projectId
+      },
+      user: {
+        id: requesterId
+      }
+    });
+  }
+
+  async function dislike(projectId, requesterId) {
+    await likeRepository.remove({
+      projectId,
+      userId: requesterId
+    });
+
+    logger.info({
+      message: 'Project disliked by user',
+      project: {
+        id: projectId
+      },
+      user: {
+        id: requesterId
+      }
+    });
+  }
+
+  // BLOCK --------------------------------------------------------------------
+
+  async function block(projectId) {
+    await projectRepository.updateBy(
+      {
+        id: projectId,
+        blocked: false
+      },
+      {
+        blocked: true
+      }
+    );
+
+    logger.info({
+      message: 'Project blocked',
+      project: {
+        id: projectId
+      }
+    });
+  }
+
+  async function unblock(projectId) {
+    await projectRepository.updateBy(
+      {
+        id: projectId,
+        blocked: true
+      },
+      {
+        blocked: false
+      }
+    );
+
+    logger.info({
+      message: 'Project unblocked',
+      project: {
+        id: projectId
+      }
+    });
+  }
+
+  // AUX ----------------------------------------------------------------------
+
   /**
    * Sets the current stage of a project.
    * Must be called by reviewer.

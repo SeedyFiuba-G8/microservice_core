@@ -1,7 +1,13 @@
 module.exports = function $validationUtils(config, errors) {
   return {
-    validateProjectInfo
+    validateProjectInfo,
+    validateRating
   };
+
+  function validateRating(rating) {
+    if (rating <= 0 || rating > 5)
+      throw errors.create(400, 'Invalid rating. It must be within 1-5!');
+  }
 
   /**
    * Validates that projectInfo respects the model constraints

@@ -1,6 +1,9 @@
 -- Drop pre-existent dbs
+DROP TABLE IF EXISTS public.notification_tokens;
 DROP TABLE IF EXISTS public.wallets;
 DROP TABLE IF EXISTS public.tags;
+DROP TABLE IF EXISTS public.likes;
+DROP TABLE IF EXISTS public.ratings;
 DROP TABLE IF EXISTS public.reviewers;
 DROP TABLE IF EXISTS public.project_hashes;
 DROP TABLE IF EXISTS public.stages;
@@ -30,7 +33,7 @@ CREATE TABLE public.projects (
 CREATE TABLE public.reviewers (
 	project_id			VARCHAR(36)					NOT NULL,
 	reviewer_id			VARCHAR(36)					NOT NULL,
-	status					VARCHAR(20)					NOT NULL,
+	status				VARCHAR(20)					NOT NULL,
 
     PRIMARY KEY (project_id, reviewer_id)
 );
@@ -46,9 +49,38 @@ CREATE TABLE public.tags (
       ON DELETE CASCADE
 );
 
+CREATE TABLE public.likes (
+	project_id			VARCHAR(36)					NOT NULL,
+	user_id				VARCHAR(36)					NOT NULL,
+
+    PRIMARY KEY (project_id, user_id),
+    CONSTRAINT fk_project
+      FOREIGN KEY(project_id) 
+	  REFERENCES public.projects(id)
+      ON DELETE CASCADE
+);
+
+CREATE TABLE public.ratings (
+	project_id			VARCHAR(36)			NOT NULL,
+	user_id				VARCHAR(36)			NOT NULL,
+	rating				INTEGER				NOT NULL	CHECK (rating > 0 and rating <= 5),
+
+    PRIMARY KEY (project_id, user_id),
+    CONSTRAINT fk_project
+      FOREIGN KEY(project_id) 
+	  REFERENCES public.projects(id)
+      ON DELETE CASCADE
+);
+
 CREATE TABLE public.wallets (
-	user_id				VARCHAR(36)					NOT NULL		 PRIMARY KEY,
-	wallet_id			VARCHAR(36)					NOT NULL
+	user_id							VARCHAR(36)					NOT NULL		 PRIMARY KEY,
+	wallet_id						VARCHAR(36)					NOT NULL
+);
+
+CREATE TABLE public.notification_tokens (
+	user_id							VARCHAR(36)					NOT NULL,
+	token 							VARCHAR(255)				NOT NULL,
+	PRIMARY KEY (user_id, token)
 );
 
 CREATE TABLE public.stages (

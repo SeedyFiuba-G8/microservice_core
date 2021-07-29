@@ -1,8 +1,25 @@
 const _ = require('lodash');
 
 module.exports = function projectUtils(errors) {
+  const previewFields = [
+    'id',
+    'status',
+    'blocked',
+    'title',
+    'description',
+    'type',
+    'objective',
+    'country',
+    'city',
+    'finalizedBy',
+    'tags',
+    'coverPicUrl'
+  ];
+
   return {
-    buildProjectInfo
+    buildProjectInfo,
+    getIdsToFilter,
+    previewFields
   };
 
   /**
@@ -42,5 +59,18 @@ module.exports = function projectUtils(errors) {
     }
 
     return projectInfo;
+  }
+
+  function getIdsToFilter(recommendedProjectIds, tagSearchProjectIds) {
+    if (
+      recommendedProjectIds === undefined &&
+      tagSearchProjectIds === undefined
+    )
+      return undefined;
+
+    return _.union(
+      recommendedProjectIds?.length > 0 ? recommendedProjectIds : [],
+      tagSearchProjectIds?.length > 0 ? tagSearchProjectIds : []
+    );
   }
 };

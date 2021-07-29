@@ -11,6 +11,9 @@ module.exports = function $projectRepository(
     count,
     create,
     get,
+    getByIdOrUser,
+    getMatchingIds,
+    getProjectId,
     getTxHash,
     update,
     updateBy,
@@ -46,8 +49,7 @@ module.exports = function $projectRepository(
             'A project with specified ID already exists.'
           );
 
-        logger.error(err);
-        throw errors.UnknownError;
+        throw err;
       });
 
     return addStages(projectInfo.id, projectInfo.stages);
@@ -86,6 +88,45 @@ module.exports = function $projectRepository(
     }
 
     return projects;
+  }
+
+  /**
+   * Gets projects by id or created by user
+   *
+   * @returns {Promise}
+   */
+  async function getByIdOrUser({ projectIds, userId }, select) {
+    return knex('projects')
+      .select(dbUtils.mapToDb(select))
+      .whereIn('id', projectIds)
+      .orWhere('user_id', userId)
+      .then(dbUtils.mapFromDb);
+  }
+
+  /**
+   * Gets project ids for matching projects
+   */
+  async function getMatchingIds({ tags, types }, userId) {
+    // Fun fact: tags are injected rawless in query,
+    // so... I can wait to see all those ';DROP DATABASE` tags :P
+    // TODO: Sanitize tags.
+
+    return (
+      knex('projects')
+        .select(['id'])
+        .whereNot(dbUtils.mapToDb({ userId }))
+
+        // eslint-disable-next-line
+        .andWhere(function () {
+          const reducer = (query, tag) =>
+            query.orWhereRaw('? = ANY(tags)', tag);
+
+          tags.reduce(reducer, this.whereIn('type', types));
+        })
+
+        .then(dbUtils.mapFromDb)
+        .then((res) => res.map(({ id }) => id))
+    );
   }
 
   /**
@@ -147,6 +188,32 @@ module.exports = function $projectRepository(
     }
 
     return projectHash.txHash;
+  }
+
+  /**
+   * Gets the txHash of a project, by its id.
+   *
+   * The txHash is the smart contract's id of the project.
+   *
+   * @param {String} projectTxHash
+   * @returns {Promise} projectId
+   */
+  async function getProjectId(txHash) {
+    const projectId = (
+      await knex('project_hashes')
+        .where(dbUtils.mapToDb({ txHash }))
+        .select('project_id')
+        .then(dbUtils.mapFromDb)
+    )[0];
+
+    if (!projectId) {
+      throw errors.create(
+        404,
+        `The project with ${txHash} was not found in the database`
+      );
+    }
+
+    return projectId.projectId;
   }
 
   /**
@@ -242,12 +309,7 @@ module.exports = function $projectRepository(
       return stage;
     });
 
-    return knex('stages')
-      .insert(dbUtils.mapToDb(stagesList))
-      .catch((err) => {
-        logger.error(err);
-        throw errors.UnknownError;
-      });
+    return knex('stages').insert(dbUtils.mapToDb(stagesList));
   }
 
   /**

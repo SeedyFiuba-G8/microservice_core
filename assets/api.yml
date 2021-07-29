@@ -29,6 +29,11 @@ tags:
 
 # =============================================================================
 
+security:
+  - ApiKeyAuth: []
+
+# =============================================================================
+
 paths:
   # PROJECTS
   /projects:
@@ -49,10 +54,22 @@ paths:
             $ref: '#/components/schemas/Id'
           description: The id of the reviewer of whom we want to retrieve projects.
         - in: query
+          name: recommended
+          required: false
+          schema:
+            $ref: '#/components/schemas/Boolean'
+          description: Fetch only recommendations.
+        - in: query
+          name: interests
+          required: false
+          schema:
+            $ref: '#/components/schemas/Interests'
+          description: User interests to get recommendations.
+        - in: query
           name: blocked
           required: false
           schema:
-            $ref: '#/components/schemas/Blocked'
+            $ref: '#/components/schemas/Boolean'
           description: Whether the project is blocked or not.
         - in: query
           name: type
@@ -74,6 +91,12 @@ paths:
             $ref: '#/components/schemas/ProjectStatus'
           description: Status of project to retrieve.
         - in: query
+          name: onlyFavorites
+          required: false
+          schema:
+            $ref: '#/components/schemas/Boolean'
+          description: Flag to retrieve only favorite projects.
+        - in: query
           name: limit
           required: false
           schema:
@@ -85,6 +108,12 @@ paths:
           schema:
             type: integer
           description: The number of projects we want to take as offset.
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user
       tags:
         - Projects
       responses:
@@ -115,7 +144,7 @@ paths:
 
   /projects/{projectId}:
     get:
-      summary: Get a project by id.
+      summary: Get a project by id
       description: Allows a user to retrieve a project's information by its id.
       tags:
         - Projects
@@ -126,6 +155,12 @@ paths:
             $ref: '#/components/schemas/Id'
           required: true
           description: uuid of the project to retrieve
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user
       responses:
         200:
           $ref: '#/components/responses/getProject'
@@ -133,7 +168,7 @@ paths:
           $ref: '#/components/responses/Error'
 
     patch:
-      summary: Modify the information of the project.
+      summary: Modify the information of the project
       description: Allows an owner of a project or an admin to modify >
        the information of a project. Allows a reviewer of a project to >
        mark stage(s) as completed, by patching lastCompletedStage.
@@ -168,7 +203,7 @@ paths:
           $ref: '#/components/responses/Error'
 
     delete:
-      summary: Delete a project by id.
+      summary: Delete a project by id
       description: Allows an owner of a project or an admin to delete a project.
       tags:
         - Projects
@@ -255,6 +290,81 @@ paths:
         default:
           $ref: '#/components/responses/Error'
 
+  /projects/{projectId}/like:
+    post:
+      summary: Like a project
+      description: Allow users to like projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user
+      responses:
+        204:
+          description: 'Project liked successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+    delete:
+      summary: Dislike a project
+      description: Allow users to dislike projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user
+      responses:
+        204:
+          description: 'Project disliked successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /projects/{projectId}/rating:
+    put:
+      summary: Rate a project
+      description: Allow users to rate projects.
+      tags:
+        - Projects
+      parameters:
+        - in: path
+          name: projectId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the project
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user
+      requestBody:
+        $ref: '#/components/requestBodies/putRatingRequest'
+      responses:
+        204:
+          description: 'Project rated successfully.'
+        default:
+          $ref: '#/components/responses/Error'
 
   # REVIEWERS
   /reviewrequests/{reviewerId}:
@@ -383,7 +493,7 @@ paths:
 
   /wallets/{userId}:
     get:
-      summary: Get a wallet by its user id.
+      summary: Get a wallet by its user id
       description: Allows a user to retrieve a wallet's information by its id.
       tags:
         - Wallets
@@ -399,8 +509,141 @@ paths:
           $ref: '#/components/responses/getWallet'
         default:
           $ref: '#/components/responses/Error'
+
+  /wallets/{walletAddress}/funds:
+    post:
+      summary: Transfer funds to an external wallet
+      description: Allows a user to transfer funds to walletAddress.
+      tags:
+        - Wallets
+      parameters:
+        - in: path
+          name: walletAddress
+          schema:
+            $ref: '#/components/schemas/Address'
+          required: true
+          description: address of the wallet we want to transfer funds
+        - in: header
+          name: uid
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: uuid of the user that wants to transfer the funds
+      requestBody:
+        $ref: '#/components/requestBodies/transferFunds'
+      responses:
+        200:
+          $ref: '#/components/responses/transferFunds'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{userId}/fundings:
+    get:
+      summary: Get the project fundings made by a user
+      description: Allows a user to retrieve a the project funding information of a user by its id.
+      tags:
+        - Wallets
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: id of the user whose project fundings we want to retrieve
+      responses:
+        200:
+          $ref: '#/components/responses/getWalletFundings'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{userId}/pushToken:
+    post:
+      summary: Post a user's expo push notification token
+      description: Allows a user to post a user's expo push notification token.
+      tags:
+        - Notifications
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: id of the user whose token we want to post
+      requestBody:
+        $ref: '#/components/requestBodies/pushTokenData'
+      responses:
+        200:
+          $ref: '#/components/responses/pushToken'
+        default:
+          $ref: '#/components/responses/Error'
+
+    delete:
+      summary: Remove a user's token
+      description: Allows a user to remove its push notifications token
+      tags:
+        - Notifications
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: id of the user whose token we want to remove
+        - in: header
+          name: expo-token
+          schema:
+            $ref: '#/components/schemas/ExpoToken'
+          description: push expoToken of the user
+      responses:
+        200:
+          description: 'Token removed successfully.'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/{userId}/message:
+    post:
+      summary: Post a notification message to a user
+      description: Allows a user to post a expo message push notification to another user.
+      tags:
+        - Notifications
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            $ref: '#/components/schemas/Id'
+          required: true
+          description: id of the user who will receive the notification message
+      requestBody:
+        $ref: '#/components/requestBodies/pushMessageData'
+      responses:
+        200:
+          $ref: '#/components/responses/pushMessage'
+        default:
+          $ref: '#/components/responses/Error'
+
+  /users/fundings:
+    get:
+      summary: Get the project fundings made by a user
+      description: Allows a user to retrieve all project funding information.
+      tags:
+        - Wallets
+      responses:
+        200:
+          $ref: '#/components/responses/getAllFundings'
+        default:
+          $ref: '#/components/responses/Error'
   
   # STATUS
+  /info:
+    get:
+      tags:
+        - Status
+      responses:
+        200:
+          $ref: '#/components/responses/info'
+        default:
+          $ref: '#/components/responses/Error'
+
   /health:
     get:
       tags:
@@ -425,13 +668,20 @@ paths:
 
 components:
   # ---------------------------------------------------------------------------
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  # ---------------------------------------------------------------------------
   requestBodies:
     fundProjectData:
       required: true
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/FundProjectData'
+            $ref: '#/components/schemas/PostFundsData'
 
     postProject:
       required: true
@@ -454,13 +704,40 @@ components:
           schema:
             $ref: '#/components/schemas/PutReviewRequest'
 
+    putRatingRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PutRatingRequest'
+
     postWalletData:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/PostWalletData'
- 
+
+    transferFunds:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostFundsData'
+
+    pushMessageData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PushMessageData'
+
+    pushTokenData:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PushTokenData'
   # ---------------------------------------------------------------------------
   responses:
     Error:
@@ -537,6 +814,41 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Address'
+
+    getWalletFundings:
+      description: Wallet fundings retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fundings'
+
+    getAllFundings:
+      description: Fundings retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Fundings'
+
+    transferFunds:
+      description: Funds transferring transaction initialized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TxHash'
+
+    pushToken:
+      description: Token registered successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Id'
+
+    pushMessage:
+      description: Message pushed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Id'
     
     # METRICS
     getBasicMetrics:
@@ -554,6 +866,13 @@ components:
             $ref: '#/components/schemas/EventMetrics'
     
     # STATUS
+    info:
+      description: Microservice general info reported.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Info'
+
     health:
       description: Microservice general health state reported.
       content:
@@ -592,7 +911,7 @@ components:
       type: string
       example: '0xf018Be4Fe4fBD4cA1B1162A44bB139a343C2087b'
 
-    Blocked:
+    Boolean:
       type: boolean
       example: false
     
@@ -610,9 +929,32 @@ components:
       format: uuid
       example: '123e4567-e89b-12d3-a456-426614174000'
 
+    Interests:
+      type: array
+      items:
+        type: string
+      example: ['music', 'entertainment', 'productivity']
+
     Picture:
       type: string
       example: 'https://imgur.com/gallery/rFvivtw'
+
+    Rated:
+      type: integer
+      example: 3
+
+    Rating:
+      type: object
+      properties:
+        samples: 
+          type: integer
+          example: 25
+        mean:
+          type: number
+          example: 3.6
+      required:
+        - samples
+        - mean
 
     Stage:
       type: object
@@ -637,6 +979,10 @@ components:
       type: string
       example: '0x30b003c570eccaf1705acd4621f72993acb51715f8decbf61535f21376cfe1d2'
 
+    ExpoToken:
+      type: string
+      example: 'ExponentPushToken[AbCdEfGHO1YJKlm_NStuvw]'
+
     # PROJECTS
     AllProjects:
       type: object
@@ -648,7 +994,7 @@ components:
       required:
         - projects
 
-    FundProjectData:
+    PostFundsData:
       type: object
       properties:
         amount:
@@ -663,10 +1009,21 @@ components:
           $ref: '#/components/schemas/Id'
         status:
           $ref: '#/components/schemas/ProjectStatus'
+        blocked:
+          $ref: '#/components/schemas/Boolean'
         userId:
           $ref: '#/components/schemas/Id'
         reviewerId:
           $ref: '#/components/schemas/Id'
+        liked:
+          $ref: '#/components/schemas/Boolean'
+        likes:
+          type: integer
+          example: 345
+        rating:
+          $ref: '#/components/schemas/Rating'
+        rated:
+          $ref: '#/components/schemas/Rated'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -712,7 +1069,12 @@ components:
       required:
         - id
         - status
+        - blocked
         - userId
+        - liked
+        - likes
+        - rating
+        - rated
         - title
         - description
         - type
@@ -736,7 +1098,9 @@ components:
         status:
           $ref: '#/components/schemas/ProjectStatus'
         blocked:
-          $ref: '#/components/schemas/Blocked'
+          $ref: '#/components/schemas/Boolean'
+        liked:
+          $ref: '#/components/schemas/Boolean'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -1019,6 +1383,15 @@ components:
         - contributors
         - contributions
 
+    PutRatingRequest:
+      type: object
+      properties:
+        rating:
+          type: integer
+          example: 4
+      required:
+        - rating
+    
     PutReviewRequest:
       type: object
       properties:
@@ -1046,6 +1419,52 @@ components:
           $ref: '#/components/schemas/Id'
       required:
         - uid
+
+    Funding:
+      type: object
+      properties:
+        userId:
+          $ref: '#/components/schemas/Id'
+        txHash:
+          $ref: '#/components/schemas/Hash'
+        projectId:
+          $ref: '#/components/schemas/Id'
+        amount:
+          $ref: '#/components/schemas/ETHAmount'
+        date:
+          $ref: '#/components/schemas/Date'
+      required:
+        - userId
+        - txHash
+        - projectId
+        - amount
+        - date
+
+    Fundings:
+      type: array
+      items:
+        $ref: '#/components/schemas/Funding'
+
+    PushTokenData:
+      type: object
+      properties:
+        token:
+          $ref: '#/components/schemas/ExpoToken'
+      required:
+        - token
+
+    PushMessageData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: 'Hola! Como va?'
+        fromUser:
+          type: string
+          example: 'Juan Perez'
+      required:
+        - message
+        - fromUser
     
     # METRICS
     BasicMetrics:
@@ -1087,6 +1506,18 @@ components:
         - publish
     
     # STATUS
+    Info:
+      type: object
+      properties:
+        creationDate:
+          $ref: '#/components/schemas/Date'
+        description:
+          type: string
+          example: 'Service description!'
+      required:
+        - creationDate
+        - description
+
     Ping:
       type: object
       properties:
