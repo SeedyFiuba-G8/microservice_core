@@ -92,18 +92,26 @@ module.exports = function $projectService(
     let project = await getSimpleProject(projectId);
     project = _.omitBy(project, _.isNull);
 
-    const [liked, likes, rating] = await Promise.all([
+    const [liked, likes, rated, rating] = await Promise.all([
       likeRepository.check({
         projectId,
         userId: requesterId
       }),
       likeRepository.countForProject(projectId),
-      ratingRepository.get(projectId)
+      ratingRepository.get({
+        projectId,
+        userId: requesterId
+      }),
+      ratingRepository.getForProject(projectId)
     ]);
 
-    project.liked = liked;
-    project.likes = likes;
-    project.rating = rating;
+    project = {
+      ...project,
+      liked,
+      likes,
+      rated,
+      rating
+    };
 
     if (!project.reviewerId)
       project.reviewers = await reviewerRepository.get({

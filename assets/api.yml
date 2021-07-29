@@ -939,6 +939,10 @@ components:
       type: string
       example: 'https://imgur.com/gallery/rFvivtw'
 
+    Rated:
+      type: integer
+      example: 3
+
     Rating:
       type: object
       properties:
@@ -1018,6 +1022,8 @@ components:
           example: 345
         rating:
           $ref: '#/components/schemas/Rating'
+        rated:
+          $ref: '#/components/schemas/Rated'
         title:
           type: string
           example: 'Prohibir la utilizacion de Winbugs globalmente'
@@ -1068,6 +1074,7 @@ components:
         - liked
         - likes
         - rating
+        - rated
         - title
         - description
         - type
