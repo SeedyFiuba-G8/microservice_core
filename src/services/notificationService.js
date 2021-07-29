@@ -53,7 +53,8 @@ module.exports = function $notificationService(
         to: token,
         sound: 'default',
         title: fromUser,
-        body: message
+        body: message,
+        data: { type: 'message' }
       })
     );
 
