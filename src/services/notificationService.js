@@ -4,27 +4,38 @@ module.exports = function $notificationService(
   errors,
   logger,
   notificationRepository,
-  sendNotifications
+  sendNotifications,
+  scGateway,
+  walletRepository
 ) {
   return {
     pushMessage,
-    pushToken
+    pushToken,
+    removeToken
   };
 
   /**
+   * Add a user's expo push token
    *
    * @param {String} userId
    * @param {String} token
    * @returns {Promise}
    */
   async function pushToken(userId, token) {
-    logger.info(`Adding ExpoToken for user ${userId}`);
-
     if (!Expo.isExpoPushToken(token))
       throw errors.create(
         400,
         `Push token ${token} is not a valid Expo push token`
       );
+
+    logger.info(`Adding ExpoToken for user ${userId}`);
+
+    await scGateway.pushToken(
+      (
+        await walletRepository.get(userId)
+      ).walletId,
+      token
+    );
 
     return notificationRepository.push(userId, token);
   }
@@ -47,5 +58,25 @@ module.exports = function $notificationService(
     );
 
     return sendNotifications(notifications);
+  }
+
+  /**
+   * Remove a user's expo push token
+   *
+   * @param {String} userId
+   * @param {String} token
+   * @returns {Promise}
+   */
+  async function removeToken(userId, token) {
+    logger.info(`Removing ExpoToken for user ${userId}`);
+
+    await scGateway.removeToken(
+      (
+        await walletRepository.get(userId)
+      ).walletId,
+      token
+    );
+
+    return notificationRepository.remove(userId, token);
   }
 };
