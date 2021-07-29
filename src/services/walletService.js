@@ -79,6 +79,14 @@ module.exports = function $walletService(
       return undefined;
     }
 
-    return { userId, projectId, date, amount, txHash };
+    const { title, type, status } = (
+      await projectRepository.get({
+        filters: {
+          id: projectId
+        }
+      })
+    )[0];
+
+    return { userId, projectId, date, amount, txHash, title, type, status };
   }
 };
