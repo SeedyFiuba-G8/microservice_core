@@ -23,14 +23,6 @@ module.exports = {
       objective: {
         min: 0,
         max: 255
-      },
-      country: {
-        min: 0,
-        max: 20
-      },
-      city: {
-        min: 0,
-        max: 20
       }
     },
     tags: {
@@ -81,6 +73,7 @@ module.exports = {
   monitoring: true,
   services: {
     apikeys: {
+      enabled: true,
       header: 'x-api-key',
       baseUrl: 'https://sf-tdp2-apikeys-main.herokuapp.com/',
       key: {
