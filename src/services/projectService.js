@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { v4: uuidv4 } = require('uuid');
+const { getDistance } = require('geolib');
 
 module.exports = function $projectService(
   errors,
@@ -129,6 +130,7 @@ module.exports = function $projectService(
   async function getPreviewsBy(
     { filters, limit, offset },
     { recommended, interests },
+    near,
     onlyFavorites,
     requesterId
   ) {
@@ -147,7 +149,7 @@ module.exports = function $projectService(
     let tagSearchProjectIds;
     if (tags) tagSearchProjectIds = await tagRepository.getProjects(tags);
 
-    const rawProjects = await projectRepository.get({
+    const projects = await projectRepository.get({
       filters: parsedFilters,
       select: projectUtils.previewFields,
       limit,
@@ -158,7 +160,33 @@ module.exports = function $projectService(
       )
     });
 
-    // Add `liked` to every project before returning
+    return addLikeInfo(
+      filterByDistance(projects, near),
+      requesterId,
+      onlyFavorites
+    );
+  }
+
+  function filterByDistance(projects, near) {
+    if (!near) return projects;
+    const { lat, long, radius } = near;
+    if (lat === undefined || long === undefined || radius === undefined)
+      throw errors.create(400, 'Near query params missing.');
+
+    return projects.filter((project) => {
+      const { lat: projectLat, long: projectLong } = project;
+      if (projectLat === undefined || projectLong === undefined) return false;
+
+      const distance = getDistance(
+        { latitude: projectLat, longitude: projectLong },
+        { latitude: lat, longitude: long }
+      );
+
+      return distance / 1000 <= radius;
+    });
+  }
+
+  async function addLikeInfo(rawProjects, requesterId, onlyFavorites) {
     const projects = [];
     const promises = [];
     rawProjects.forEach(async (project) => {

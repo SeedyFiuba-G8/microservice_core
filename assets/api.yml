@@ -48,6 +48,25 @@ paths:
             $ref: '#/components/schemas/Id'
           description: The userId of whom we want to retrieve projects.
         - in: query
+          name: lat
+          required: false
+          schema:
+            $ref: '#/components/schemas/Coordinate'
+          description: Latitude.
+        - in: query
+          name: long
+          required: false
+          schema:
+            $ref: '#/components/schemas/Coordinate'
+          description: Longitude.
+        - in: query
+          name: radius
+          required: false
+          schema:
+            type: number
+            example: 6.7
+          description: Distance radius in km.
+        - in: query
           name: reviewerId
           required: false
           schema:
