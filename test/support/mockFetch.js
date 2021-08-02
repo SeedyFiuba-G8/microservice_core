@@ -51,7 +51,7 @@ module.exports = function mockFetch(config) {
       }
 
       default:
-        console.log('got fetch', method, url);
+        // console.log('got fetch', method, url);
         return { status: 404, data: {} };
     }
     return { status: 404, data: {} };
