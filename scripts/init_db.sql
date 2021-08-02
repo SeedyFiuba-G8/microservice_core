@@ -23,8 +23,8 @@ CREATE TABLE public.projects (
 	cover_pic_url		VARCHAR(255),
 	type				VARCHAR(20)					NOT NULL,
 	objective			VARCHAR(255)				NOT NULL,
-	country				VARCHAR(20)					NOT NULL,
-	city				VARCHAR(20)					NOT NULL,
+	lat					FLOAT,
+	long				FLOAT,
 	published_on		TIMESTAMP WITH TIME ZONE	NOT NULL	DEFAULT CURRENT_TIMESTAMP(2),
 	finalized_by		TIMESTAMP WITH TIME ZONE	NOT NULL	DEFAULT CURRENT_TIMESTAMP(2),
 	tags				VARCHAR(20) ARRAY[12]		NOT NULL 	DEFAULT '{}'

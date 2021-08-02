@@ -65,12 +65,20 @@ module.exports = function $projectController(expressify, projectService) {
    */
   async function getPreviewsBy(req, res) {
     const requesterId = req.headers.uid;
-    const { filters, limit, offset, onlyFavorites, recommended, interests } =
-      parseFilters(req.query);
+    const {
+      filters,
+      limit,
+      offset,
+      onlyFavorites,
+      near,
+      recommended,
+      interests
+    } = parseFilters(req.query);
 
     const projects = await projectService.getPreviewsBy(
       { filters, limit, offset },
       { recommended, interests },
+      near,
       onlyFavorites,
       requesterId
     );
@@ -180,20 +188,27 @@ module.exports = function $projectController(expressify, projectService) {
    * @returns {Object}
    */
   function parseFilters(filters) {
-    return {
-      filters: _.pick(filters, [
-        'userId',
-        'blocked',
-        'type',
-        'tags',
-        'status',
-        'reviewerId'
-      ]),
-      limit: _.get(filters, 'limit'),
-      offset: _.get(filters, 'offset'),
-      onlyFavorites: _.get(filters, 'onlyFavorites'),
-      recommended: _.get(filters, 'recommended'),
-      interests: _.get(filters, 'interests')
-    };
+    const nearFields = _.pick(filters, ['lat', 'long', 'radius']);
+    const near = !_.isEmpty(nearFields) ? nearFields : undefined;
+
+    return _.omitBy(
+      {
+        filters: _.pick(filters, [
+          'userId',
+          'blocked',
+          'type',
+          'tags',
+          'status',
+          'reviewerId'
+        ]),
+        limit: _.get(filters, 'limit'),
+        offset: _.get(filters, 'offset'),
+        near,
+        onlyFavorites: _.get(filters, 'onlyFavorites'),
+        recommended: _.get(filters, 'recommended'),
+        interests: _.get(filters, 'interests')
+      },
+      _.isUndefined
+    );
   }
 };

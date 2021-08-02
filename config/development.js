@@ -24,6 +24,7 @@ module.exports = {
   monitoring: false,
   services: {
     apikeys: {
+      enabled: false,
       baseUrl: _.get(
         process.env,
         'APIKEYS_URL',
