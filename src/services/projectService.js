@@ -113,27 +113,6 @@ module.exports = function $projectService(
       rating
     };
 
-    const [liked, likes, rated, rating] = await Promise.all([
-      likeRepository.check({
-        projectId,
-        userId: requesterId
-      }),
-      likeRepository.countForProject(projectId),
-      ratingRepository.get({
-        projectId,
-        userId: requesterId
-      }),
-      ratingRepository.getForProject(projectId)
-    ]);
-
-    project = {
-      ...project,
-      liked,
-      likes,
-      rated,
-      rating
-    };
-
     if (!project.reviewerId)
       project.reviewers = await reviewerRepository.get({
         filters: { projectId: project.id },
