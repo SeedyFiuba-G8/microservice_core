@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 module.exports = function $validationUtils(config, errors) {
   return {
     validateProjectInfo,
@@ -26,13 +28,16 @@ module.exports = function $validationUtils(config, errors) {
         );
     });
 
-    const { tags, reviewers, stages } = projectInfo;
+    const { tags, reviewers, stages, lat, long } = projectInfo;
 
-    // Reviewers validation
+    // Coordinates validation
+    validateCoordinates(lat, long);
+
     if (reviewers !== undefined) {
+      // Reviewers validation
       const { max: maxReviewers } = config.constraints.reviewers;
 
-      if (reviewers && reviewers.length > maxReviewers)
+      if (reviewers?.length > maxReviewers)
         throw errors.create(
           400,
           `Too many reviewers! Up to ${maxReviewers} are allowed`
@@ -74,6 +79,26 @@ module.exports = function $validationUtils(config, errors) {
           );
       });
     }
+  }
+
+  function validateCoordinates(lat, long) {
+    if (lat === undefined && long === undefined) return;
+
+    if ((lat && long === undefined) || (long && lat === undefined))
+      throw errors.create(
+        400,
+        'Lat and long should be sent together or not sent at all.'
+      );
+
+    if (
+      !_.isNumber(lat) ||
+      lat < -90 ||
+      lat > 90 ||
+      !_.isNumber(long) ||
+      long < -180 ||
+      long > 180
+    )
+      throw errors.create(400, 'Invalid lat/long combination.');
   }
 
   /**

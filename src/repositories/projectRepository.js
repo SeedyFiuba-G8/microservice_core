@@ -72,7 +72,9 @@ module.exports = function $projectRepository(
 
     let projects = await Promise.all(
       (
-        await query.then(dbUtils.mapFromDb)
+        await query
+          .then(dbUtils.mapFromDb)
+          .then((res) => res.map((project) => _.omitBy(project, _.isNull)))
       ).map(async (project) => ({
         ...project,
         ...(await getFundingInfo(project.id, project.status)),
@@ -100,7 +102,8 @@ module.exports = function $projectRepository(
       .select(dbUtils.mapToDb(select))
       .whereIn('id', projectIds)
       .orWhere('user_id', userId)
-      .then(dbUtils.mapFromDb);
+      .then(dbUtils.mapFromDb)
+      .then((res) => res.map((project) => _.omitBy(project, _.isNull)));
   }
 
   /**
@@ -125,6 +128,7 @@ module.exports = function $projectRepository(
         })
 
         .then(dbUtils.mapFromDb)
+        .then((res) => res.map((project) => _.omitBy(project, _.isNull)))
         .then((res) => res.map(({ id }) => id))
     );
   }

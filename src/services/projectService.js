@@ -90,7 +90,6 @@ module.exports = function $projectService(
    */
   async function get(projectId, requesterId) {
     let project = await getSimpleProject(projectId);
-    project = _.omitBy(project, _.isNull);
 
     const [liked, likes, rated, rating] = await Promise.all([
       likeRepository.check({
@@ -485,7 +484,7 @@ module.exports = function $projectService(
     if (!projects.length)
       throw errors.create(404, 'There is no project with the specified id.');
 
-    return projects[0];
+    return _.omitBy(projects[0], _.isNull);
   }
 
   /**
