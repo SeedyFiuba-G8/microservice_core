@@ -48,7 +48,7 @@ module.exports = function projectUtils(errors) {
         tag.toLowerCase()
       );
 
-    projectInfo.type = projectInfo.type.toLowerCase();
+    if (projectInfo.type) projectInfo.type = projectInfo.type.toLowerCase();
 
     if (addFinalizationDate && projectInfo.finalizedBy) {
       const finalizedByDate = new Date(projectInfo.finalizedBy);
