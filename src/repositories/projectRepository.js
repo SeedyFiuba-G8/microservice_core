@@ -28,10 +28,8 @@ module.exports = function $projectRepository(
    * @returns {Promise}
    */
   function count({ filters = {} } = {}) {
-    return knex('projects')
-      .where(dbUtils.mapToDb(filters))
-      .count('id')
-      .then((result) => Number(result[0].count));
+    // ik this is not efficient, but it is what it is
+    return get({ filters }).then((projects) => projects?.length ?? 0);
   }
 
   /**
