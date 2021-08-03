@@ -943,10 +943,6 @@ components:
       format: date-time
       example: '2021-06-13T21:29:29.330Z'
 
-    Email:
-      type: string
-      format: email
-      example: 'example@email.com'
 
     ETHAmount:
       type: number
@@ -1299,7 +1295,7 @@ components:
     ReviewersRaw:
       type: array
       items:
-        $ref: '#/components/schemas/Email'
+        $ref: '#/components/schemas/Id'
 
     ReviewerStatus:
       type: string
