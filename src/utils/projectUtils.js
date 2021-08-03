@@ -35,7 +35,6 @@ module.exports = function projectUtils(errors) {
       'type',
       'lat',
       'long',
-      'country',
       'finalizedBy',
       'tags',
       'reviewers',
@@ -44,7 +43,12 @@ module.exports = function projectUtils(errors) {
     ]);
 
     // We make sure there are no duplicated tags
-    if (projectInfo.tags) projectInfo.tags = _.uniq(projectInfo.tags);
+    if (projectInfo.tags)
+      projectInfo.tags = _.uniq(projectInfo.tags).map((tag) =>
+        tag.toLowerCase()
+      );
+
+    if (projectInfo.type) projectInfo.type = projectInfo.type.toLowerCase();
 
     if (addFinalizationDate && projectInfo.finalizedBy) {
       const finalizedByDate = new Date(projectInfo.finalizedBy);
