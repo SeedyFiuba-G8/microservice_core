@@ -9,7 +9,7 @@ module.exports = {
         max: 100
       },
       description: {
-        min: 0,
+        min: 1,
         max: 255
       },
       coverPicUrl: {
@@ -17,11 +17,11 @@ module.exports = {
         max: 255
       },
       type: {
-        min: 0,
+        min: 1,
         max: 20
       },
       objective: {
-        min: 0,
+        min: 1,
         max: 255
       }
     },
