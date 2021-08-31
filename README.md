@@ -1,10 +1,11 @@
-# Core Microservice
+# [Core Microservice](https://seedyfiuba-g8.github.io/)
 
 ![CI](https://github.com/SeedyFiuba-G8/microservice_core/actions/workflows/default.yml/badge.svg)
 [![codecov](https://codecov.io/gh/SeedyFiuba-G8/microservice_core/branch/main/graph/badge.svg?token=6LJU7XFOGM)](https://codecov.io/gh/SeedyFiuba-G8/microservice_core)
 
 Written in JavaScript (Node.js).
 
+Visit our project page [_here_](https://seedyfiuba-g8.github.io/).
 
 ## DISCLAIMER: ¡Currently offline! :broken_heart:
 
