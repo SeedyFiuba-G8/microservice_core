@@ -1001,11 +1001,11 @@ components:
 
     Hash:
       type: string
-      example: '0x30b003c570eccaf1705acd4621f72993acb51715f8decbf61535f21376cfe1d2'
+      example: '0x30b003c570eccaf1705acd4621f72994acb51715f8decbf61535f21376cfe1d2'
 
     ExpoToken:
       type: string
-      example: 'ExponentPushToken[AbCdEfGHO1YJKlm_NStuvw]'
+      example: 'ExponentPushToken[AbCdEfGHO1YJKlm_MStuvw]'
 
     # PROJECTS
     AllProjects:
